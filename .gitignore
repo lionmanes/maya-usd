@@ -1,0 +1,8 @@
+/build/
+/nbproject/
+.project
+.cproject
+.pydevproject
+.settings/
+*~
+*.orig
