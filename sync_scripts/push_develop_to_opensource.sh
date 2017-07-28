@@ -68,7 +68,7 @@ find_latest_squash () {
 }
 
 prefix=src
-oss_url=https://github.al.com.au/fabricem/AL_USDMayaSyncTest_ext.git
+oss_url=https://github.al.com.au/fabricem/AL_USDMayaNewSyncTest_ext.git
 
 # This script is supposed to be run on Jenkins, during a push event, only for
 # the develop branch. A filter is therefore going to present in the Jenkinsfile,
