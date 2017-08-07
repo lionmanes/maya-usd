@@ -1,6 +1,6 @@
 name: AL_USDMaya
 
-version: 0.20.2
+version: 0.20.3
 
 uuid: 476ecc31-62be-3106-a837-a77d1a24e62a
 
@@ -17,12 +17,12 @@ private_build_requires:
 - AL_MTypeId-1.41+
 - gdb-7.10
 - doxygen-1
-- AL_USDSchemas-0.26+<1 # To get SdfMetadatas during unittest.
+- AL_USDSchemas-0.27+<1 # To get SdfMetadatas during unittest.
 - Qt_vfx-5+
 
 requires:
-- usdBase-0.7.al5
-- usdImaging-0.7.al5
+- usdBase-0.8.al1
+- usdImaging-0.8.al1
 - glew-2.0
 - googletest
 - python-2.7+<3
