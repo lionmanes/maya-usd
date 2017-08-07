@@ -134,8 +134,6 @@ file(GENERATE
     ${CMAKE_CURRENT_SOURCE_DIR}/schemas/__init__.py
     )
 
-pxr_setup_plugins()
-
 IF ($ENV{REZ_BUILD_VARIANT_NUMBER} STREQUAL "0")
     set(doxygen_dirs
         ${CMAKE_CURRENT_SOURCE_DIR}/src/lib/AL_USDMaya/AL
