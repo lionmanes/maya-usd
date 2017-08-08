@@ -248,7 +248,6 @@ public:
   // TODO reset if the usd file path is updated via the ui
   AL_DECL_ATTRIBUTE(serializedSessionLayer);
 
-
   /// serialised asset resolver context
   // @note currently not used
   AL_DECL_ATTRIBUTE(serializedArCtx);
@@ -258,24 +257,6 @@ public:
 
   /// Open the stage unloaded.
   AL_DECL_ATTRIBUTE(unloaded);
-
-  /// an array of strings that represent the paths to be driven
-  AL_DECL_ATTRIBUTE(drivenPrimPaths);
-
-  /// an array of visibility flags for the driven transforms
-  AL_DECL_ATTRIBUTE(drivenVisibility);
-
-  /// an array of translation values for the driven transforms
-  AL_DECL_ATTRIBUTE(drivenTranslate);
-
-  /// an array of scale values for the driven transforms
-  AL_DECL_ATTRIBUTE(drivenScale);
-
-  /// an array of rotation values for the driven transforms
-  AL_DECL_ATTRIBUTE(drivenRotate);
-
-  /// an array of rotate order values for the driven transforms
-  AL_DECL_ATTRIBUTE(drivenRotateOrder);
 
   /// an array of MPxData for the driven transforms
   AL_DECL_ATTRIBUTE(inDrivenTransformsData);
@@ -562,8 +543,8 @@ public:
       return;
     }
     m_compositionHasChanged = true;
-    m_variantChangePath = changePath;
-    onPrePrimChanged(m_variantChangePath, m_variantSwitchedPrims);
+    m_changedPath = changePath;
+    onPrePrimChanged(m_changedPath, m_variantSwitchedPrims);
   }
 
   /// \brief  change the status of the composition changed status
@@ -587,8 +568,6 @@ private:
   void removeTransformRefs(const std::vector<std::pair<SdfPath, MObject>>& removedRefs, TransformReason reason);
   void insertTransformRefs(const std::vector<std::pair<SdfPath, MObject>>& removedRefs, TransformReason reason);
   void constructExcludedPrims();
-  bool getInternalValueInContext(const MPlug& plug, MDataHandle& dataHandle, MDGContext& ctx) override;
-  bool setInternalValueInContext(const MPlug& plug, const MDataHandle& dataHandle, MDGContext& ctx) override;
 
   MObject makeUsdTransformChain_internal(
       const UsdPrim& usdPrim,
@@ -747,7 +726,7 @@ private:
   UsdStageRefPtr m_stage;
   SdfPath m_path;
   SchemaNodeRefDB m_schemaNodeDB;
-  SdfPath m_variantChangePath;
+  SdfPath m_changedPath;
   SdfPathVector m_variantSwitchedPrims;
   UsdImagingGLHdEngine* m_engine = 0;
   uint32_t m_engineRefCount = 0;

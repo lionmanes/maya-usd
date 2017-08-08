@@ -17,7 +17,7 @@
 ### Update and push the wiki. ###
 function update_and_push_wiki {
   internal_wiki_url=https://github.al.com.au/rnd/AL_USDMaya.wiki.git
-  oss_wiki_url=https://github.al.com.au/fabricem/AL_USDMayaSyncTest_ext.wiki.git
+  oss_wiki_url=https://github.al.com.au/rnd/AL_USDMaya_oss_ready.wiki.git
 
   echo "Cloning iternal wiki."
   git clone -q $internal_wiki_url
@@ -39,7 +39,7 @@ function update_and_push_wiki {
 ### Update and push the doxygen documentation. ###
 function update_and_push_dox {
   internal_dox_url=https://github.al.com.au/documentation/AL_USDMaya.git
-  oss_gh_url=https://github.al.com.au/fabricem/AL_USDMayaSyncTest_ext.git
+  oss_gh_url=https://github.al.com.au/rnd/AL_USDMaya_oss_ready.git
 
   echo "Cloning internal doxygen documentation."
   git clone -q $internal_dox_url || exit $?
