@@ -60,7 +60,7 @@ namespace nodes {
 //----------------------------------------------------------------------------------------------------------------------
 void ProxyShape::serialiseTranslatorContext()
 {
-  serializedTrCtxPlug().setValue(m_schemaNodeDB.context()->serialise());
+  serializedTrCtxPlug().setValue(context()->serialise());
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -68,7 +68,7 @@ void ProxyShape::deserialiseTranslatorContext()
 {
   MString value;
   serializedTrCtxPlug().getValue(value);
-  m_schemaNodeDB.context()->deserialise(value);
+  context()->deserialise(value);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -95,7 +95,6 @@ static void beforeSaveScene(void* clientData)
 
     proxyShape->serialiseTranslatorContext();
     proxyShape->serialiseTransformRefs();
-    proxyShape->serialiseSchemaPrims();
 
     // prior to saving, serialize any modified layers
     MFnDependencyNode fn;
@@ -139,7 +138,6 @@ MObject ProxyShape::m_specular = MObject::kNullObj;
 MObject ProxyShape::m_emission = MObject::kNullObj;
 MObject ProxyShape::m_shininess = MObject::kNullObj;
 MObject ProxyShape::m_serializedRefCounts = MObject::kNullObj;
-MObject ProxyShape::m_serializedSchemaPrims = MObject::kNullObj;
 
 //----------------------------------------------------------------------------------------------------------------------
 Layer* ProxyShape::getLayer()
@@ -386,7 +384,9 @@ bool ProxyShape::getRenderAttris(void* pattribs, const MHWRender::MFrameContext&
 
 //----------------------------------------------------------------------------------------------------------------------
 ProxyShape::ProxyShape()
-  : MPxSurfaceShape(), maya::NodeHelper(), m_schemaNodeDB(this)
+  : MPxSurfaceShape(), maya::NodeHelper(),
+    m_context(fileio::translators::TranslatorContext::create(this)),
+    m_translatorManufacture(context())
 {
   Trace("ProxyShape::ProxyShape");
   m_beforeSaveSceneId = MSceneMessage::addCallback(MSceneMessage::kBeforeSave, beforeSaveScene, this);
@@ -483,7 +483,6 @@ MStatus ProxyShape::initialise()
     m_shininess = addFloatAttr("shininess", "shi", 5.0f, kReadable | kWritable | kConnectable | kStorable | kAffectsAppearance);
 
     m_serializedRefCounts = addStringAttr("serializedRefCounts", "strcs", kReadable | kWritable | kStorable | kHidden);
-    m_serializedSchemaPrims = addStringAttr("serializedSchemaPrims", "ssp", kReadable | kWritable | kStorable | kHidden);
 
     AL_MAYA_CHECK_ERROR(attributeAffects(m_time, m_outTime), errorString);
     AL_MAYA_CHECK_ERROR(attributeAffects(m_timeOffset, m_outTime), errorString);
@@ -534,25 +533,22 @@ void ProxyShape::onPrimResync(SdfPath primPath, const SdfPathVector& variantPrim
   fn.getPath(dag_path);
   dag_path.pop();
 
-  auto primsToSwitch = huntForNativeNodesUnderPrim(dag_path, primPath, m_schemaNodeDB.translatorManufacture());
+  auto primsToSwitch = huntForNativeNodesUnderPrim(dag_path, primPath, translatorManufacture());
 
-  nodes::SchemaNodeRefDB& schemaNodeDB = schemaDB();
-  schemaNodeDB.lock();
-  schemaNodeDB.removeEntries(variantPrimsToSwitch);
+  context()->removeEntries(variantPrimsToSwitch);
   m_variantSwitchedPrims.clear();
 
   cleanupTransformRefs();
 
   MObjectToPrim objsToCreate = filterUpdatablePrims(primsToSwitch);
-  schemaNodeDB.context()->updatePrimTypes();
+  context()->updatePrimTypes();
 
   cmds::ProxyShapePostLoadProcess::createTranformChainsForSchemaPrims(this, primsToSwitch, dag_path, objsToCreate);
 
-  cmds::ProxyShapePostLoadProcess::createSchemaPrims(&schemaNodeDB, objsToCreate);
-  schemaNodeDB.unlock();
+  cmds::ProxyShapePostLoadProcess::createSchemaPrims(this, objsToCreate);
 
   // now perform any post-creation fix up
-  cmds::ProxyShapePostLoadProcess::connectSchemaPrims(&schemaNodeDB, objsToCreate);
+  cmds::ProxyShapePostLoadProcess::connectSchemaPrims(this, objsToCreate);
 
   AL_END_PROFILE_SECTION();
 
@@ -564,11 +560,11 @@ void ProxyShape::onPrimResync(SdfPath primPath, const SdfPathVector& variantPrim
 ProxyShape::MObjectToPrim ProxyShape::filterUpdatablePrims(std::vector<UsdPrim>& variantPrimsToSwitch)
 {
   MObjectToPrim objsToCreate;
-  fileio::SchemaPrimsUtils schemaPrimUtils(schemaDB().translatorManufacture());
-  auto manufacture = schemaDB().translatorManufacture();
+  fileio::SchemaPrimsUtils schemaPrimUtils(translatorManufacture());
+  auto manufacture = translatorManufacture();
   for(auto it = variantPrimsToSwitch.begin(); it != variantPrimsToSwitch.end(); )
   {
-    TfToken type = schemaDB().context()->getTypeForPath(it->GetPath());
+    TfToken type = context()->getTypeForPath(it->GetPath());
     fileio::translators::TranslatorRefPtr translator = manufacture.get(type);
     if(type == it->GetTypeName() && translator && translator->supportsUpdate() && translator->needsTransformParent())
     {
@@ -684,8 +680,7 @@ std::vector<UsdPrim> ProxyShape::huntForNativeNodesUnderPrim(
 void ProxyShape::onPrePrimChanged(const SdfPath& path, SdfPathVector& outPathVector)
 {
   Trace("ProxyShape::onPrePrimChanged");
-  nodes::SchemaNodeRefDB& db = schemaDB();
-  db.preRemoveEntry(path, outPathVector);
+  context()->preRemoveEntry(path, outPathVector);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1421,19 +1416,6 @@ void ProxyShape::deserialiseTransformRefs()
   }
 
   serializedRefCountsPlug().setString("");
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-void ProxyShape::serialiseSchemaPrims()
-{
-  serializedSchemaPrimsPlug().setString(m_schemaNodeDB.serialize());
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-void ProxyShape::deserialiseSchemaPrims()
-{
-  m_schemaNodeDB.deserialize(serializedSchemaPrimsPlug().asString());
-  serializedSchemaPrimsPlug().setString("");
 }
 
 //----------------------------------------------------------------------------------------------------------------------
