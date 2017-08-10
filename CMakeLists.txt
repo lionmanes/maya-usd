@@ -96,13 +96,16 @@ set(SCHEMAS_PYTHON_MODULE AL.usd.schemas.opensource)
 set(SCHEMAS_PYTHON_PATH AL/usd/schemas/opensource)
 
 # This will drive the schemas library and binding library names
-set(SCHEMAS_PACKAGE AL_USDSchemas_opensource)
-set(SCHEMAS_PYTHON_PACKAGE _AL_USDSchemas_opensource)
+set(SCHEMAS_PACKAGE AL_USDMayaSchemas)
+set(SCHEMAS_PYTHON_PACKAGE _AL_USDMayaSchemas)
 set(TRANSLATORS_PACKAGE AL_USDMayaTranslators_opensource)
 
 # Use another token prefix (defined in the usd layer used to generate schemas source
 # code) because AL_Schemas is already used by our internal schemas.
-set(SCHEMAS_TOKENS_PREFIX AL_Schemas_opensource) 
+set(SCHEMAS_TOKENS_PREFIX AL_USDMayaSchemas) 
+
+# Compare generated code
+set(VALIDATE_GENERATED_SCHEMAS "Generate schemas code and compare." ON)
 
 # Build our plugs... non-standard as we're building from another source tree
 add_subdirectory(${SUBTREE_DIRECTORY}/lib)
@@ -122,7 +125,7 @@ add_custom_target( filter_schemas_pluginfo
     COMMAND python
             ${CMAKE_CURRENT_SOURCE_DIR}/schemas/filter_pluginfo.py
             ${CMAKE_BINARY_DIR}/src/schemas/AL/usd/schemas/plugInfo.json
-    DEPENDS AL_USDSchemas_opensource
+    DEPENDS AL_USDMayaSchemas
     )
 
 # Overwrite AL/usd/schemas/__init__.py to handle merging with our internal AL_USDSchemas.
