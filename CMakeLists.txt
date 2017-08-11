@@ -120,13 +120,29 @@ add_subdirectory(${SUBTREE_DIRECTORY}/tests)
 #   - al_usdmaya_excludeFromProxyShape
 # Internally, these metadatas have been kept in AL_USDSchemas for the cases we want to access them
 # without depending on AL_USDMaya therefore we're going to filter these metadatas out.
-add_custom_target( filter_schemas_pluginfo
-    ALL
-    COMMAND python
-            ${CMAKE_CURRENT_SOURCE_DIR}/schemas/filter_pluginfo.py
-            ${CMAKE_BINARY_DIR}/src/schemas/AL/usd/schemas/plugInfo.json
-    DEPENDS AL_USDMayaSchemas
+set(to_filter
+    ${CMAKE_CURRENT_BINARY_DIR}/src/schemas/AL/usd/schemas/plugInfo.json
+)
+
+message(
+    STATUS
+    "Removing opensource metadatas from ${to_filter}"
+)
+execute_process(
+    COMMAND
+        python
+        ${CMAKE_CURRENT_SOURCE_DIR}/schemas/filter_pluginfo.py
+        ${to_filter}
+    RESULT_VARIABLE
+        filter_pluginfo
+)
+
+if(filter_pluginfo)
+    message(
+        FATAL_ERROR
+        "An error occured while filtering ${to_filter}"
     )
+endif()
 
 # Overwrite AL/usd/schemas/__init__.py to handle merging with our internal AL_USDSchemas.
 file(REMOVE ${CMAKE_BINARY_DIR}/AL/usd/schemas/__init__.py)
