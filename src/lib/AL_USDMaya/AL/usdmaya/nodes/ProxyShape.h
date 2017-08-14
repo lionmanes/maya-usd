@@ -20,7 +20,6 @@
 #include "AL/usdmaya/fileio/translators/TranslatorBase.h"
 #include "AL/usdmaya/fileio/translators/TranslatorContext.h"
 #include "AL/usdmaya/fileio/translators/TransformTranslator.h"
-#include "AL/usdmaya/nodes/USDToMayaMappingDB.h"
 
 #include "maya/MPxSurfaceShape.h"
 #include "maya/MEventMessage.h"
@@ -70,6 +69,7 @@ struct SelectionUndoHelper
   /// \param  proxy pointer to the maya node on which the selection operation will be performed.
   /// \param  paths the USD paths to be selected / toggled / unselected
   /// \param  mode the selection mode (add, remove, xor, etc)
+  /// \param  internal if the internal flag is set, then modifications to Maya's selection list will NOT occur.
   SelectionUndoHelper(nodes::ProxyShape* proxy, SdfPathVector paths, MGlobal::ListAdjustment mode, bool internal = false);
 
   /// \brief  performs the selection changes
@@ -101,8 +101,14 @@ class SelectionList
 {
 public:
 
+  /// \brief  default ctor
   SelectionList() = default;
-  SelectionList(const SelectionList&) = default;
+
+  /// \brief  copy ctor
+  /// \param  sl the selection list to copy
+  SelectionList(const SelectionList& sl) = default;
+
+  /// \brief  dtor
   ~SelectionList() = default;
 
   /// \brief  clear the selection list
@@ -178,6 +184,9 @@ class ProxyShape
   friend class SelectionUndoHelper;
   friend class ProxyShapeUI;
 public:
+
+  /// \brief  a mapping between a maya transform (or MObject::kNullObj), and the prim that exists at that location
+  ///         in the DAG graph.
   typedef std::vector<std::pair<MObject, UsdPrim> > MObjectToPrim;
 
   /// \brief  ctor
@@ -278,9 +287,6 @@ public:
 
   /// Serialised reference counts to rebuild the transform reference information
   AL_DECL_ATTRIBUTE(serializedRefCounts);
-
-  /// Serialised info about the schema prims that have been imported into the scene
-  AL_DECL_ATTRIBUTE(serializedSchemaPrims);
 
   //--------------------------------------------------------------------------------------------------------------------
   /// \name   Output Attributes
@@ -447,10 +453,15 @@ public:
   /// \brief  searches for the excluded geometry
   void findExcludedGeometry();
 
-  /// \brief  return a reference to the DB of schema prims imported via custom translators (used for variant switching)
-  /// \return a reference to the DB used for variant changes.
-  nodes::SchemaNodeRefDB& schemaDB()
-    { return m_schemaNodeDB; }
+  /// \brief  returns the plugin translator registry assigned to this shape
+  /// \return the translator registry
+  fileio::translators::TranslatorManufacture& translatorManufacture()
+    { return m_translatorManufacture; }
+
+  /// \brief  returns the plugin translator context assigned to this shape
+  /// \return the translator context
+  fileio::translators::TranslatorContextPtr& context()
+    { return m_context; }
 
   //--------------------------------------------------------------------------------------------------------------------
   /// \name   ProxyShape selection
@@ -514,16 +525,10 @@ public:
   /// \brief  deserialise the state of the transform ref counts prior to saving the file
   void deserialiseTransformRefs();
 
-  /// \brief  serialise the state of the transform ref counts prior to saving the file
-  void serialiseSchemaPrims();
-
-  /// \brief  deserialise the state of the transform ref counts prior to saving the file
-  void deserialiseSchemaPrims();
-
   /// \brief Finds the corresponding translator for each decendant prim that has a corresponding Translator 
   ///        and calls preTearDown.
   /// \param[in] path of the point in the hierarchy that is potentially undergoing structural changes
-  /// \param[out] vector of SdfPaths that are decendants of 'path'
+  /// \param[out] outPathVector of SdfPaths that are decendants of 'path'
   void onPrePrimChanged(const SdfPath& path, SdfPathVector& outPathVector);
 
   /// \brief Re-Creates and updates the maya prim hierarchy starting from the specified primpath
@@ -725,7 +730,8 @@ private:
   SdfPathVector m_excludedTaggedGeometry;
   UsdStageRefPtr m_stage;
   SdfPath m_path;
-  SchemaNodeRefDB m_schemaNodeDB;
+  fileio::translators::TranslatorContextPtr m_context;
+  fileio::translators::TranslatorManufacture m_translatorManufacture;
   SdfPath m_changedPath;
   SdfPathVector m_variantSwitchedPrims;
   UsdImagingGLHdEngine* m_engine = 0;
