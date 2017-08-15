@@ -12,25 +12,6 @@ set(BOOST_ROOT ${boost_ROOT})
 
 add_definitions("-DUSE_AL_DEFAULT=1")
 
-macro(add_optional_flag flag_name flag_description)
-  set( with_name "WITH_${flag_name}" )
-  option(${with_name} ${flag_description} OFF)
-  if(${with_name})
-    add_definitions(-D${flag_name}=1)
-  endif()
-  
-  string(TOLOWER "${flag_name}" lower_flag_name)
-  
-  set(enable_flag "${lower_flag_name}_enable" )
-  ADD_CUSTOM_TARGET(${enable_flag}
-    COMMAND ${CMAKE_COMMAND} ${CMAKE_BINARY_DIR} -D${with_name}=ON)
-  
-  set(disable_flag "${lower_flag_name}_disable" )
-  ADD_CUSTOM_TARGET(${disable_flag}
-    COMMAND ${CMAKE_COMMAND} ${CMAKE_BINARY_DIR} -D${with_name}=OFF)
-endmacro(add_optional_flag)
-
-add_optional_flag(AL_ENABLE_TRACE "Enabled AL_USDMaya Traces")
 
 IF(DEFINED boost_NAMESPACE)
   add_definitions("-DBOOST_NAMESPACE=${boost_NAMESPACE}")
