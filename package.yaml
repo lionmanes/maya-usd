@@ -1,6 +1,6 @@
 name: AL_USDMaya
 
-version: 0.22.1
+version: 0.23.0
 
 uuid: 476ecc31-62be-3106-a837-a77d1a24e62a
 
@@ -31,7 +31,7 @@ requires:
 - zlib-1.2
 - cppunit-1.12+<2
 - AL_CMakeLibGitHub-0.1.0+<1
-- ~AL_USDSchemas-0.28+<1 # For the SdfMetadata only
+- ~AL_USDSchemas-0.29+<1 # For the SdfMetadata only
 
 variants:
 - [CentOS-6.2+<7, mayaDevKit-2017.0, AL_boost-1.55, AL_boost_python-1.55]
