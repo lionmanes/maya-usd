@@ -1,3 +1,5 @@
+@Library('AL@fabricem_build_and_tests_options')
+
 def gitHubRepo = "https://github.al.com.au/rnd/AL_USDMaya.git"
 
 // The list of packages that will be executed, the mode will determine if the stages can be executed in parallel or in serial.
@@ -22,15 +24,19 @@ def dependentJobs = [["USDIntegration"],
                     ]
                     
 // flags passed to the rez build -- -- all_tests
-def rezBuildOptions = ""
+def rezBuildOptions = "-- -- -j16"
+
+// test only Maya 2017 variant
+// (Maya 2016 variant will hang because of the tbb USD issue)
+def rezTestOptions = "--variants 1 -- --"
 
 timeout(time: 30)
 {
-    node ('CentOS-6.6&&!restricted&&graphicsTest')
+    node ('CentOS-6.6&&!restricted')
     {
         ansiColor('xterm')
         {
-            testing.runRepositoryTests(gitHubRepo, packages, dependentJobs, rootFolder, rezBuildOptions, "all_tests")
+            testing.runRepositoryTests(gitHubRepo, packages, dependentJobs, rootFolder, rezBuildOptions, "all_tests", true, rezTestOptions)
         }
     }
 }
