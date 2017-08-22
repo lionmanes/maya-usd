@@ -1,6 +1,6 @@
 name: AL_USDMaya
 
-version: 0.23.3
+version: 0.23.2
 
 uuid: 476ecc31-62be-3106-a837-a77d1a24e62a
 
@@ -17,12 +17,11 @@ private_build_requires:
 - AL_MTypeId-1.41+
 - gdb-7.10
 - doxygen-1
-- AL_USDSchemas-0.29+<1
-- Qt_vfx-5+
+- AL_USDSchemas-0.29+<1 # To get SdfMetadatas during unittest.
 
 requires:
 - usdBase-0.8.al1
-- usdImaging-0.8.al1.0.1+<0.9
+- usdImaging-0.8.al1
 - glew-2.0
 - googletest
 - python-2.7+<3
@@ -31,7 +30,7 @@ requires:
 - zlib-1.2
 - cppunit-1.12+<2
 - AL_CMakeLibGitHub-0.1.0+<1
-- ~AL_USDSchemas-0.29+<1
+- ~AL_USDSchemas-0.29+<1 # For the SdfMetadata only
 
 variants:
 - [CentOS-6.2+<7, mayaDevKit-2016.0, AL_boost-1.55, AL_boost_python-1.55, MayaQt-2016]
@@ -39,7 +38,7 @@ variants:
 - [CentOS-6.2+<7, mayaDevKit-2018.0, AL_boost-1.55, AL_boost_python-1.55]
 
 help:
-- [API, '$BROWSER http://github.al.com.au/pages/documentation/AL_USDMaya']
+- [ "API", "$BROWSER http://github.al.com.au/pages/documentation/AL_USDMaya"]
 
 commands: |-
   prependenv('PATH', '{root}/bin')
@@ -56,3 +55,4 @@ commands: |-
   # usd then wants to initialize tbb with (available cores) which leads to the warnings
   # manually set usd's limit to this empirically observed value
   env.PXR_WORK_THREAD_LIMIT='-3'
+  
