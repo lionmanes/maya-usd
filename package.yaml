@@ -1,6 +1,6 @@
 name: AL_USDMaya
 
-version: 0.21.1
+version: 0.23.1
 
 uuid: 476ecc31-62be-3106-a837-a77d1a24e62a
 
@@ -11,14 +11,13 @@ description: USD to Maya Bridge
 
 private_build_requires:
 - AL_CMakeLib
-- cmake-3.2+
+- cmake-2.8+
 - AL_CMakeLibPython-6.0.9+<7
 - gcc-4.8
 - AL_MTypeId-1.41+
 - gdb-7.10
 - doxygen-1
-- AL_USDSchemas-0.27+<1 # To get SdfMetadatas during unittest.
-- Qt_vfx-5+
+- AL_USDSchemas-0.29+<1 # To get SdfMetadatas during unittest.
 
 requires:
 - usdBase-0.8.al1
@@ -31,11 +30,11 @@ requires:
 - zlib-1.2
 - cppunit-1.12+<2
 - AL_CMakeLibGitHub-0.1.0+<1
-- ~AL_USDSchemas-0.26+<1 # For the SdfMetadata only
+- ~AL_USDSchemas-0.29+<1 # For the SdfMetadata only
 
 variants:
-- [CentOS-6.2+<7, mayaDevKit-2017.0, AL_boost-1.55, AL_boost_python-1.55]
-#- [CentOS-6.2+<7, mayaDevKit-2018.b77, AL_boost-1.55, AL_boost_python-1.55]
+- [CentOS-6.2+<7, mayaDevKit-2016.0, AL_boost-1.55, AL_boost_python-1.55, MayaQt-2016]
+- [CentOS-6.2+<7, mayaDevKit-2017.0, AL_boost-1.55, AL_boost_python-1.55, Qt_vfx-5.6]
 
 help:
 - [ "API", "$BROWSER http://github.al.com.au/pages/documentation/AL_USDMaya"]
