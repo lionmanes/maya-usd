@@ -107,6 +107,10 @@ set(SCHEMAS_TOKENS_PREFIX AL_USDMayaSchemas)
 # Compare generated code
 set(VALIDATE_GENERATED_SCHEMAS "Generate schemas code and compare." ON)
 
+if(${MAYA_API_VERSION} STRLESS 2017)
+    set(QT_QTGUI_LIBRARY QtGui)
+endif()
+
 # Build our plugs... non-standard as we're building from another source tree
 add_subdirectory(${SUBTREE_DIRECTORY}/lib)
 add_subdirectory(${SUBTREE_DIRECTORY}/plugin)

@@ -17,6 +17,7 @@
 #include "AL/usdmaya/Utils.h"
 #include "AL/usdmaya/Metadata.h"
 #include "AL/usdmaya/StageData.h"
+#include "AL/usdmaya/DebugCodes.h"
 #include "AL/usdmaya/cmds/LayerCommands.h"
 #include "AL/usdmaya/cmds/ProxyShapePostLoadProcess.h"
 #include "AL/usdmaya/fileio/ImportParams.h"
@@ -50,13 +51,6 @@
 
 #include <map>
 #include <string>
-
-// printf debugging
-#if 0 || AL_ENABLE_TRACE
-# define Trace(X) std::cout << X << std::endl;
-#else
-# define Trace(X)
-#endif
 
 namespace AL {
 namespace usdmaya {
@@ -148,14 +142,15 @@ void huntForNativeNodes(
     fileio::translators::TranslatorManufacture& manufacture)
 {
   fileio::SchemaPrimsUtils utils(manufacture);
-  Trace("huntForNativeNodes::huntForNativeNodes");
+  TF_DEBUG(ALUSDMAYA_COMMANDS).Msg("huntForNativeNodes::huntForNativeNodes\n");
   fileio::TransformIterator it(stage, proxyTransformPath);
   for(; !it.done(); it.next())
   {
     UsdPrim prim = it.prim();
-    Trace("huntForNativeNodes: " << prim.GetName().GetText());
+    TF_DEBUG(ALUSDMAYA_COMMANDS).Msg("huntForNativeNodes: %s\n", prim.GetName().GetText());
     if(utils.isSchemaPrim(prim))
     {
+      TF_DEBUG(ALUSDMAYA_TRANSLATORS).Msg("ProxyShapePostLoadProcess::huntForNativeNodes found matching schema %s\n", prim.GetPath().GetText());
       schemaPrims.push_back(prim);
     }
 
@@ -175,6 +170,7 @@ void huntForNativeNodes(
         importCallback.type = ImportCallback::kMel;
         importCallback.params = melCommand->second.Get<VtDictionary>();
 
+        TF_DEBUG(ALUSDMAYA_TRANSLATORS).Msg("ProxyShapePostLoadProcess::huntForNativeNodes adding post callback from %s\n", prim.GetPath().GetText());
         postCallBacks.push_back(importCallback);
       }
     }
@@ -185,7 +181,7 @@ void huntForNativeNodes(
 MObject makeLayerNode(SdfLayerHandle layer, LayerToObjectMap& layerToObjectMap, nodes::ProxyShape* proxyShape)
 {
   LAYER_HANDLE_CHECK(layer);
-  Trace("ProxyShapePostLoadProcess::makeLayerNode " << layer->GetDisplayName());
+  TF_DEBUG(ALUSDMAYA_COMMANDS).Msg("ProxyShapePostLoadProcess::makeLayerNode %s\n", layer->GetDisplayName().c_str());
   MFnDependencyNode fn;
   MObject layerNode = fn.create(nodes::Layer::kTypeId);
 
@@ -220,7 +216,7 @@ MObject makeLayerNode(SdfLayerHandle layer, LayerToObjectMap& layerToObjectMap, 
 void buildLayerTree(MObject layerNode, const SdfLayerHandle& layer, LayerMap& layerMap, LayerToObjectMap& layersToObjects, MDGModifier& modifier, nodes::ProxyShape* proxyShape)
 {
   LAYER_HANDLE_CHECK(layer);
-  Trace("ProxyShapePostLoadProcess::buildLayerTree " << layer->GetDisplayName());
+  TF_DEBUG(ALUSDMAYA_COMMANDS).Msg("ProxyShapePostLoadProcess::buildLayerTree %s\n", layer->GetDisplayName().c_str());
   {
     // first attempt to create any sub layers that are connected to the input layer
     SdfSubLayerProxy subLayers = layer->GetSubLayerPaths();
@@ -360,7 +356,7 @@ void ProxyShapePostLoadProcess::createTranformChainsForSchemaPrims(
     const MDagPath& proxyTransformPath,
     ProxyShapePostLoadProcess::MObjectToPrim& objsToCreate)
 {
-  Trace("ProxyShapePostLoadProcess::createTranformChainsForSchemaPrims");
+  TF_DEBUG(ALUSDMAYA_TRANSLATORS).Msg("ProxyShapePostLoadProcess::createTranformChainsForSchemaPrims\n");
   AL_BEGIN_PROFILE_SECTION(CreateTransformChains);
   {
     objsToCreate.reserve(schemaPrims.size());
@@ -369,7 +365,6 @@ void ProxyShapePostLoadProcess::createTranformChainsForSchemaPrims(
 
     MPlug outStage = ptrNode->outStageDataPlug();
     MPlug outTime = ptrNode->outTimePlug();
-
     MFnTransform fnx(proxyTransformPath);
     fileio::SchemaPrimsUtils schemaPrimUtils(ptrNode->translatorManufacture());
     for(auto it = schemaPrims.begin(); it != schemaPrims.end(); ++it)
@@ -378,6 +373,7 @@ void ProxyShapePostLoadProcess::createTranformChainsForSchemaPrims(
       if(usdPrim.IsValid())
       {
         SdfPath path = usdPrim.GetPath();
+        TF_DEBUG(ALUSDMAYA_TRANSLATORS).Msg("ProxyShapePostLoadProcess::createTranformChainsForSchemaPrims checking %s\n", path.GetText());
         MObject newpath = MObject::kNullObj;
         if(schemaPrimUtils.needsTransformParent(usdPrim))
         {
@@ -407,12 +403,9 @@ void ProxyShapePostLoadProcess::createTranformChainsForSchemaPrims(
 //----------------------------------------------------------------------------------------------------------------------
 void ProxyShapePostLoadProcess::createSchemaPrims(
     nodes::ProxyShape* proxy,
-    const MObjectToPrim& objsToCreate)
+    const std::vector<UsdPrim>& objsToCreate)
 {
-  Trace("ProxyShapePostLoadProcess::createSchemaPrims");
-#if AL_ENABLE_TRACE
-  Trace("createSchemaPrims")
-#endif
+  TF_DEBUG(ALUSDMAYA_TRANSLATORS).Msg("ProxyShapePostLoadProcess::createSchemaPrims\n");
   AL_BEGIN_PROFILE_SECTION(CreatePrims);
   {
     fileio::translators::TranslatorContextPtr context = proxy->context();
@@ -422,13 +415,52 @@ void ProxyShapePostLoadProcess::createSchemaPrims(
     const auto end = objsToCreate.end();
     for(; it != end; ++it)
     {
-      MObject object = it->first;
-      UsdPrim prim = it->second;
+      UsdPrim prim = *it;
+
+      MObject object = proxy->findRequiredPath(prim.GetPath());
+
       fileio::translators::TranslatorRefPtr translator = translatorManufacture.get(prim.GetTypeName());
-      Trace("Translator-createSchemaPrims: hasEntry(" << prim.GetPath().GetText() << ", "
-            << prim.GetTypeName() << ")=" << context->hasEntry(prim.GetPath(), prim.GetTypeName()));
+      TF_DEBUG(ALUSDMAYA_TRANSLATORS).Msg("ProxyShapePostLoadProcess::createSchemaPrims prim=%s\n", prim.GetPath().GetText());
+
+      //if(!context->hasEntry(prim.GetPath(), prim.GetTypeName()))
+      {
+        AL_BEGIN_PROFILE_SECTION(SchemaPrims);
+        if(!fileio::importSchemaPrim(prim, object, 0, context, translator))
+        {
+          std::cerr << "Error: unable to load schema prim node: '" << prim.GetName().GetString() << "' that has type: '" << prim.GetTypeName() << "'" << std::endl;
+        }
+        AL_END_PROFILE_SECTION();
+      }
+    }
+  }
+  AL_END_PROFILE_SECTION();
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void ProxyShapePostLoadProcess::updateSchemaPrims(
+    nodes::ProxyShape* proxy,
+    const std::vector<UsdPrim>& objsToCreate)
+{
+  TF_DEBUG(ALUSDMAYA_TRANSLATORS).Msg("ProxyShapePostLoadProcess::updateSchemaPrims\n");
+  AL_BEGIN_PROFILE_SECTION(CreatePrims);
+  {
+    fileio::translators::TranslatorContextPtr context = proxy->context();
+    fileio::translators::TranslatorManufacture& translatorManufacture = proxy->translatorManufacture();
+
+    auto it = objsToCreate.begin();
+    const auto end = objsToCreate.end();
+    for(; it != end; ++it)
+    {
+      UsdPrim prim = *it;
+
+      MObject object = proxy->findRequiredPath(prim.GetPath());
+
+      fileio::translators::TranslatorRefPtr translator = translatorManufacture.get(prim.GetTypeName());
+      TF_DEBUG(ALUSDMAYA_TRANSLATORS).Msg("ProxyShapePostLoadProcess::updateSchemaPrims: hasEntry(%s, %s)=%b\n", prim.GetPath().GetText(), prim.GetTypeName().GetText(), context->hasEntry(prim.GetPath(), prim.GetTypeName()));
+
       if(!context->hasEntry(prim.GetPath(), prim.GetTypeName()))
       {
+        TF_DEBUG(ALUSDMAYA_TRANSLATORS).Msg("ProxyShapePostLoadProcess::createSchemaPrims prim=%s hasEntry=false\n", prim.GetPath().GetText());
         AL_BEGIN_PROFILE_SECTION(SchemaPrims);
         if(!fileio::importSchemaPrim(prim, object, 0, context, translator))
         {
@@ -438,7 +470,7 @@ void ProxyShapePostLoadProcess::createSchemaPrims(
       }
       else
       {
-        Trace("Translator-createSchemaPrims: update prim: " << prim.GetPath().GetText());
+        TF_DEBUG(ALUSDMAYA_TRANSLATORS).Msg("ProxyShapePostLoadProcess::createSchemaPrims [update] prim=%s\n", prim.GetPath().GetText());
         if(translator && translator->update(prim).statusCode() == MStatus::kNotImplemented)
         {
           MGlobal::displayError(
@@ -451,29 +483,28 @@ void ProxyShapePostLoadProcess::createSchemaPrims(
   AL_END_PROFILE_SECTION();
 }
 
+
 //----------------------------------------------------------------------------------------------------------------------
 void ProxyShapePostLoadProcess::connectSchemaPrims(
     nodes::ProxyShape* proxy,
-    const MObjectToPrim& objsToCreate)
+    const std::vector<UsdPrim>& objsToCreate)
 {
-  Trace("ProxyShapePostLoadProcess::connectSchemaPrims");
+  TF_DEBUG(ALUSDMAYA_TRANSLATORS).Msg("ProxyShapePostLoadProcess::connectSchemaPrims\n");
+  AL_BEGIN_PROFILE_SECTION(PostImportLogic);
+
   fileio::translators::TranslatorContextPtr context = proxy->context();
   fileio::translators::TranslatorManufacture& translatorManufacture = proxy->translatorManufacture();
 
+  // iterate over the prims we created, and call any post-import logic to make any attribute connections etc
   auto it = objsToCreate.begin();
   const auto end = objsToCreate.end();
-  // Post import logic
-  AL_BEGIN_PROFILE_SECTION(PostImportLogic);
   for(; it != end; ++it)
   {
-    MObject object = it->first;
-    UsdPrim prim = it->second;
-    Trace(prim.GetPath().GetText());
-
+    UsdPrim prim = *it;
     fileio::translators::TranslatorRefPtr torBase = translatorManufacture.get(prim.GetTypeName());
     if(torBase)
     {
-      Trace("Translator-PostImport: postImport prim: " << prim.GetPath().GetText());
+      TF_DEBUG(ALUSDMAYA_TRANSLATORS).Msg("ProxyShapePostLoadProcess::connectSchemaPrims [postImport] prim=%s\n", prim.GetPath().GetText());
       AL_BEGIN_PROFILE_SECTION(TranslatorBasePostImport);
       torBase->postImport(prim);
       AL_END_PROFILE_SECTION();
@@ -485,14 +516,11 @@ void ProxyShapePostLoadProcess::connectSchemaPrims(
 //----------------------------------------------------------------------------------------------------------------------
 MStatus ProxyShapePostLoadProcess::initialise(nodes::ProxyShape* ptrNode)
 {
-  Trace("ProxyShapePostLoadProcess::initialise");
-
-  fileio::NodeFactory& factory = fileio::getNodeFactory();
-  factory.setImportParams(&m_params);
+  TF_DEBUG(ALUSDMAYA_TRANSLATORS).Msg("ProxyShapePostLoadProcess::initialise called\n");
 
   MFnDagNode fn(ptrNode->thisMObject());
-  MDagPath node;
-  fn.getPath(node);
+  MDagPath proxyTransformPath;
+  fn.getPath(proxyTransformPath);
 
   // make sure we unload all references prior to reloading them again
   ptrNode->unloadMayaReferences();
@@ -522,13 +550,11 @@ MStatus ProxyShapePostLoadProcess::initialise(nodes::ProxyShape* ptrNode)
   }
 
   AL_BEGIN_PROFILE_SECTION(HuntForNativePrims);
-  MDagPath proxyTransformPath = node;
   proxyTransformPath.pop();
 
+  // iterate over the stage and find all custom schema nodes that have registered translator plugins
   std::vector<UsdPrim> schemaPrims;
   std::vector<ImportCallback> callBacks;
-
-
   UsdStageRefPtr stage = ptrNode->getUsdStage();
   if(stage)
   {
@@ -542,17 +568,17 @@ MStatus ProxyShapePostLoadProcess::initialise(nodes::ProxyShape* ptrNode)
   }
   AL_END_PROFILE_SECTION();
 
-  MPlug outTime = ptrNode->outTimePlug();
-
   // generate the transform chains
   MObjectToPrim objsToCreate;
   createTranformChainsForSchemaPrims(ptrNode, schemaPrims, proxyTransformPath, objsToCreate);
 
-  createSchemaPrims(ptrNode, objsToCreate);
+  // create prims that need to be imported
+  createSchemaPrims(ptrNode, schemaPrims);
 
   // now perform any post-creation fix up
-  connectSchemaPrims(ptrNode, objsToCreate);
+  connectSchemaPrims(ptrNode, schemaPrims);
 
+  // hunt for geometry that can be hidden
   ptrNode->findExcludedGeometry();
   return MS::kSuccess;
 }

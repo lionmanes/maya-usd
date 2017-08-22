@@ -13,8 +13,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+#include "maya/MTypes.h"
+#if MAYA_API_VERSION < 201700
+#include <QtGui/QApplication>
+#else
 #include <QGuiApplication>
+#endif
 
+#include "AL/usdmaya/DebugCodes.h"
 #include "AL/usdmaya/nodes/ProxyShape.h"
 #include "AL/usdmaya/nodes/ProxyShapeUI.h"
 #include "AL/usdmaya/nodes/ProxyDrawOverride.h"
@@ -31,12 +37,6 @@
 #include "maya/MObjectArray.h"
 #include "maya/MPointArray.h"
 
-// printf debugging
-#if 0 || AL_ENABLE_TRACE
-# define Trace(X) std::cerr << X << std::endl;
-#else
-# define Trace(X)
-#endif
 
 namespace AL {
 namespace usdmaya {
@@ -45,13 +45,13 @@ namespace nodes {
 //----------------------------------------------------------------------------------------------------------------------
 ProxyShapeUI::ProxyShapeUI()
 {
-  Trace("ProxyShapeUI::ProxyShapeUI");
+  TF_DEBUG(ALUSDMAYA_DRAW).Msg("ProxyShapeUI::ProxyShapeUI");
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 ProxyShapeUI::~ProxyShapeUI()
 {
-  Trace("ProxyShapeUI::~ProxyShapeUI");
+  TF_DEBUG(ALUSDMAYA_DRAW).Msg("ProxyShapeUI::~ProxyShapeUI");
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -63,7 +63,7 @@ void* ProxyShapeUI::creator()
 //----------------------------------------------------------------------------------------------------------------------
 void ProxyShapeUI::getDrawRequests(const MDrawInfo& drawInfo, bool isObjectAndActiveOnly, MDrawRequestQueue& requests)
 {
-  Trace("ProxyShapeUI::getDrawRequests");
+  TF_DEBUG(ALUSDMAYA_DRAW).Msg("ProxyShapeUI::getDrawRequests");
 
   MDrawRequest request = drawInfo.getPrototype(*this);
 
@@ -84,7 +84,7 @@ void ProxyShapeUI::getDrawRequests(const MDrawInfo& drawInfo, bool isObjectAndAc
 //----------------------------------------------------------------------------------------------------------------------
 void ProxyShapeUI::draw(const MDrawRequest& request, M3dView& view) const
 {
-  Trace("ProxyShapeUI::draw");
+  TF_DEBUG(ALUSDMAYA_DRAW).Msg("ProxyShapeUI::draw");
 
   //
   view.beginGL();
@@ -267,7 +267,7 @@ SdfPathVector ProxyShapeSelectionHelper::m_paths;
 //----------------------------------------------------------------------------------------------------------------------
 bool ProxyShapeUI::select(MSelectInfo& selectInfo, MSelectionList& selectionList, MPointArray& worldSpaceSelectPoints) const
 {
-  Trace("ProxyShapeUI::select");
+  TF_DEBUG(ALUSDMAYA_DRAW).Msg("ProxyShapeUI::select");
 
   float clearCol[4];
   glGetFloatv(GL_COLOR_CLEAR_VALUE, clearCol);
@@ -320,7 +320,11 @@ bool ProxyShapeUI::select(MSelectInfo& selectInfo, MSelectionList& selectionList
   {
     if(hitSelected)
     {
+#if MAYA_API_VERSION < 201700
+      Qt::KeyboardModifiers modifiers = QApplication::keyboardModifiers();
+#else
       Qt::KeyboardModifiers modifiers = QGuiApplication::keyboardModifiers();
+#endif
       bool shiftHeld = modifiers.testFlag(Qt::ShiftModifier);
       bool ctrlHeld = modifiers.testFlag(Qt::ControlModifier);
       MGlobal::ListAdjustment mode = MGlobal::kReplaceList;
@@ -379,7 +383,11 @@ bool ProxyShapeUI::select(MSelectInfo& selectInfo, MSelectionList& selectionList
   }
   else
   {
+#if MAYA_API_VERSION < 201700
+    Qt::KeyboardModifiers modifiers = QApplication::keyboardModifiers();
+#else
     Qt::KeyboardModifiers modifiers = QGuiApplication::keyboardModifiers();
+#endif
     bool shiftHeld = modifiers.testFlag(Qt::ShiftModifier);
     bool ctrlHeld = modifiers.testFlag(Qt::ControlModifier);
     MGlobal::ListAdjustment mode = MGlobal::kReplaceList;

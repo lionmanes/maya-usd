@@ -46,12 +46,6 @@
 #include "pxr/usd/ar/resolver.h"
 #include "pxr/usd/usd/stageCacheContext.h"
 
-// printf debugging
-#if 0 || AL_ENABLE_TRACE
-# define Trace(X) std::cout << X << std::endl;
-#else
-# define Trace(X)
-#endif
 
 namespace AL {
 namespace usdmaya {
@@ -104,7 +98,7 @@ static void beforeSaveScene(void* clientData)
       fn.setObject(iter.item());
       if(fn.typeId() == Layer::kTypeId)
       {
-        Trace("serialising layer: " << fn.name().asChar());
+        TF_DEBUG(ALUSDMAYA_EVALUATION).Msg("serialising layer: %s\n", fn.name().asChar());
         Layer* layerPtr = (Layer*)fn.userNode();
         layerPtr->populateSerialisationAttributes();
       }
@@ -183,7 +177,7 @@ Layer* ProxyShape::findLayer(SdfLayerHandle handle)
   LAYER_HANDLE_CHECK(handle);
   if(handle)
   {
-    Trace("ProxyShape::findLayer: " << handle->GetIdentifier());
+    TF_DEBUG(ALUSDMAYA_EVALUATION).Msg("ProxyShape::findLayer: %s\n", handle->GetIdentifier().c_str());
     Layer* layer = getLayer();
     if(layer)
     {
@@ -200,7 +194,7 @@ MString ProxyShape::findLayerMayaName(SdfLayerHandle handle)
   LAYER_HANDLE_CHECK(handle);
   if(handle)
   {
-    Trace("ProxyShape::findLayerMayaName: " << handle->GetIdentifier());
+    TF_DEBUG(ALUSDMAYA_EVALUATION).Msg("ProxyShape::findLayerMayaName: %s\n", handle->GetIdentifier().c_str());
     Layer* node = findLayer(handle);
     if(node)
     {
@@ -214,7 +208,7 @@ MString ProxyShape::findLayerMayaName(SdfLayerHandle handle)
 //----------------------------------------------------------------------------------------------------------------------
 UsdPrim ProxyShape::getUsdPrim(MDataBlock& dataBlock) const
 {
-  Trace("ProxyShape::getUsdPrim");
+  TF_DEBUG(ALUSDMAYA_EVALUATION).Msg("ProxyShape::getUsdPrim\n");
   UsdPrim usdPrim;
   StageData* outData = inputDataValue<StageData>(dataBlock, m_outStageData);
   if(outData)
@@ -232,7 +226,7 @@ UsdPrim ProxyShape::getUsdPrim(MDataBlock& dataBlock) const
 //----------------------------------------------------------------------------------------------------------------------
 SdfPathVector ProxyShape::getExcludePrimPaths() const
 {
-  Trace("ProxyShape::getExcludePrimPaths");
+  TF_DEBUG(ALUSDMAYA_EVALUATION).Msg("ProxyShape::getExcludePrimPaths\n");
 
   SdfPathVector result;
 
@@ -256,7 +250,7 @@ SdfPathVector ProxyShape::getExcludePrimPaths() const
 //----------------------------------------------------------------------------------------------------------------------
 void ProxyShape::constructGLImagingEngine()
 {
-  Trace("ProxyShape::constructGLImagingEngine");
+  TF_DEBUG(ALUSDMAYA_EVALUATION).Msg("ProxyShape::constructGLImagingEngine\n");
   if (MGlobal::mayaState() != MGlobal::kBatch)
   {
     if(m_stage)
@@ -388,7 +382,7 @@ ProxyShape::ProxyShape()
     m_context(fileio::translators::TranslatorContext::create(this)),
     m_translatorManufacture(context())
 {
-  Trace("ProxyShape::ProxyShape");
+  TF_DEBUG(ALUSDMAYA_EVALUATION).Msg("ProxyShape::ProxyShape\n");
   m_beforeSaveSceneId = MSceneMessage::addCallback(MSceneMessage::kBeforeSave, beforeSaveScene, this);
   m_onSelectionChanged = MEventMessage::addEventCallback(MString("SelectionChanged"), onSelectionChanged, this);
 
@@ -403,7 +397,7 @@ ProxyShape::ProxyShape()
 //----------------------------------------------------------------------------------------------------------------------
 ProxyShape::~ProxyShape()
 {
-  Trace("ProxyShape::~ProxyShape");
+  TF_DEBUG(ALUSDMAYA_EVALUATION).Msg("ProxyShape::~ProxyShape\n");
   MSceneMessage::removeCallback(m_beforeSaveSceneId);
   MNodeMessage::removeCallback(m_attributeChanged);
   MEventMessage::removeCallback(m_onSelectionChanged);
@@ -444,7 +438,7 @@ static const int16_t rotate_order_values[] =
 //----------------------------------------------------------------------------------------------------------------------
 MStatus ProxyShape::initialise()
 {
-  Trace("ProxyShape::initialise");
+  TF_DEBUG(ALUSDMAYA_EVALUATION).Msg("ProxyShape::initialise\n");
 
   const char* errorString = "ProxyShape::initialize";
   try
@@ -504,7 +498,7 @@ MStatus ProxyShape::initialise()
 //----------------------------------------------------------------------------------------------------------------------
 void ProxyShape::onEditTargetChanged(UsdNotice::StageEditTargetChanged const& notice, UsdStageWeakPtr const& sender)
 {
-  Trace("ProxyShape::onEditTargetChanged");
+  TF_DEBUG(ALUSDMAYA_EVALUATION).Msg("ProxyShape::onEditTargetChanged\n");
   if (!sender || sender != m_stage)
       return;
 
@@ -518,8 +512,9 @@ void ProxyShape::onEditTargetChanged(UsdNotice::StageEditTargetChanged const& no
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void ProxyShape::onPrimResync(SdfPath primPath, const SdfPathVector& variantPrimsToSwitch)
+void ProxyShape::onPrimResync(SdfPath primPath, const SdfPathVector& previousPrims)
 {
+  TF_DEBUG(ALUSDMAYA_TRANSLATORS).Msg("ProxyShape::onPrimResync checking %s\n", primPath.GetText());
 
   UsdPrim resyncPrim = m_stage->GetPrimAtPath(primPath);
   if(!resyncPrim.IsValid())
@@ -527,28 +522,72 @@ void ProxyShape::onPrimResync(SdfPath primPath, const SdfPathVector& variantPrim
     return;
   }
 
+  TF_DEBUG(ALUSDMAYA_TRANSLATORS).Msg("ProxyShape::onPrimResync begin:\n%s\n", context()->serialise().asChar());
+
   AL_BEGIN_PROFILE_SECTION(ObjectChanged);
   MFnDagNode fn(thisMObject());
   MDagPath dag_path;
   fn.getPath(dag_path);
   dag_path.pop();
 
-  auto primsToSwitch = huntForNativeNodesUnderPrim(dag_path, primPath, translatorManufacture());
+  // find the new set of prims
+  std::vector<UsdPrim> newPrimSet = huntForNativeNodesUnderPrim(dag_path, primPath, translatorManufacture());
+  std::vector<UsdPrim> updatablePrimSet;
+  std::vector<UsdPrim> transformsToCreate;
 
-  context()->removeEntries(variantPrimsToSwitch);
+  SdfPathVector removedPrimSet;
+  filterPrims(previousPrims, newPrimSet, transformsToCreate, updatablePrimSet, removedPrimSet);
   m_variantSwitchedPrims.clear();
+
+#if AL_ENABLE_TRACE
+  std::cout << "new prims" << std::endl;
+  for(auto it : newPrimSet)
+  {
+    std::cout << it.GetPath().GetText() << std::endl;
+  }
+  std::cout << "new transforms" << std::endl;
+  for(auto it : transformsToCreate)
+  {
+    std::cout << it.GetPath().GetText() << std::endl;
+  }
+  std::cout << "updateable prims" << std::endl;
+  for(auto it : updatablePrimSet)
+  {
+    std::cout << it.GetPath().GetText() << std::endl;
+  }
+  std::cout << "removed prims" << std::endl;
+  for(auto it : removedPrimSet)
+  {
+    std::cout << it.GetText() << std::endl;
+  }
+#endif
+
+  cmds::ProxyShapePostLoadProcess::MObjectToPrim objsToCreate;
+  if(!transformsToCreate.empty())
+    cmds::ProxyShapePostLoadProcess::createTranformChainsForSchemaPrims(this, transformsToCreate, dag_path, objsToCreate);
+
+  if(!newPrimSet.empty())
+    cmds::ProxyShapePostLoadProcess::createSchemaPrims(this, newPrimSet);
+
+  if(!updatablePrimSet.empty())
+    cmds::ProxyShapePostLoadProcess::updateSchemaPrims(this, updatablePrimSet);
+
+  context()->removeEntries(removedPrimSet);
 
   cleanupTransformRefs();
 
-  MObjectToPrim objsToCreate = filterUpdatablePrims(primsToSwitch);
   context()->updatePrimTypes();
 
-  cmds::ProxyShapePostLoadProcess::createTranformChainsForSchemaPrims(this, primsToSwitch, dag_path, objsToCreate);
-
-  cmds::ProxyShapePostLoadProcess::createSchemaPrims(this, objsToCreate);
-
   // now perform any post-creation fix up
-  cmds::ProxyShapePostLoadProcess::connectSchemaPrims(this, objsToCreate);
+  if(!newPrimSet.empty())
+    cmds::ProxyShapePostLoadProcess::connectSchemaPrims(this, newPrimSet);
+
+  //cmds::ProxyShapePostLoadProcess::createTranformChainsForSchemaPrims(this, primsToSwitch, dag_path, objsToCreate);
+  if(!updatablePrimSet.empty())
+    cmds::ProxyShapePostLoadProcess::connectSchemaPrims(this, updatablePrimSet);
+
+
+  TF_DEBUG(ALUSDMAYA_TRANSLATORS).Msg("ProxyShape::onPrimResync end:\n%s\n", context()->serialise().asChar());
 
   AL_END_PROFILE_SECTION();
 
@@ -557,26 +596,82 @@ void ProxyShape::onPrimResync(SdfPath primPath, const SdfPathVector& variantPrim
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-ProxyShape::MObjectToPrim ProxyShape::filterUpdatablePrims(std::vector<UsdPrim>& variantPrimsToSwitch)
+void ProxyShape::filterPrims(
+    const SdfPathVector& previousPrims,
+    std::vector<UsdPrim>& newPrimSet,
+    std::vector<UsdPrim>& transformsToCreate,
+    std::vector<UsdPrim>& updatablePrimSet,
+    SdfPathVector& removedPrimSet)
 {
+  // copy over original prims
+  removedPrimSet.assign(previousPrims.begin(), previousPrims.end());
+
+  // to see if no prims are found
+  TfToken nullToken;
+
   MObjectToPrim objsToCreate;
   fileio::SchemaPrimsUtils schemaPrimUtils(translatorManufacture());
   auto manufacture = translatorManufacture();
-  for(auto it = variantPrimsToSwitch.begin(); it != variantPrimsToSwitch.end(); )
+  for(auto it = newPrimSet.begin(); it != newPrimSet.end(); )
   {
-    TfToken type = context()->getTypeForPath(it->GetPath());
-    fileio::translators::TranslatorRefPtr translator = manufacture.get(type);
-    if(type == it->GetTypeName() && translator && translator->supportsUpdate() && translator->needsTransformParent())
+    UsdPrim prim = *it;
+    auto lastIt = it;
+    ++it;
+
+    SdfPath path = prim.GetPath();
+
+    // check previous prim type (if it exists at all?)
+    TfToken type = context()->getTypeForPath(path);
+    TfToken newType = prim.GetTypeName();
+    fileio::translators::TranslatorRefPtr translator = manufacture.get(newType);
+
+    if(nullToken == type)
     {
-      objsToCreate.push_back(std::pair<MObject, UsdPrim>(findRequiredPath(it->GetPath()), *it));
-      variantPrimsToSwitch.erase(it);
+      // all good, prim will remain in the new set (we have no entry for it)
+      if(translator->needsTransformParent())
+      {
+        transformsToCreate.push_back(prim);
+      }
     }
     else
     {
-      ++it;
+      // if the type remains the same, and the type supports update
+      if(translator->supportsUpdate())
+      {
+        if(type == prim.GetTypeName())
+        {
+          // add to updatable prim list
+          updatablePrimSet.push_back(prim);
+
+          // locate the path and delete from the removed set (we do not want to delete this prim!
+          auto iter = std::lower_bound(removedPrimSet.begin(), removedPrimSet.end(), path, [](const SdfPath& a, const SdfPath& b){ return b < a; } );
+          if(iter != removedPrimSet.end() && *iter == path)
+          {
+            removedPrimSet.erase(iter);
+            it = newPrimSet.erase(lastIt);
+          }
+        }
+      }
+      else
+      {
+        // should always be the case?
+        if(translator)
+        {
+          // if we need a transform, make a note of it now
+          if(translator->needsTransformParent())
+          {
+            transformsToCreate.push_back(prim);
+          }
+        }
+        else
+        {
+          // we should be able to delete this prim from the set??
+          // We shouldn't really get here however!
+          it = newPrimSet.erase(lastIt);
+        }
+      }
     }
   }
-  return objsToCreate;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -585,10 +680,10 @@ void ProxyShape::onObjectsChanged(UsdNotice::ObjectsChanged const& notice, UsdSt
   if(MFileIO::isOpeningFile())
     return;
 
-  Trace("ProxyShape::onObjectsChanged");
   if (!sender || sender != m_stage)
       return;
 
+  TF_DEBUG(ALUSDMAYA_EVENTS).Msg("ProxyShape::onObjectsChanged called m_compositionHasChanged=%i\n", m_compositionHasChanged);
   // These paths are subtree-roots representing entire subtrees that may have
   // changed. In this case, we must dump all cached data below these points
   // and repopulate those trees.
@@ -610,7 +705,7 @@ void ProxyShape::onObjectsChanged(UsdNotice::ObjectsChanged const& notice, UsdSt
 //----------------------------------------------------------------------------------------------------------------------
 void ProxyShape::validateTransforms()
 {
-  Trace("validateTransforms");
+  TF_DEBUG(ALUSDMAYA_EVALUATION).Msg("validateTransforms\n");
   if(m_stage)
   {
     SdfPathVector pathsToNuke;
@@ -644,7 +739,7 @@ void ProxyShape::validateTransforms()
       }
     }
   }
-  Trace("/validateTransforms");
+  TF_DEBUG(ALUSDMAYA_EVALUATION).Msg("/validateTransforms\n");
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -654,7 +749,7 @@ std::vector<UsdPrim> ProxyShape::huntForNativeNodesUnderPrim(
     fileio::translators::TranslatorManufacture& manufacture)
 {
 
-  Trace("ProxyShape::huntForNativeNodesUnderPrim");
+  TF_DEBUG(ALUSDMAYA_EVALUATION).Msg("ProxyShape::huntForNativeNodesUnderPrim\n");
   std::vector<UsdPrim> prims;
   fileio::SchemaPrimsUtils utils(manufacture);
 
@@ -679,7 +774,7 @@ std::vector<UsdPrim> ProxyShape::huntForNativeNodesUnderPrim(
 //----------------------------------------------------------------------------------------------------------------------
 void ProxyShape::onPrePrimChanged(const SdfPath& path, SdfPathVector& outPathVector)
 {
-  Trace("ProxyShape::onPrePrimChanged");
+  TF_DEBUG(ALUSDMAYA_EVALUATION).Msg("ProxyShape::onPrePrimChanged\n");
   context()->preRemoveEntry(path, outPathVector);
 }
 
@@ -700,18 +795,15 @@ void ProxyShape::variantSelectionListener(SdfNotice::LayersDidChange const& noti
       const SdfPath &path = entryIter->first;
       const SdfChangeList::Entry &entry = entryIter->second;
 
-      Trace("variantSelectionListener, oldPath=" << entry.oldPath.GetString() << ", oldIdentifier=" << entry.oldIdentifier << ", path=" << path.GetText());
-
-      MFnDagNode fn(thisMObject());
-      MDagPath dag_path;
-      fn.getPath(dag_path);
-      dag_path.pop();
-
       TF_FOR_ALL(it, entry.infoChanged)
       {
         if (it->first == SdfFieldKeys->VariantSelection ||
             it->first == SdfFieldKeys->Active)
         {
+          TF_DEBUG(ALUSDMAYA_EVENTS).Msg("ProxyShape::variantSelectionListener oldPath=%s, oldIdentifier=%s, path=%s\n",
+                                         entry.oldPath.GetString().c_str(),
+                                         entry.oldIdentifier.c_str(),
+                                         path.GetText());
           m_compositionHasChanged = true;
           m_changedPath = path;
           onPrePrimChanged(m_changedPath, m_variantSwitchedPrims);
@@ -724,7 +816,7 @@ void ProxyShape::variantSelectionListener(SdfNotice::LayersDidChange const& noti
 //----------------------------------------------------------------------------------------------------------------------
 void ProxyShape::reloadStage(MPlug& plug)
 {
-  Trace("ProxyShape::reloadStage");
+  TF_DEBUG(ALUSDMAYA_EVALUATION).Msg("ProxyShape::reloadStage\n");
 
   maya::Profiler::clearAll();
   AL_BEGIN_PROFILE_SECTION(ReloadStage);
@@ -926,7 +1018,7 @@ void ProxyShape::onAttributeChanged(MNodeMessage::AttributeMessage msg, MPlug& p
 //----------------------------------------------------------------------------------------------------------------------
 void ProxyShape::postConstructor()
 {
-  Trace("ProxyShape::postConstructor");
+  TF_DEBUG(ALUSDMAYA_EVALUATION).Msg("ProxyShape::postConstructor\n");
   setRenderable(true);
   MObject obj = thisMObject();
   m_attributeChanged = MNodeMessage::addAttributeChangedCallback(obj, onAttributeChanged, (void*)this);
@@ -935,7 +1027,7 @@ void ProxyShape::postConstructor()
 //----------------------------------------------------------------------------------------------------------------------
 bool ProxyShape::primHasExcludedParent(UsdPrim prim)
 {
-  Trace("ProxyShape::primHasExcludedParent");
+  TF_DEBUG(ALUSDMAYA_EVALUATION).Msg("ProxyShape::primHasExcludedParent\n");
   if(prim.IsValid())
   {
     SdfPath primPath = prim.GetPrimPath();
@@ -954,7 +1046,7 @@ bool ProxyShape::primHasExcludedParent(UsdPrim prim)
 //----------------------------------------------------------------------------------------------------------------------
 void ProxyShape::findExcludedGeometry()
 {
-  Trace("ProxyShape::findExcludedGeometry");
+  TF_DEBUG(ALUSDMAYA_EVALUATION).Msg("ProxyShape::findExcludedGeometry\n");
   if(!m_stage)
     return;
 
@@ -1013,7 +1105,7 @@ MStatus ProxyShape::computeOutStageData(const MPlug& plug, MDataBlock& dataBlock
 //----------------------------------------------------------------------------------------------------------------------
 bool ProxyShape::isStageValid() const
 {
-  Trace("ProxyShape::isStageValid");
+  TF_DEBUG(ALUSDMAYA_EVALUATION).Msg("ProxyShape::isStageValid\n");
   MDataBlock dataBlock = const_cast<ProxyShape*>(this)->forceCache();
 
   StageData* outData = inputDataValue<StageData>(dataBlock, m_outStageData);
@@ -1026,7 +1118,7 @@ bool ProxyShape::isStageValid() const
 //----------------------------------------------------------------------------------------------------------------------
 UsdStageRefPtr ProxyShape::getUsdStage() const
 {
-  Trace("ProxyShape::getUsdStage");
+  TF_DEBUG(ALUSDMAYA_EVALUATION).Msg("ProxyShape::getUsdStage\n");
 
   MPlug plug(thisMObject(), m_outStageData);
   MObject data;
@@ -1054,7 +1146,7 @@ MStatus ProxyShape::computeOutputTime(const MPlug& plug, MDataBlock& dataBlock, 
 //----------------------------------------------------------------------------------------------------------------------
 MStatus ProxyShape::compute(const MPlug& plug, MDataBlock& dataBlock)
 {
-  Trace("ProxyShape::compute " << plug.name().asChar());
+  TF_DEBUG(ALUSDMAYA_EVALUATION).Msg("ProxyShape::compute %s\n", plug.name().asChar());
   MTime currentTime;
   if(plug == m_outTime)
   {
@@ -1176,11 +1268,12 @@ MBoundingBox ProxyShape::boundingBox() const
 //----------------------------------------------------------------------------------------------------------------------
 void ProxyShape::unloadMayaReferences()
 {
+  TF_DEBUG(ALUSDMAYA_TRANSLATORS).Msg("ProxyShape::unloadMayaReferences called\n");
   MObjectArray references;
   for(auto it = m_requiredPaths.begin(), e = m_requiredPaths.end(); it != e; ++it)
   {
     MStatus status;
-    MFnDependencyNode fn(it->second.m_node, &status);
+    MFnDependencyNode fn(it->second.node(), &status);
     if(status)
     {
       MPlug plug = fn.findPlug("message", &status);
@@ -1193,14 +1286,12 @@ void ProxyShape::unloadMayaReferences()
           MObject temp = plugs[i].node();
           if(temp.hasFn(MFn::kReference))
           {
-            Trace("unloading reference: " << MFileIO::unloadReferenceByNode(temp));
-
             MString command = MString("referenceQuery -filename ") + MFnDependencyNode(temp).name();
             MString referenceFilename;
             MStatus returnStatus = MGlobal::executeCommand(command, referenceFilename);
             if (returnStatus != MStatus::kFailure)
             {
-              Trace("Removing reference: " << referenceFilename);
+              TF_DEBUG(ALUSDMAYA_EVALUATION).Msg("ProxyShape::unloadMayaReferences removing %s\n", referenceFilename.asChar());
               MFileIO::removeReference(referenceFilename);
             }
           }
@@ -1268,23 +1359,23 @@ void ProxyShape::updateDrivenTransforms(std::vector<UsdPrim>& drivenPrims,
       UsdGeomXformOp xformop = xform.AddTransformOp();
       TransformationMatrix::pushMatrix(drivenTransforms.m_drivenMatrix[idx], xformop, currentTime.as(MTime::uiUnit()));
     }
-    Trace("ProxyShape::updateDrivenTransforms t="<<currentTime.as(MTime::uiUnit()) << " "
-        << drivenTransforms.m_drivenMatrix[idx][0][0] << " "
-        << drivenTransforms.m_drivenMatrix[idx][0][1] << " "
-        << drivenTransforms.m_drivenMatrix[idx][0][2] << " "
-        << drivenTransforms.m_drivenMatrix[idx][0][3] << " "
-        << drivenTransforms.m_drivenMatrix[idx][1][0] << " "
-        << drivenTransforms.m_drivenMatrix[idx][1][1] << " "
-        << drivenTransforms.m_drivenMatrix[idx][1][2] << " "
-        << drivenTransforms.m_drivenMatrix[idx][1][3] << " "
-        << drivenTransforms.m_drivenMatrix[idx][2][0] << " "
-        << drivenTransforms.m_drivenMatrix[idx][2][1] << " "
-        << drivenTransforms.m_drivenMatrix[idx][2][2] << " "
-        << drivenTransforms.m_drivenMatrix[idx][2][3] << " "
-        << drivenTransforms.m_drivenMatrix[idx][3][0] << " "
-        << drivenTransforms.m_drivenMatrix[idx][3][1] << " "
-        << drivenTransforms.m_drivenMatrix[idx][3][2] << " "
-        << drivenTransforms.m_drivenMatrix[idx][3][3]);
+    TF_DEBUG(ALUSDMAYA_EVALUATION).Msg("ProxyShape::updateDrivenTransforms %d %d %d %d  %d %d %d %d  %d %d %d %d  %d %d %d %d\n",
+      drivenTransforms.m_drivenMatrix[idx][0][0],
+      drivenTransforms.m_drivenMatrix[idx][0][1],
+      drivenTransforms.m_drivenMatrix[idx][0][2],
+      drivenTransforms.m_drivenMatrix[idx][0][3],
+      drivenTransforms.m_drivenMatrix[idx][1][0],
+      drivenTransforms.m_drivenMatrix[idx][1][1],
+      drivenTransforms.m_drivenMatrix[idx][1][2],
+      drivenTransforms.m_drivenMatrix[idx][1][3],
+      drivenTransforms.m_drivenMatrix[idx][2][0],
+      drivenTransforms.m_drivenMatrix[idx][2][1],
+      drivenTransforms.m_drivenMatrix[idx][2][2],
+      drivenTransforms.m_drivenMatrix[idx][2][3],
+      drivenTransforms.m_drivenMatrix[idx][3][0],
+      drivenTransforms.m_drivenMatrix[idx][3][1],
+      drivenTransforms.m_drivenMatrix[idx][3][2],
+      drivenTransforms.m_drivenMatrix[idx][3][3]);
   }
 }
 
@@ -1315,7 +1406,7 @@ void ProxyShape::updateDrivenVisibility(std::vector<UsdPrim>& drivenPrims,
 //----------------------------------------------------------------------------------------------------------------------
 MStatus ProxyShape::computeDrivenAttributes(const MPlug& plug, MDataBlock& dataBlock, const MTime& currentTime)
 {
-  Trace("ProxyShape::computeDrivenAttributes");
+  TF_DEBUG(ALUSDMAYA_EVALUATION).Msg("ProxyShape::computeDrivenAttributes\n");
   m_drivenTransformsDirty = false;
   MArrayDataHandle drvTransArray = dataBlock.inputArrayValue(m_inDrivenTransformsData);
   uint32_t elemCnt = drvTransArray.elementCount();
@@ -1359,7 +1450,7 @@ void ProxyShape::serialiseTransformRefs()
   std::ostringstream oss;
   for(auto iter : m_requiredPaths)
   {
-    MFnDagNode fn(iter.second.m_node);
+    MFnDagNode fn(iter.second.node());
     MDagPath path;
     fn.getPath(path);
     oss << path.fullPathName() << " "
