@@ -18,7 +18,6 @@ private_build_requires:
 - gdb-7.10
 - doxygen-1
 - AL_USDSchemas-0.29+<1
-- Qt_vfx-5+
 
 requires:
 - usdBase-0.8.al1
