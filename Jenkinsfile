@@ -37,6 +37,28 @@ timeout(time: 30)
         ansiColor('xterm')
         {
             testing.runRepositoryTests(gitHubRepo, packages, dependentJobs, rootFolder, rezBuildOptions, "all_tests", true, rezTestOptions)
+            
+            def workspace = pwd() + "/src/docker"
+            parallel Opensource Maya2016:{
+                            dir ('src') {
+                                // Change the docker repository
+                                sh "sed '/FROM/c\\FROM knockout:5000/usd-docker/usd:latest-centos6-maya2016' ${workspace}/Dockerfile_centos6 > ${workspace}/Dockerfile_centos6_2016"
+                                
+                                // Build image
+                                sh 'sudo docker build -f docker/Dockerfile_centos6_2016 .'
+                            }
+                    },
+              		 Opensource Maya2017:{
+                            dir ('src') {
+                                // Change the repository
+                                sh "sed '/FROM/c\\FROM knockout:5000/usd-docker/usd:latest-centos6-maya2017' ${workspace}/Dockerfile_centos6 > ${workspace}/Dockerfile_centos6_2017"
+                                
+                                // Build image
+                                sh 'sudo docker build -f docker/Dockerfile_centos6_2017 .'
+                        }
+                    },
+                    failFast: false
+            sh 'sudo docker images | grep "^<none>" | awk "{print $3}" | xargs -L1 sudo docker rmi -f'
         }
     }
 }
