@@ -116,7 +116,6 @@ add_subdirectory(${SUBTREE_DIRECTORY}/lib)
 add_subdirectory(${SUBTREE_DIRECTORY}/plugin)
 add_subdirectory(${SUBTREE_DIRECTORY}/schemas)
 add_subdirectory(${SUBTREE_DIRECTORY}/translators)
-add_subdirectory(${SUBTREE_DIRECTORY}/tests)
 
 # The opensource build has our these custom SdfMetadata in the schema plugInfo.json:
 #   - al_usdmaya_transformType
@@ -194,3 +193,14 @@ install(FILES ${PROJECT_BINARY_DIR}/ALUsdMayaConfig.cmake
   COMPONENT dev
 )
 
+if(MAYA_API_VERSION STRLESS 201700)
+    # AL_usdmaya_UnitTestHarness will hang maya 2016 (see PXR_MAYA_TBB_WORKAROUND)
+    # Exclude it for now for maya 2016 variant
+    add_custom_target(all_tests
+        ${CMAKE_CTEST_COMMAND} --output-on-failure -E "TestAL_USDMaya"
+    )
+else()
+    add_custom_target(all_tests
+        ${CMAKE_CTEST_COMMAND} --output-on-failure
+    )
+endif()
