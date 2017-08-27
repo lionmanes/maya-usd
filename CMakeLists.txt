@@ -196,6 +196,9 @@ install(FILES ${PROJECT_BINARY_DIR}/ALUsdMayaConfig.cmake
 if(MAYA_API_VERSION STRLESS 201700)
     # AL_usdmaya_UnitTestHarness will hang maya 2016 (see PXR_MAYA_TBB_WORKAROUND)
     # Exclude it for now for maya 2016 variant
+    message(STATUS
+        "Skipping AL_USDMayaTestPlugin for maya 2016 tests because of tbb bug"
+    )
     add_custom_target(all_tests
         ${CMAKE_CTEST_COMMAND} --output-on-failure -E "TestAL_USDMaya"
     )
