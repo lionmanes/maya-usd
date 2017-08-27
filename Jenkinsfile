@@ -24,11 +24,11 @@ def dependentJobs = [["USDIntegration"],
                     ]
                     
 // flags passed to the rez build -- -- all_tests
-def rezBuildOptions = "-- -- -j16"
+def rezBuildOptions = "-i -- -- -j16"
 
-// test only Maya 2017 variant
+// test only Maya 2017 and 2018 variants
 // (Maya 2016 variant will hang because of the tbb USD issue)
-def rezTestOptions = "--variants 1 -- --"
+def rezTestOptions = "--variants 1 2 -- --"
 
 timeout(time: 30)
 {
