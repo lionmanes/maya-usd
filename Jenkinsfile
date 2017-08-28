@@ -24,11 +24,11 @@ def dependentJobs = [["USDIntegration"],
                     ]
                     
 // flags passed to the rez build -- -- all_tests
-def rezBuildOptions = "-- -- -j16"
+def rezBuildOptions = "-i -- -- -j16"
 
-// test only Maya 2017 variant
+// test only Maya 2017 and 2018 variants
 // (Maya 2016 variant will hang because of the tbb USD issue)
-def rezTestOptions = "--variants 1 -- --"
+def rezTestOptions = "--variants 1 2 -- --"
 
 timeout(time: 30)
 {
@@ -37,6 +37,28 @@ timeout(time: 30)
         ansiColor('xterm')
         {
             testing.runRepositoryTests(gitHubRepo, packages, dependentJobs, rootFolder, rezBuildOptions, "all_tests", true, rezTestOptions)
+            
+            def workspace = pwd() + "/src/docker"
+            parallel "Opensource Maya2016":{
+                            dir ('src') {
+                                // Change the docker repository
+                                sh "sed '/FROM/c\\FROM knockout:5000/usd-docker/usd:latest-centos6-maya2016' ${workspace}/Dockerfile_centos6 > ${workspace}/Dockerfile_centos6_2016"
+                                
+                                // Build image
+                                sh 'sudo docker build -f docker/Dockerfile_centos6_2016 .'
+                            }
+                    },
+              		 "Opensource Maya2017":{
+                            dir ('src') {
+                                // Change the repository
+                                sh "sed '/FROM/c\\FROM knockout:5000/usd-docker/usd:latest-centos6-maya2017' ${workspace}/Dockerfile_centos6 > ${workspace}/Dockerfile_centos6_2017"
+                                
+                                // Build image
+                                sh 'sudo docker build -f docker/Dockerfile_centos6_2017 .'
+                        }
+                    },
+                    failFast: false
+            sh 'sudo docker images | grep "^<none>" | awk "{print $3}" | xargs -L1 sudo docker rmi -f'
         }
     }
 }
