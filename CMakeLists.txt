@@ -111,6 +111,13 @@ if(${MAYA_API_VERSION} STRLESS 2017)
     set(QT_QTGUI_LIBRARY QtGui)
 endif()
 
+set(AL_USDMAYA_LOCATION_NAME
+    "AL_USDMAYA_LOCATION"
+    CACHE
+    STRING
+    "Name of the environment variable used to store AL_USDMaya installation location"
+)
+
 # Build our plugs... non-standard as we're building from another source tree
 add_subdirectory(${SUBTREE_DIRECTORY}/lib)
 add_subdirectory(${SUBTREE_DIRECTORY}/plugin)
