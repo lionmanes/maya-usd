@@ -1,5 +1,3 @@
-@Library('AL@fabricem_build_and_tests_options')
-
 def gitHubRepo = "https://github.al.com.au/rnd/AL_USDMaya.git"
 
 // The list of packages that will be executed, the mode will determine if the stages can be executed in parallel or in serial.
