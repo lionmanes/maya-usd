@@ -37,6 +37,22 @@ timeout(time: 30)
             testing.runRepositoryTests(gitHubRepo, packages, dependentJobs, rootFolder, rezBuildOptions, "all_tests", true, rezTestOptions)
         }
     }
+
+    node ('CentOS-6.6&&!restricted&&devbuild10')
+    {
+        ansiColor('xterm')
+        {
+            def workspace = pwd() + "/src"
+            stage("Opensource Maya2016")
+            {
+                sh "sudo docker run --rm -v $workspace:/tmp/usd-build/AL_USDMaya knockout:5000/usd-docker/usd:latest-centos6-maya2016 bash /tmp/usd-build/AL_USDMaya/docker/build_alusdmaya.sh"
+            }
+            stage("Opensource Maya2017")
+            {
+                sh "sudo docker run --rm -v $workspace:/tmp/usd-build/AL_USDMaya knockout:5000/usd-docker/usd:latest-centos6-maya2017 bash /tmp/usd-build/AL_USDMaya/docker/build_alusdmaya.sh"
+            }
+        }
+    }
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * *
