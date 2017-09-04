@@ -30,7 +30,11 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m'
 
+cleanup () {
+}
+
 die () {
+    cleanup
     echo -e "${RED}$@${NC}" 1>&2
     exit 1
 }
@@ -78,11 +82,15 @@ tmp_oss_remote="_tmp_oss_remote_"
 git remote add $tmp_oss_remote $oss_url || exit 1
 git fetch -q $tmp_oss_remote
 
+# Override
+cleanup () {
+    git remote remove $tmp_oss_remote
+}
+
 # Check if not already tagged
 tag_found=`git tag -l $oss_tag`
 if test -n "$tag_found"
 then
-    git remote remove $tmp_oss_remote
     die "$oss_tag is already used"
 fi
 
@@ -129,7 +137,6 @@ done
 
 if [[ $exported -eq 0 ]]
 then
-    git remote remove $tmp_oss_remote
     die "$previous needs to be exported first."
 fi
 
@@ -150,7 +157,6 @@ commit_found=`git rev-list $tmp_oss_remote/develop |\
 
 if test -z "$commit_found"
 then
-    git remote remove $tmp_oss_remote
     die "The corresponding commits need first to be exported to " \
         $oss_url
 fi
@@ -163,11 +169,11 @@ commit_merged=`git rev-list $tmp_oss_remote/$oss_master_branch |\
 
 if test -n "$commit_merged"
 then
-    git remote remove $tmp_oss_remote
     die "$last_subtree_commit is already part of the opensource master branch"
 fi
 
-clean_git_temp () {
+# Override
+cleanup () {
     git remote remove $tmp_oss_remote
     git checkout -q $current_branch
     git branch -q -D $tmp_push_branch    
@@ -176,7 +182,6 @@ clean_git_temp () {
 pass_or_die() {
     if test $1 -ne 0
     then
-        clean_git_temp
         die $2
     fi
 }
@@ -195,4 +200,4 @@ git push $tmp_oss_remote $oss_tag
 pass_or_die $? "Unable to push $oss_tag tag to $oss_url"
 
 # Clean up
-clean_git_temp
+cleanup
