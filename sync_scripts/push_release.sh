@@ -99,13 +99,6 @@ cleanup () {
     git remote remove $tmp_oss_remote
 }
 
-# Check if not already tagged
-tag_found=`git tag -l $oss_tag`
-if test -n "$tag_found"
-then
-    quit "$oss_tag is already used"
-fi
-
 ################################################################################
 
 # Check if the previous version has been tagged
