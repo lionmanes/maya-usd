@@ -31,11 +31,23 @@ GREEN='\033[0;32m'
 NC='\033[0m'
 
 cleanup () {
+    return
+}
+
+print_and_cleanup () {
+    cleanup
+    prompt=$1
+    shift
+    echo -e "${!prompt}$@${NC}" 1>&2
+}
+
+quit () {
+    print_and_cleanup "GREEN" $@
+    exit 0
 }
 
 die () {
-    cleanup
-    echo -e "${RED}$@${NC}" 1>&2
+    print_and_cleanup "RED" $@
     exit 1
 }
 
@@ -91,7 +103,7 @@ cleanup () {
 tag_found=`git tag -l $oss_tag`
 if test -n "$tag_found"
 then
-    die "$oss_tag is already used"
+    quit "$oss_tag is already used"
 fi
 
 ################################################################################
@@ -137,7 +149,7 @@ done
 
 if [[ $exported -eq 0 ]]
 then
-    die "$previous needs to be exported first."
+    quit "$previous needs to be exported first."
 fi
 
 ################################################################################
@@ -157,7 +169,7 @@ commit_found=`git rev-list $tmp_oss_remote/develop |\
 
 if test -z "$commit_found"
 then
-    die "The corresponding commits need first to be exported to " \
+    quit "The corresponding commits need first to be exported to " \
         $oss_url
 fi
 
@@ -169,7 +181,7 @@ commit_merged=`git rev-list $tmp_oss_remote/$oss_master_branch |\
 
 if test -n "$commit_merged"
 then
-    die "$last_subtree_commit is already part of the opensource master branch"
+    quit "$last_subtree_commit is already merged in opensource master"
 fi
 
 # Override
