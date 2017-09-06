@@ -17,10 +17,50 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m'
 
+# The opensource repository to push to
+oss_url=https://github.al.com.au/rnd/AL_USDMaya_oss_ready.git
+
+# The opensource branch to push to
+oss_branch=develop
+
+# Allows to test the script against other branches
+dry_run=
+
+USAGE="
+push_develop_to_opensource [--dry-run]
+
+options:
+  --dry-run    do not check diff between internal and opensource branches /
+               extract to a local \"develop_test\" branch
+  -h           show this message
+"
+
 die () {
     echo "$@" 1>&2
     exit 1
 }
+
+while test $# -gt 0
+do
+    opt="$1"
+    shift
+
+    case "$opt" in
+    --dry-run)
+        dry_run="dry_run"
+        ;;
+    -h)
+        echo "$USAGE"
+        exit 1
+        ;;
+    --)
+        break
+        ;;
+    *)
+        die "Unexpected option: $opt"
+        ;;
+    esac
+done
 
 find_latest_squash () {
 # Get the latest commit pulled from opensource we're currently based on.
@@ -67,18 +107,21 @@ find_latest_squash () {
     done
 }
 
+# Git subtree folder name
 prefix=src
-oss_url=https://github.al.com.au/rnd/AL_USDMaya_oss_ready.git
 
 # This script is supposed to be run on Jenkins, during a push event, only for
 # the develop branch. A filter is therefore going to present in the Jenkinsfile,
 # just double check here as we don't want to push feature branches stuff!!!
 # (Jenkins checkouts are in detached mode, compare SHAs)
-current_sha=$(git rev-parse HEAD)
-develop_sha=$(git rev-parse origin/develop)
-if test "$current_sha" != "$develop_sha"
-then
-    die "Only allowed to work with develop branch"
+if test -z "$dry_run"
+    then
+    current_sha=$(git rev-parse HEAD)
+    develop_sha=$(git rev-parse origin/develop)
+    if test "$current_sha" != "$develop_sha" -a "$oss_branch" == "develop"
+    then
+        die "Only allowed to work with develop branch"
+    fi
 fi
 
 # This will give us FETCH HEAD and is also needed by git subtree to work
@@ -121,15 +164,22 @@ else
     # New commits to pushed to opensource.
     if test "$oss_pulled_commit" = "$oss_fetched_commit"
     then
-        # Nothing to pull from opensource, we're ok to push.
-        git subtree push -q -P src $oss_url develop || exit $?
+        if test -z "$dry_run"
+            then
+            # Nothing to pull from opensource, we're ok to push.
+            git subtree push -q -P src $oss_url develop || exit $?
 
-        # Update develop.
-        git subtree pull -m "Merge from $oss_url" -q -P src $oss_url develop \
-                         --squash || exit $?
-        git push --quiet origin HEAD:develop || exit $?
+            # Update develop.
+            git subtree pull -m "Merge from $oss_url" -q -P src $oss_url develop \
+                             --squash || exit $?
+            git push --quiet origin HEAD:develop || exit $?
 
-        echo -e "${GREEN}The opensource repository has been updated.${NC}"
+            echo -e "${GREEN}The opensource repository has been updated.${NC}"
+        else
+            echo -e "[DRY RUN] History will be locally extracted to develop_test"
+
+            git subtree split -P src -b develop_test || exit $?
+        fi
     else
         echo -e "${RED}Some commits have to be pushed to the opensource repo,"
         echo -e "but the internal repo has to be updated first${NC}"
