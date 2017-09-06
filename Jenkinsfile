@@ -20,13 +20,13 @@ def rootFolder = "/film/rndbuilddata/usd/builds"
 
 def dependentJobs = [["USDIntegration"],
                     ]
-                    
+
 // flags passed to the rez build -- -- all_tests
-def rezBuildOptions = "-i -- -- -j16"
+def rezBuildOptions = "-i --variants 1 -- -- -j16"
 
 // test only Maya 2017 and 2018 variants
 // (Maya 2016 variant will hang because of the tbb USD issue)
-def rezTestOptions = "--variants 1 2 -- --"
+def rezTestOptions = "--variants 1 -- --"
 
 timeout(time: 30)
 {
@@ -34,12 +34,27 @@ timeout(time: 30)
     {
         ansiColor('xterm')
         {
-            testing.runRepositoryTests(gitHubRepo, packages, dependentJobs, rootFolder, rezBuildOptions, "all_tests", true, rezTestOptions)
+            testing.runRepositoryTests(
+                gitHubRepo,
+                packages,
+                dependentJobs,
+                rootFolder,
+                rezBuildOptions,
+                "all_tests",
+                true,
+                rezTestOptions
+            )
         }
+
+        stage ('Clean Workspace') {
+            cleanWs notFailBuild: true
+        } // End stage ('Clean Workspace')
     }
 
     node ('CentOS-6.6&&!restricted&&devbuild10')
     {
+        checkout scm
+
         ansiColor('xterm')
         {
             def workspace = pwd() + "/src"
@@ -52,34 +67,9 @@ timeout(time: 30)
                 sh "sudo docker run --rm -v $workspace:/tmp/usd-build/AL_USDMaya knockout:5000/usd-docker/usd:latest-centos6-maya2017 bash /tmp/usd-build/AL_USDMaya/docker/build_alusdmaya.sh"
             }
         }
+
+        stage ('Clean Workspace') {
+            cleanWs notFailBuild: true
+        } // End stage ('Clean Workspace')
     }
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-*  THIS WILL NEED SPECIAL USER/MACHINE WITH PERMISSIONS  *
-*  WHEN USED IN PRODUCTION                               *
-* * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-node('CentOS-6.6&&!restricted'){
-    // Previous checkout has been cleared.
-    checkout scm
-
-    // This script will update the external repository 'develop' branch by
-    // subtree-pushing to it.
-    if(env.BRANCH_NAME == "develop"){
-      stage('Update opensource develop branch'){
-        ansiColor('xterm') {
-          sh "./sync_scripts/push_develop_to_opensource.sh"
-        }
-      }
-    }
-
-    // This script will update the external wiki and doxygen docs.
-    if(env.BRANCH_NAME == "master"){
-      stage('Update opensource docs'){
-        ansiColor('xterm') {
-          sh "./sync_scripts/push_docs_to_opensource.sh"
-        }
-      }
-    }
-
-} // End of Node
+} // End timeout
