@@ -19,6 +19,18 @@ node('CentOS-6.6&&!restricted'){
         }
     }
 
+    // Propagate our internal releases.
+    stage('Update releases'){
+        ansiColor('xterm') {
+            if ( env.DRY_RUN ) {
+                sh "./sync_scripts/push_releases_to_opensource.sh --dry-run"
+            }
+            else {
+                sh "./sync_scripts/push_releases_to_opensource.sh"
+            }
+        }
+    }
+
     // This script will update the external wiki and doxygen docs.
     stage('Update opensource docs'){
         ansiColor('xterm') {
