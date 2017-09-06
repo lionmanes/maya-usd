@@ -7,6 +7,39 @@
 #
 ################################################################################
 
+# Allows to test the script against other branches
+dry_run=
+
+USAGE="
+push_releases_to_opensource [--dry-run]
+
+options:
+  --dry-run    do not actually merge / push
+  -h           show this message
+"
+
+while test $# -gt 0
+do
+    opt="$1"
+    shift
+
+    case "$opt" in
+    --dry-run)
+        dry_run="--dry-run"
+        ;;
+    -h)
+        echo "$USAGE"
+        exit 1
+        ;;
+    --)
+        break
+        ;;
+    *)
+        die "Unexpected option: $opt"
+        ;;
+    esac
+done
+
 res=0
 i=0
 # Loop through tags sorted by lexical order
@@ -18,7 +51,7 @@ do
 	if [[ -n "$sha" ]]
 	then
 		echo "Processing $tag"
-		./sync_scripts/push_release.sh $tag
+		./sync_scripts/push_release.sh $dry_run $tag
 		res=$(( $res | $? ))
 	fi
 done

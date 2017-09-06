@@ -30,6 +30,17 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m'
 
+# Allows to test the script against other branches
+dry_run=
+
+USAGE="
+push_release [--dry-run] version
+
+options:
+  --dry-run    do not actually merge / push
+  -h           show this message
+"
+
 cleanup () {
     return
 }
@@ -51,15 +62,38 @@ die () {
     exit 1
 }
 
+# Test there's at least one input argument
+if test "$#" -eq 0
+then
+    die "Please specify the internal tag which has to be exported"
+fi
+
+while test $# -gt 1
+do
+    opt="$1"
+    shift
+
+    case "$opt" in
+    --dry-run)
+        dry_run="--dry-run"
+        ;;
+    -h)
+        echo "$USAGE"
+        exit 1
+        ;;
+    --)
+        break
+        ;;
+    *)
+        die "Unexpected option: $opt"
+        ;;
+    esac
+done
+
+input_tag=$1
+
 subtree_dir="src"
 oss_url="https://github.al.com.au/rnd/AL_USDMaya_oss_ready.git"
-
-# Test there's one input argument
-if test "$#" -ne 1
-then
-    die "Please set the internal tag which has to be exported"
-fi
-input_tag=$1
 
 # Test we're able to find this tag
 tag_found=`git tag -l $input_tag`
@@ -196,13 +230,18 @@ tmp_push_branch="_tmp_oss_mater_"
 git checkout -q -b $tmp_push_branch $tmp_oss_remote/$oss_master_branch
 git merge -q -m $oss_tag --no-ff $last_subtree_commit
 pass_or_die $? "Unable to merge $last_subtree_commit"
- 
-git push $tmp_oss_remote $tmp_push_branch:$oss_master_branch
+
+git push $dry_run $tmp_oss_remote $tmp_push_branch:$oss_master_branch
 pass_or_die $? "Unable to push opensource's master to $oss_url"
 
 git tag $oss_tag
-git push $tmp_oss_remote $oss_tag
+git push $dry_run $tmp_oss_remote $oss_tag
 pass_or_die $? "Unable to push $oss_tag tag to $oss_url"
+
+if [[ -n $dry_run ]]
+then
+    git tag -d $oss_tag
+fi
 
 # Clean up
 cleanup
