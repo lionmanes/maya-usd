@@ -28,6 +28,15 @@ def rezBuildOptions = "-i --variants 1 -- -- -j16"
 // (Maya 2016 variant will hang because of the tbb USD issue)
 def rezTestOptions = "--variants 1 -- --"
 
+def testingParams = new al.TestingParameters()
+testingParams.gitHubRepo = gitHubRepo
+testingParams.packagesList = packages
+testingParams.dependentJobs = dependentJobs
+testingParams.rootFolder = rootFolder
+testingParams.buildOptions = rezBuildOptions
+testingParams.testTargetName = "all_tests"
+testingParams.cleanup = true
+testingParams.testOptions = rezTestOptions
 
 timeout(time: 30)
 {
@@ -35,16 +44,7 @@ timeout(time: 30)
     {
         ansiColor('xterm')
         {
-            testing.runRepositoryTests(
-                gitHubRepo,
-                packages,
-                dependentJobs,
-                rootFolder,
-                rezBuildOptions,
-                "all_tests",
-                true,
-                rezTestOptions
-            )
+            testing.runRepositoryTests(testingParams)
         }
 
         stage ('Clean Workspace') {
