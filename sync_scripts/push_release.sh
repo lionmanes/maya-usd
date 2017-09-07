@@ -183,11 +183,10 @@ fi
 
 # Get the latest subtree exported commit (before the target tag)
 # To do so, extract the history in a temporary branch
-current_branch=`git rev-parse --abbrev-ref HEAD`
 tmp_branch="_tmp_subtree_split_"
 git checkout -q $input_tag || exit 1
 last_subtree_commit=`git subtree -q split -P $subtree_dir -b $tmp_branch`
-git checkout -q $current_branch
+git checkout - # Restore previous state
 git branch -q -D $tmp_branch
 
 # Look for this commit in the external repository
