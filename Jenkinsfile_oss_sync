@@ -20,7 +20,7 @@ node('CentOS-6.6&&!restricted'){
     }
 
     // Propagate our internal releases.
-    stage('Update releases'){
+    stage('Update opensource releases'){
         ansiColor('xterm') {
             if ( env.DRY_RUN ) {
                 sh "./sync_scripts/push_releases_to_opensource.sh --dry-run"
