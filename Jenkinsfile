@@ -28,7 +28,7 @@ def rezBuildOptions = "-i --variants 1 -- -- -j16"
 // (Maya 2016 variant will hang because of the tbb USD issue)
 def rezTestOptions = "--variants 1 -- --"
 
-def testingParams = new al.TestingParameters()
+def testingParams = new AL.TestingParameters()
 testingParams.gitHubRepo = gitHubRepo
 testingParams.packagesList = packages
 testingParams.dependentJobs = dependentJobs
