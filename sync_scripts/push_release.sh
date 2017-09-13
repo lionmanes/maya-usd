@@ -213,7 +213,7 @@ fi
 # Override
 cleanup () {
     git remote remove $tmp_oss_remote
-    git checkout -q $current_branch
+    git checkout -
     git branch -q -D $tmp_push_branch    
 }
 
@@ -225,7 +225,7 @@ pass_or_die() {
 }
 
 # Otherwise merge this commit into master and tag
-tmp_push_branch="_tmp_oss_mater_"
+tmp_push_branch="_tmp_oss_master_"
 git checkout -q -b $tmp_push_branch $tmp_oss_remote/$oss_master_branch
 git merge -q -m $oss_tag --no-ff $last_subtree_commit
 pass_or_die $? "Unable to merge $last_subtree_commit"
