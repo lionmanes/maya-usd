@@ -1,5 +1,3 @@
-@Library('AL@fabricem_build_and_tests_options')
-
 def gitHubRepo = "https://github.al.com.au/rnd/AL_USDMaya.git"
 
 // The list of packages that will be executed, the mode will determine if the stages can be executed in parallel or in serial.
@@ -22,13 +20,23 @@ def rootFolder = "/film/rndbuilddata/usd/builds"
 
 def dependentJobs = [["USDIntegration"],
                     ]
-                    
+
 // flags passed to the rez build -- -- all_tests
-def rezBuildOptions = "-i -- -- -j16"
+def rezBuildOptions = "-i --variants 1 -- -- -j16"
 
 // test only Maya 2017 and 2018 variants
 // (Maya 2016 variant will hang because of the tbb USD issue)
-def rezTestOptions = "--variants 1 2 -- --"
+def rezTestOptions = "--variants 1 -- --"
+
+def testingParams = new al.TestingParameters()
+testingParams.gitHubRepo = gitHubRepo
+testingParams.packagesList = packages
+testingParams.dependentJobs = dependentJobs
+testingParams.rootFolder = rootFolder
+testingParams.buildOptions = rezBuildOptions
+testingParams.testTargetName = "all_tests"
+testingParams.cleanup = true
+testingParams.testOptions = rezTestOptions
 
 timeout(time: 30)
 {
@@ -36,58 +44,33 @@ timeout(time: 30)
     {
         ansiColor('xterm')
         {
-            testing.runRepositoryTests(gitHubRepo, packages, dependentJobs, rootFolder, rezBuildOptions, "all_tests", true, rezTestOptions)
-            
-            def workspace = pwd() + "/src/docker"
-            parallel "Opensource Maya2016":{
-                            dir ('src') {
-                                // Change the docker repository
-                                sh "sed '/FROM/c\\FROM knockout:5000/usd-docker/usd:latest-centos6-maya2016' ${workspace}/Dockerfile_centos6 > ${workspace}/Dockerfile_centos6_2016"
-                                
-                                // Build image
-                                sh 'sudo docker build -f docker/Dockerfile_centos6_2016 .'
-                            }
-                    },
-              		 "Opensource Maya2017":{
-                            dir ('src') {
-                                // Change the repository
-                                sh "sed '/FROM/c\\FROM knockout:5000/usd-docker/usd:latest-centos6-maya2017' ${workspace}/Dockerfile_centos6 > ${workspace}/Dockerfile_centos6_2017"
-                                
-                                // Build image
-                                sh 'sudo docker build -f docker/Dockerfile_centos6_2017 .'
-                        }
-                    },
-                    failFast: false
-            sh 'sudo docker images | grep "^<none>" | awk "{print $3}" | xargs -L1 sudo docker rmi -f'
+            testing.runRepositoryTests(testingParams)
         }
-    }
-}
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-*  THIS WILL NEED SPECIAL USER/MACHINE WITH PERMISSIONS  *
-*  WHEN USED IN PRODUCTION                               *
-* * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-node('CentOS-6.6&&!restricted'){
-    // Previous checkout has been cleared.
-    checkout scm
-
-    // This script will update the external repository 'develop' branch by
-    // subtree-pushing to it.
-    if(env.BRANCH_NAME == "develop"){
-      stage('Update opensource develop branch'){
-        ansiColor('xterm') {
-          sh "./sync_scripts/push_develop_to_opensource.sh"
-        }
-      }
+        stage ('Clean Workspace') {
+            cleanWs notFailBuild: true
+        } // End stage ('Clean Workspace')
     }
 
-    // This script will update the external wiki and doxygen docs.
-    if(env.BRANCH_NAME == "master"){
-      stage('Update opensource docs'){
-        ansiColor('xterm') {
-          sh "./sync_scripts/push_docs_to_opensource.sh"
-        }
-      }
-    }
+    node ('CentOS-6.6&&!restricted&&devbuild10')
+    {
+        checkout scm
 
-} // End of Node
+        ansiColor('xterm')
+        {
+            def workspace = pwd() + "/src"
+            stage("Opensource Maya2016")
+            {
+                sh "sudo docker run --rm -v $workspace:/tmp/usd-build/AL_USDMaya knockout:5000/usd-docker/usd:latest-centos6-maya2016 bash /tmp/usd-build/AL_USDMaya/docker/build_alusdmaya.sh"
+            }
+            stage("Opensource Maya2017")
+            {
+                sh "sudo docker run --rm -v $workspace:/tmp/usd-build/AL_USDMaya knockout:5000/usd-docker/usd:latest-centos6-maya2017 bash /tmp/usd-build/AL_USDMaya/docker/build_alusdmaya.sh"
+            }
+        }
+
+        stage ('Clean Workspace') {
+            cleanWs notFailBuild: true
+        } // End stage ('Clean Workspace')
+    }
+} // End timeout
