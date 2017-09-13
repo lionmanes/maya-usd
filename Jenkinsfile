@@ -22,11 +22,11 @@ def dependentJobs = [["USDIntegration"],
                     ]
 
 // flags passed to the rez build -- -- all_tests
-def rezBuildOptions = "-i --variants 1 -- -- -j16"
+def rezBuildOptions = "-i --variants 0 1 -- -- -j16"
 
 // test only Maya 2017 and 2018 variants
 // (Maya 2016 variant will hang because of the tbb USD issue)
-def rezTestOptions = "--variants 1 -- --"
+def rezTestOptions = "--variants 0 1 -- --"
 
 def testingParams = new al.TestingParameters()
 testingParams.gitHubRepo = gitHubRepo
