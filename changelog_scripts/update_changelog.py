@@ -3,14 +3,14 @@ import logging
 import re
 import sys
 
-from AL.github.changelog.formatter import KeepAChangeLogFormatter
+from AL.github.changelog.formatter import TopicsFormatter
 from AL.github.changelog.release import GitHubRepository, ReleaseNotFound, PackageNotFound
 from AL.github.changelog.changelog import ChangeLog
 
 logger = logging.getLogger(__name__)
 
 
-class AL_USDMayaChangeLogFormatter(KeepAChangeLogFormatter):
+class AL_USDMayaChangeLogFormatter(TopicsFormatter):
 
     def __init__(self, release):
         super(AL_USDMayaChangeLogFormatter, self).__init__(release, public=True)
