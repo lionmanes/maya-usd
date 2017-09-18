@@ -32,20 +32,17 @@ class AL_USDMayaChangeLogFormatter(TopicsFormatter):
 
         return title
 
+
 class AL_USDMayaChangeLog(ChangeLog):
 
-    def __init__(self, initial_version):
+    def __init__(self):
         """
-        Prepend releases changelog starting from 'initial_version'
-
-        :param initial_version: generate changelog starting from this version
+        Prepend releases changelog to the changelog file
         """
         super(AL_USDMayaChangeLog, self).__init__(repository='AL_USDMaya',
                                                   package='AL_USDMaya',
                                                   root='',
                                                   owner='rnd')
-
-        self._initial_version = initial_version
 
     def write(self, path, branch=None):
         """
@@ -66,10 +63,21 @@ class AL_USDMayaChangeLog(ChangeLog):
         logger.info('Updating Change Log: {}'.format(path))
         with open(path, 'r') as istream:
             previous = istream.read()
+            # Get the latest changelog version
+            r = re.compile(r'^#+\s+v(\d+\.\d+\.\d)+.*')
+            for l in previous.splitlines():
+                m = r.match(l)
+                if m:
+                    initial_version = 'AL_USDMaya-{}'.format(m.groups()[0])
+                    logger.debug('Updating changelog from version {}'.format(initial_version))
+                    break
+            if not initial_version:
+                logger.error('Unable to extract the latest changelog version')
+                sys.exit(1)
 
         with open(path, 'w') as ostream:
             for release in package.iter_releases(branch=branch):
-                if release.release_tag < self._initial_version:
+                if release.release_tag <= initial_version:
                     logger.debug('Skipping version {}'.format(release.release_tag))
                     continue
                     
@@ -86,8 +94,6 @@ def main():
     parser = argparse.ArgumentParser(description='Update AL_USDMaya changelog')
     parser.add_argument('-o', '--output', required=True,
                         type=str, help='output path for the generated change log')
-    parser.add_argument('-i', '--initial_version', required=False, default='AL_USDMaya-0.23.3',
-                        type=str, help='version from which the changelog is generated')
     parser.add_argument('-v', '--verbose', required=False,
                         action='store_true')
     opts = parser.parse_args()
@@ -101,7 +107,7 @@ def main():
     ch.setLevel(log_level)
     logger.addHandler(ch)
 
-    maya_changelog = AL_USDMayaChangeLog(opts.initial_version)
+    maya_changelog = AL_USDMayaChangeLog()
     maya_changelog.write(opts.output)
 
 
