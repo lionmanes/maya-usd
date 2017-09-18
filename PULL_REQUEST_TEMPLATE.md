@@ -1,7 +1,12 @@
 ## Description
 
 ## Changelog
-(Edit at least one of this field. It doesn't have to be done at first, you can always get back to the PR, even if closed and edit the comment. This template will be used when a release is created.)
+> This template will be used by the changelog updater script.
+
+> Edit at least one of this field if you want anything to be added to the changelog file. It doesn't have to be done at first, you can always get back to the PR, even if closed and edit its description. What's added here is going to be copied _as it is_ so please use markdown formatting.
+
+> Keep in mind that the changelog file is publicly shared. Use the description above if you want to share content not relevant to the opensource community.
+
 ### Added
 
 ### Changed
@@ -12,7 +17,7 @@
 
 ### Fixed
 
-## Checklist
+## Checklist (Please do not remove this line)
 - [ ] Make sure the Title and Description of the PR make sense and  provide sufficient context for your work
 - [ ] Do any added files have the correct AL Apache Licence Header?
 - [ ] Are there Doxygen comments in the headers?
