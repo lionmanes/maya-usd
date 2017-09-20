@@ -8,6 +8,13 @@ rez_find_packages ( PREFIX pkgs AUTO )
 
 include(pxrConfig)
 
+# Bake version
+string(REPLACE "." ";" AL_USDMAYA_VERSION $ENV{REZ_BUILD_PROJECT_VERSION})
+list(GET AL_USDMAYA_VERSION 0 AL_USDMAYA_VERSION_MAJOR)
+list(GET AL_USDMAYA_VERSION 1 AL_USDMAYA_VERSION_MINOR)
+list(GET AL_USDMAYA_VERSION 2 AL_USDMAYA_VERSION_PATCH)
+configure_file(Version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/lib/AL_USDMaya/AL/usdmaya/Version.h)
+
 set(BOOST_ROOT ${boost_ROOT})
 
 add_definitions("-DUSE_AL_DEFAULT=1")
