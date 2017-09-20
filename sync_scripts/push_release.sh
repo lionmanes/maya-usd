@@ -147,7 +147,10 @@ do
     if [[ "$tag" =~ ^AL_USDMaya-[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]* ]]; then
         extract=`expr "$tag" : \
                       'AL_USDMaya-\([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\)'`
-        al_versions=($extract ${al_versions[*]})
+        # Internal versions might use 4 digits, check for duplicate.
+        if [[ "$extract" != "${al_versions[0]}" ]]; then
+            al_versions=($extract ${al_versions[*]})
+        fi
         continue
     fi
 done

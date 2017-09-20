@@ -22,9 +22,8 @@ class AL_USDMayaChangeLogFormatter(TopicsFormatter):
 
         package_info = self._release.release_package_info
 
-        # Extract the version number
-        print re.search(r'^AL_USDMaya-(\d+\.\d+\.\d+)$', package_info.release_tag).group(0)
-        title_content = "v{}".format(re.search(r'^AL_USDMaya-(\d+\.\d+\.\d+)$',
+        # Extract the version number (internal version might use 4 digits)
+        title_content = "v{}".format(re.search(r'^AL_USDMaya-(\d+\.\d+\.\d+)(\.\d)?$',
                                                package_info.release_tag).group(1))
         title_date = self._release.get_release_date()
 
