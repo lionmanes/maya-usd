@@ -23,7 +23,7 @@ def dependentJobs = [
 ]
 
 // flags passed to the rez build -- -- all_tests
-def rezBuildOptions = "-i --variants 0 1 -- -- -j16"
+def rezBuildOptions = "-i --variants 0 1 -- -- -j8"
 
 // test only Maya 2017 and 2018 variants
 // (Maya 2016 variant will hang because of the tbb USD issue)
@@ -67,7 +67,7 @@ def notifyError() {
     )
 }
 
-timeout(time: 30)
+timeout(time: 45)
 {
     node ('CentOS-6.6&&!restricted')
     {
@@ -104,11 +104,11 @@ timeout(time: 30)
                 def workspace = pwd() + "/src"
                 stage("Opensource Maya2016")
                 {
-                    sh "sudo docker run --rm -v $workspace:/tmp/usd-build/AL_USDMaya knockout:5000/usd-docker/usd:latest-centos6-maya2016 bash /tmp/usd-build/AL_USDMaya/docker/build_alusdmaya.sh"
+                    sh "sudo docker run --rm -e \"BUILD_PROCS=4\" -v $workspace:/tmp/usd-build/AL_USDMaya knockout:5000/usd-docker/usd:latest-centos6-maya2016 bash /tmp/usd-build/AL_USDMaya/docker/build_alusdmaya.sh"
                 }
                 stage("Opensource Maya2017")
                 {
-                    sh "sudo docker run --rm -v $workspace:/tmp/usd-build/AL_USDMaya knockout:5000/usd-docker/usd:latest-centos6-maya2017 bash /tmp/usd-build/AL_USDMaya/docker/build_alusdmaya.sh"
+                    sh "sudo docker run --rm -e \"BUILD_PROCS=4\" -v $workspace:/tmp/usd-build/AL_USDMaya knockout:5000/usd-docker/usd:latest-centos6-maya2017 bash /tmp/usd-build/AL_USDMaya/docker/build_alusdmaya.sh"
                 }
 
                 currentBuild.result = 'SUCCESS'
