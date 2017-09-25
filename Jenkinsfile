@@ -18,7 +18,9 @@ def rootFolder = "/film/rndbuilddata/usd/builds"
 
 
 
-def dependentJobs = []
+def dependentJobs = [
+    "AL_USDMayaTranslators"
+]
 
 // flags passed to the rez build -- -- all_tests
 def rezBuildOptions = "-i --variants 0 1 -- -- -j16"
