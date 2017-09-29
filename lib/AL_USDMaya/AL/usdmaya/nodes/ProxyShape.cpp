@@ -843,7 +843,11 @@ void ProxyShape::reloadStage(MPlug& plug)
       AL_END_PROFILE_SECTION();
 
       AL_BEGIN_PROFILE_SECTION(OpenRootLayer);
-        SdfLayerRefPtr rootLayer = SdfLayer::FindOrOpen(fileString);
+
+      // Initialise the asset resolver
+      pxr::ArGetResolver().ConfigureResolverForAsset(fileString);
+
+      SdfLayerRefPtr rootLayer = SdfLayer::FindOrOpen(fileString);
       AL_END_PROFILE_SECTION();
 
       if(rootLayer)
