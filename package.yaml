@@ -34,8 +34,7 @@ requires:
 
 variants:
 - [CentOS-6.2+<7, mayaDevKit-2017.0, AL_boost-1.55, AL_boost_python-1.55, Qt_vfx-5.6]
-- [CentOS-6.2+<7, mayaDevKit-2018.0, AL_boost-1.55, AL_boost_python-1.55, Qt_vfx-5.6]
-- [CentOS-6.2+<7, mayaDevKit-2016.0, AL_boost-1.55, AL_boost_python-1.55, MayaQt-2016]
+
 
 help:
 - [ "API", "$BROWSER http://github.al.com.au/pages/documentation/AL_USDMaya"]
