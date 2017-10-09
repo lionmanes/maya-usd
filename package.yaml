@@ -20,8 +20,8 @@ private_build_requires:
 - AL_USDSchemas-0.29+<1 # To get SdfMetadatas during unittest.
 
 requires:
-- usdBase-0.8.al1
-- usdImaging-0.8.al1
+- usdBase-0.8.al2
+- usdImaging-0.8.al2
 - glew-2.0
 - googletest
 - python-2.7+<3
