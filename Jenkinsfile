@@ -76,10 +76,6 @@ timeout(time: 45)
             {
                 testing.runRepositoryTests(testingParams)
             }
-
-            stage ('Clean Workspace') {
-                cleanWs notFailBuild: true
-            } // End stage ('Clean Workspace')
         }
         catch(Exception e) {
             notifyError()
@@ -88,6 +84,9 @@ timeout(time: 45)
         }
         finally {
             algit.reportCurrentStatusToGitHub()
+            stage ('Clean Workspace') {
+                cleanWs notFailBuild: true
+            } // End stage ('Clean Workspace')
         }
     }
 
