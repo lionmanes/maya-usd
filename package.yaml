@@ -21,7 +21,7 @@ private_build_requires:
 
 requires:
 - usdBase-0.8.al2
-- usdImaging-0.8.al2
+- usdImaging-0.8.al3
 - glew-2.0
 - googletest
 - python-2.7+<3
