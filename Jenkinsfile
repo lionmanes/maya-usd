@@ -69,7 +69,7 @@ def notifyError() {
 
 timeout(time: 45)
 {
-    node ('CentOS-6.6&&!restricted')
+    node ('CentOS-6.6&&Sydney')
     {
         try {
             ansiColor('xterm')
@@ -90,7 +90,7 @@ timeout(time: 45)
         }
     }
 
-    node ('CentOS-6.6&&!restricted&&devbuild10')
+    node ('devbuild10')
     {
         checkout scm
 
