@@ -3,6 +3,8 @@
 ## Changelog
 > This template will be used by the changelog updater script.
 
+> Use markdown list syntax for each entry
+
 > Edit at least one of this field if you want anything to be added to the changelog file. It doesn't have to be done at first, you can always get back to the PR, even if closed and edit its description. What's added here is going to be copied _as it is_ so please use markdown formatting.
 
 > Keep in mind that the changelog file is publicly shared. Use the description above if you want to share content not relevant to the opensource community.
