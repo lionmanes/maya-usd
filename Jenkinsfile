@@ -69,7 +69,7 @@ def notifyError() {
 
 timeout(time: 45)
 {
-    node ('CentOS-6.6&&Sydney')
+    node ('CentOS-6.6&&Sydney&&!restricted')
     {
         try {
             ansiColor('xterm')
