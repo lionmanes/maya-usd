@@ -101,14 +101,13 @@ timeout(time: 45)
             ansiColor('xterm')
             {
                 def workspace = pwd() + "/src"
-                // Disabling maya 2016 tests for now until Maya 2016 Ext2 has been installed on Docker
-                //stage("Opensource Maya2016")
-                //{
-                //    sh "sudo docker run --rm -e \"BUILD_PROCS=4\" -v $workspace:/tmp/usd-build/AL_USDMaya knockout:5000/usd-docker/usd:latest-centos6-maya2016 bash /tmp/usd-build/AL_USDMaya/docker/build_alusdmaya.sh"
-                //}
+                stage("Opensource Maya2016")
+                {
+                    sh "sudo docker run --rm -e \"BUILD_PROCS=8\" -v $workspace:/tmp/usd-build/AL_USDMaya knockout:5000/usd-docker/usd:latest-centos6-maya2016.5 bash /tmp/usd-build/AL_USDMaya/docker/build_alusdmaya.sh"
+                }
                 stage("Opensource Maya2017")
                 {
-                    sh "sudo docker run --rm -e \"BUILD_PROCS=4\" -v $workspace:/tmp/usd-build/AL_USDMaya knockout:5000/usd-docker/usd:latest-centos6-maya2017 bash /tmp/usd-build/AL_USDMaya/docker/build_alusdmaya.sh"
+                    sh "sudo docker run --rm -e \"BUILD_PROCS=8\" -v $workspace:/tmp/usd-build/AL_USDMaya knockout:5000/usd-docker/usd:latest-centos6-maya2017 bash /tmp/usd-build/AL_USDMaya/docker/build_alusdmaya.sh"
                 }
 
                 currentBuild.result = 'SUCCESS'
