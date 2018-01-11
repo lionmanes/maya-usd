@@ -25,4 +25,5 @@
 - [ ] Are there Doxygen comments in the headers?
 - [ ] Are any new features, behaviour changes documented in the .md format [documentation](https://github.com/AnimalLogic/AL_USDMaya/docs)
 - [ ] Have you added, updated tests to cover new features and behaviour changes
+- [ ] Do all the commits in this PR have a meaningful message?
 - [ ] Can ChangeLog info be extracted from the PR description or commit messages
