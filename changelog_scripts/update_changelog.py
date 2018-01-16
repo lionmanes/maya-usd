@@ -22,13 +22,12 @@ class AL_USDMayaChangeLogFormatter(TopicsFormatter):
 
         package_info = self._release.release_package_info
 
-        # Extract the version number
-        print re.search(r'^AL_USDMaya-(\d+\.\d+\.\d+)$', package_info.release_tag).group(0)
-        title_content = "v{}".format(re.search(r'^AL_USDMaya-(\d+\.\d+\.\d+)$',
+        # Extract the version number (internal version might use 4 digits)
+        title_content = "v{}".format(re.search(r'^AL_USDMaya-(\d+\.\d+\.\d+)(\.\d)?$',
                                                package_info.release_tag).group(1))
         title_date = self._release.get_release_date()
 
-        title = u'## {} ({})\n'.format(title_content, title_date.strftime('%Y-%m-%d'))
+        title = u'## {} ({})\n\n'.format(title_content, title_date.strftime('%Y-%m-%d'))
 
         return title
 
@@ -65,6 +64,7 @@ class AL_USDMayaChangeLog(ChangeLog):
             previous = istream.read()
             # Get the latest changelog version
             r = re.compile(r'^#+\s+v(\d+\.\d+\.\d)+.*')
+            initial_version = ''
             for l in previous.splitlines():
                 m = r.match(l)
                 if m:

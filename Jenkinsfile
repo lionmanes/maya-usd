@@ -18,10 +18,12 @@ def rootFolder = "/film/rndbuilddata/usd/builds"
 
 
 
-def dependentJobs = []
+def dependentJobs = [
+    "AL_USDMayaTranslators"
+]
 
 // flags passed to the rez build -- -- all_tests
-def rezBuildOptions = "-i --variants 0 1 -- -- -j16"
+def rezBuildOptions = "-i --variants 0 1 -- -- -j8"
 
 // test only Maya 2017 and 2018 variants
 // (Maya 2016 variant will hang because of the tbb USD issue)
@@ -65,54 +67,61 @@ def notifyError() {
     )
 }
 
-timeout(time: 30)
+timeout(time: 45)
 {
-    try {
-
-        node ('CentOS-6.6&&!restricted')
-        {
+    node ('CentOS-6.6&&Sydney&&!restricted')
+    {
+        try {
             ansiColor('xterm')
             {
                 testing.runRepositoryTests(testingParams)
             }
-
+        }
+        catch(Exception e) {
+            notifyError()
+            currentBuild.result = 'FAILURE'
+            throw e
+        }
+        finally {
+            algit.reportCurrentStatusToGitHub()
             stage ('Clean Workspace') {
                 cleanWs notFailBuild: true
             } // End stage ('Clean Workspace')
         }
+    }
 
-        node ('CentOS-6.6&&!restricted&&devbuild10')
-        {
-            checkout scm
+    node ('devbuild10')
+    {
+        checkout scm
 
-            // Sets the status as 'PENDING'
-            algit.reportCurrentStatusToGitHub()
+        // Sets the status as 'PENDING'
+        algit.reportStatusToGitHub('PENDING', '')
 
+        try {
             ansiColor('xterm')
             {
                 def workspace = pwd() + "/src"
                 stage("Opensource Maya2016")
                 {
-                    sh "sudo docker run --rm -v $workspace:/tmp/usd-build/AL_USDMaya knockout:5000/usd-docker/usd:latest-centos6-maya2016 bash /tmp/usd-build/AL_USDMaya/docker/build_alusdmaya.sh"
+                    sh "sudo docker run --rm -e \"BUILD_PROCS=8\" -v $workspace:/tmp/usd-build/AL_USDMaya knockout:5000/usd-docker/usd:latest-centos6-maya2016.5 bash /tmp/usd-build/AL_USDMaya/docker/build_alusdmaya.sh"
                 }
                 stage("Opensource Maya2017")
                 {
-                    sh "sudo docker run --rm -v $workspace:/tmp/usd-build/AL_USDMaya knockout:5000/usd-docker/usd:latest-centos6-maya2017 bash /tmp/usd-build/AL_USDMaya/docker/build_alusdmaya.sh"
+                    sh "sudo docker run --rm -e \"BUILD_PROCS=8\" -v $workspace:/tmp/usd-build/AL_USDMaya knockout:5000/usd-docker/usd:latest-centos6-maya2017 bash /tmp/usd-build/AL_USDMaya/docker/build_alusdmaya.sh"
                 }
+
+                currentBuild.result = 'SUCCESS'
             }
-
-            algit.reportStatusToGitHub('SUCCESS', '')
-
-            stage ('Clean Workspace') {
-                cleanWs notFailBuild: true
-            } // End stage ('Clean Workspace')
-
         }
-
-    }
-    catch(Exception e) {
-        notifyError()
-        throw e
+        catch(Exception e) {
+            notifyError()
+            currentBuild.result = 'FAILURE'
+            throw e
+        }
+        finally {
+            algit.reportCurrentStatusToGitHub()
+            cleanWs notFailBuild: true
+        }
     }
 
 } // End timeout
