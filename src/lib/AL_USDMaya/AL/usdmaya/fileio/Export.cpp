@@ -368,6 +368,10 @@ void Export::exportGeometryConstraint(MDagPath constraintPath, const SdfPath& us
     if(connected.length())
     {
       MPlug inputGeom = connected[0];
+      MFnDagNode fn(inputGeom.node());
+      MDagPath geomPath;
+      fn.getPath(geomPath);
+      if(AnimationTranslator::isAnimatedMesh(geomPath))
       {
         auto stage = m_impl->stage();
 
@@ -621,6 +625,16 @@ void Export::exportSceneHierarchy(MDagPath rootPath, SdfPath& defaultPrim)
       if(!status)
       {
         usdPath = makeUsdPath(parentPath, transformPath);
+      }
+
+      if(transformPath.node().hasFn(MFn::kIkEffector))
+      {
+        exportIkChain(transformPath, usdPath);
+      }
+      else
+      if(transformPath.node().hasFn(MFn::kGeometryConstraint))
+      {
+        exportGeometryConstraint(transformPath, usdPath);
       }
 
       // for UV only exporting, record first prim as default
