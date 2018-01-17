@@ -51,6 +51,8 @@ include(ProjectDefaults)
 include(Public)
 include(CXXDefaults)
 
+add_definitions(-DPXR_PYTHON_SUPPORT_ENABLED)
+
 add_definitions(${_PXR_CXX_DEFINITIONS})
 
 find_package(Maya REQUIRED)
@@ -80,7 +82,8 @@ find_package(PythonLibs)
 # Adding specific components forces calls to _Boost_find_library, which
 # is the rationale for listing them here.
 find_package(Boost COMPONENTS
-                python
+                python # initialises Boost_PYTHON_LIBRARY
+                thread # initialises Boost_THREAD_LIBRARY
                 REQUIRED
 )
 

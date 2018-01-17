@@ -27,7 +27,7 @@ class AL_USDMayaChangeLogFormatter(TopicsFormatter):
                                                package_info.release_tag).group(1))
         title_date = self._release.get_release_date()
 
-        title = u'## {} ({})\n'.format(title_content, title_date.strftime('%Y-%m-%d'))
+        title = u'## {} ({})\n\n'.format(title_content, title_date.strftime('%Y-%m-%d'))
 
         return title
 
@@ -64,6 +64,7 @@ class AL_USDMayaChangeLog(ChangeLog):
             previous = istream.read()
             # Get the latest changelog version
             r = re.compile(r'^#+\s+v(\d+\.\d+\.\d)+.*')
+            initial_version = ''
             for l in previous.splitlines():
                 m = r.match(l)
                 if m:
