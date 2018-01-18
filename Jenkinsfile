@@ -4,8 +4,7 @@ def gitHubRepo = "https://github.al.com.au/rnd/AL_USDMaya.git"
 def packages = []
 
 // the root folder where the package will be built
-def rootFolder = "/film/rndbuilddata/usd/builds"
-
+def rootFolder = ""
 
 // write here the name of the jenkins jobs that we want to chain to this one
 // def dependentJobs = ["dependentTest1","dependent test 2"],
@@ -15,13 +14,13 @@ def rootFolder = "/film/rndbuilddata/usd/builds"
 // so in the end it looks like
 //def dependentJobs = [["dependentTest1",'JOBPARM1=value;JOBPARM2=value2'] ,
 //                    "dependent test 2"],
-
-
-
 def dependentJobs = [
     // Disabled while waiting for https://github.al.com.au/rnd/AL_jenkins_pipeline_library/pull/62
     // "AL_USDMayaTranslators"
 ]
+
+// String, whitespace separated
+def upstreamJobs = "AL_USDSchemas"
 
 // flags passed to the rez build -- -- all_tests
 def rezBuildOptions = "-i --variants 0 1 -- -- -j8"
@@ -34,39 +33,12 @@ def testingParams = new al.TestingParameters()
 testingParams.gitHubRepo = gitHubRepo
 testingParams.packagesList = packages
 testingParams.dependentJobs = dependentJobs
+testingParams.upstreamJobs = upstreamJobs
 testingParams.rootFolder = rootFolder
 testingParams.buildOptions = rezBuildOptions
 testingParams.testTargetName = "all_tests"
-testingParams.cleanup = true
 testingParams.testOptions = rezTestOptions
-
-def notifyError() {
-  def subject = "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
-  def summary = "${subject} (${env.BUILD_URL})"
-  def details = """Check console output at ${env.BUILD_URL}"""
-
-  hipchatSend (
-      color: 'RED',
-      credentialId: 'HipChat-JenkinsUsdBuilds-Token',
-      room: 'JenkinsUsdBuilds',
-      sendAs: 'AL_USDMaya Test Jenkins',
-      server: '',
-      v2enabled: true,
-      notify: true,
-      message: summary
-  )
-
-  emailext (
-      subject: subject,
-      body: details,
-      recipientProviders: [
-          [$class: 'CulpritsRecipientProvider'],
-          [$class: 'DevelopersRecipientProvider'],
-          [$class: 'RequesterRecipientProvider'],
-          [$class: 'UpstreamComitterRecipientProvider']
-      ]
-    )
-}
+testingParams.createBuildArtifacts = true
 
 timeout(time: 45)
 {
@@ -79,8 +51,11 @@ timeout(time: 45)
             }
         }
         catch(Exception e) {
-            notifyError()
             currentBuild.result = 'FAILURE'
+            global.notifyResult(currentBuild.result,
+                                'HipChat-JenkinsUsdBuilds-Token',
+                                'JenkinsUsdBuilds',
+                                '')
             throw e
         }
         finally {
@@ -115,8 +90,11 @@ timeout(time: 45)
             }
         }
         catch(Exception e) {
-            notifyError()
             currentBuild.result = 'FAILURE'
+            global.notifyResult(currentBuild.result,
+                                'HipChat-JenkinsUsdBuilds-Token',
+                                'JenkinsUsdBuilds',
+                                '')
             throw e
         }
         finally {
