@@ -387,7 +387,7 @@ MStatus ProxyShapePostLoadProcess::initialise(nodes::ProxyShape* ptrNode)
   // iterate over the stage and find all custom schema nodes that have registered translator plugins
   std::vector<UsdPrim> schemaPrims;
   std::vector<ImportCallback> callBacks;
-  UsdStageRefPtr stage = ptrNode->getUsdStage();
+  UsdStageRefPtr stage = ptrNode->usdStage();
   if(stage)
   {
     huntForNativeNodes(proxyTransformPath, schemaPrims, callBacks, stage, ptrNode->translatorManufacture());

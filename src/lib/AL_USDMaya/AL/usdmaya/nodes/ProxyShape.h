@@ -336,9 +336,15 @@ public:
   /// \name   Public Utils
   //--------------------------------------------------------------------------------------------------------------------
 
-  /// \brief  provides access to the UsdStage that this proxy shape is currently representing
+  /// \brief  provides access to the UsdStage that this proxy shape is currently representing. This will cause a compute
+  ///         on the output stage.
   /// \return the proxy shape
   UsdStageRefPtr getUsdStage() const;
+
+  /// \brief  provides access to the UsdStage that this proxy shape is currently representing
+  /// \return the proxy shape
+  UsdStageRefPtr usdStage() const
+    { return m_stage; }
 
   /// \brief  gets hold of the attributes on this node that control the rendering in some way
   /// \param  attribs the returned set of render attributes (should be of type: UsdImagingGLEngine::RenderParams*. Hiding
@@ -696,10 +702,17 @@ public:
   const AL::usdmaya::SelectabilityDB& selectabilityDB() const
     { return const_cast<ProxyShape*>(this)->selectabilityDB(); }
 
+  /// \brief  used to reload the stage after file open
   void loadStage();
 
+  /// \brief  adds the attribute changed callback to the proxy shape
+  void addAttributeChangedCallback();
+
+  /// \brief  removes the attribute changed callback from the proxy shape
+  void removeAttributeChangedCallback();
 
 private:
+
   static void onSelectionChanged(void* ptr);
   bool removeAllSelectedNodes(SelectionUndoHelper& helper);
   void removeTransformRefs(const std::vector<std::pair<SdfPath, MObject>>& removedRefs, TransformReason reason);
@@ -881,8 +894,9 @@ private:
   TfNotice::Key m_editTargetChanged;
 
   mutable std::map<UsdTimeCode, MBoundingBox> m_boundingBoxCache;
-  MCallbackId m_attributeChanged;
-  MCallbackId m_onSelectionChanged;
+  MCallbackId m_beforeSaveSceneId = -1;
+  MCallbackId m_attributeChanged = -1;
+  MCallbackId m_onSelectionChanged = -1;
   SdfPathVector m_excludedGeometry;
   SdfPathVector m_excludedTaggedGeometry;
   SdfPathSet m_lockTransformPrims;
