@@ -62,6 +62,11 @@ die () {
     exit 1
 }
 
+die_no_error () {
+    print_and_cleanup "RED" $@
+    exit 0
+}
+
 # Test there's at least one input argument
 if test "$#" -eq 0
 then
@@ -113,7 +118,15 @@ oss_tag=`expr "$input_tag" : \
               'AL_USDMaya-\([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\)'`
 if test -z "$oss_tag"
 then
-    die "Unrecognized tag version ($input_tag), should be AL_USDMaya-X.Y.Z(.W)"
+    die_no_error "Unrecognized tag version ($input_tag), should be AL_USDMaya-X.Y.Z(.W)"
+fi
+
+# Check the tag is on master only (ignore "release-X" branches)
+sha=`git rev-list -n 1 $input_tag`
+found_branches=`git branch -a --contains $sha *master`
+if test -z "$found_branches"
+then
+    die_no_error "$input_tag has not been found on master"
 fi
 
 # Check the status
