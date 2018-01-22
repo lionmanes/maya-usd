@@ -4,6 +4,7 @@
 .cproject
 .pydevproject
 .settings/
+.vscode/
 *~
 *.orig
 *.pyc

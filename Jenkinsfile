@@ -19,7 +19,8 @@ def rootFolder = "/film/rndbuilddata/usd/builds"
 
 
 def dependentJobs = [
-    "AL_USDMayaTranslators"
+    // Disabled while waiting for https://github.al.com.au/rnd/AL_jenkins_pipeline_library/pull/62
+    // "AL_USDMayaTranslators"
 ]
 
 // flags passed to the rez build -- -- all_tests
