@@ -19,7 +19,8 @@ def rootFolder = "/film/rndbuilddata/usd/builds"
 
 
 def dependentJobs = [
-    "AL_USDMayaTranslators"
+    // Disabled while waiting for https://github.al.com.au/rnd/AL_jenkins_pipeline_library/pull/62
+    // "AL_USDMayaTranslators"
 ]
 
 // flags passed to the rez build -- -- all_tests
@@ -103,11 +104,11 @@ timeout(time: 45)
                 def workspace = pwd() + "/src"
                 stage("Opensource Maya2016")
                 {
-                    sh "sudo docker run --rm -e \"BUILD_PROCS=4\" -v $workspace:/tmp/usd-build/AL_USDMaya knockout:5000/usd-docker/usd:latest-centos6-maya2016 bash /tmp/usd-build/AL_USDMaya/docker/build_alusdmaya.sh"
+                    sh "sudo docker run --rm -e \"BUILD_PROCS=8\" -v $workspace:/tmp/usd-build/AL_USDMaya knockout:5000/usd-docker/usd:latest-centos6-maya2016.5 bash /tmp/usd-build/AL_USDMaya/docker/build_alusdmaya.sh"
                 }
                 stage("Opensource Maya2017")
                 {
-                    sh "sudo docker run --rm -e \"BUILD_PROCS=4\" -v $workspace:/tmp/usd-build/AL_USDMaya knockout:5000/usd-docker/usd:latest-centos6-maya2017 bash /tmp/usd-build/AL_USDMaya/docker/build_alusdmaya.sh"
+                    sh "sudo docker run --rm -e \"BUILD_PROCS=8\" -v $workspace:/tmp/usd-build/AL_USDMaya knockout:5000/usd-docker/usd:latest-centos6-maya2017 bash /tmp/usd-build/AL_USDMaya/docker/build_alusdmaya.sh"
                 }
 
                 currentBuild.result = 'SUCCESS'
