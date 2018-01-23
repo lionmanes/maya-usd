@@ -41,65 +41,73 @@ testingParams.createBuildArtifacts = true
 
 timeout(time: 45)
 {
-    node ('CentOS-6.6&&Sydney&&!restricted')
-    {
-        try {
-            ansiColor('xterm')
+    parallel (
+        "Internal" : {
+
+            node ('CentOS-6.6&&Sydney&&!restricted&&!devbuild10')
             {
-                testing.runRepositoryTests(testingParams)
-            }
-        }
-        catch(Exception e) {
-            currentBuild.result = 'FAILURE'
-            global.notifyResult(currentBuild.result,
-                                'HipChat-JenkinsUsdBuilds-Token',
-                                'JenkinsUsdBuilds',
-                                '')
-            throw e
-        }
-        finally {
-            algit.reportCurrentStatusToGitHub()
-            stage ('Clean Workspace') {
-                cleanWs notFailBuild: true
-            } // End stage ('Clean Workspace')
-        }
-    }
+                try {
+                    ansiColor('xterm')
+                    {
+                        testing.runRepositoryTests(testingParams)
+                    }
+                }
+                catch(Exception e) {
+                    currentBuild.result = 'FAILURE'
+                    global.notifyResult(currentBuild.result,
+                                        'HipChat-JenkinsUsdBuilds-Token',
+                                        'JenkinsUsdBuilds',
+                                        '')
+                    throw e
+                }
+                finally {
+                    algit.reportCurrentStatusToGitHub()
+                    stage ('Clean Workspace') {
+                        cleanWs notFailBuild: true
+                    }
+                }
+            } // node
+        }, // "Internal"
 
-    node ('devbuild10')
-    {
-        checkout scm
+        "Docker" : {
 
-        // Sets the status as 'PENDING'
-        algit.reportStatusToGitHub('PENDING', '')
-
-        try {
-            ansiColor('xterm')
+            node ('devbuild10')
             {
-                def workspace = pwd() + "/src"
-                stage("Opensource Maya2016")
-                {
-                    sh "sudo docker run --rm -e \"BUILD_PROCS=8\" -v $workspace:/tmp/usd-build/AL_USDMaya knockout:5000/usd-docker/usd:latest-centos6-maya2016.5 bash /tmp/usd-build/AL_USDMaya/docker/build_alusdmaya.sh"
-                }
-                stage("Opensource Maya2017")
-                {
-                    sh "sudo docker run --rm -e \"BUILD_PROCS=8\" -v $workspace:/tmp/usd-build/AL_USDMaya knockout:5000/usd-docker/usd:latest-centos6-maya2017 bash /tmp/usd-build/AL_USDMaya/docker/build_alusdmaya.sh"
-                }
+                checkout scm
 
-                currentBuild.result = 'SUCCESS'
-            }
-        }
-        catch(Exception e) {
-            currentBuild.result = 'FAILURE'
-            global.notifyResult(currentBuild.result,
-                                'HipChat-JenkinsUsdBuilds-Token',
-                                'JenkinsUsdBuilds',
-                                '')
-            throw e
-        }
-        finally {
-            algit.reportCurrentStatusToGitHub()
-            cleanWs notFailBuild: true
-        }
-    }
+                // Sets the status as 'PENDING'
+                algit.reportStatusToGitHub('PENDING', '')
+
+                try {
+                    ansiColor('xterm')
+                    {
+                        def workspace = pwd() + "/src"
+                        stage("Opensource Maya2016")
+                        {
+                            sh "sudo docker run --rm -e \"BUILD_PROCS=8\" -v $workspace:/tmp/usd-build/AL_USDMaya knockout:5000/usd-docker/usd:latest-centos6-maya2016.5 bash /tmp/usd-build/AL_USDMaya/docker/build_alusdmaya.sh"
+                        }
+                        stage("Opensource Maya2017")
+                        {
+                            sh "sudo docker run --rm -e \"BUILD_PROCS=8\" -v $workspace:/tmp/usd-build/AL_USDMaya knockout:5000/usd-docker/usd:latest-centos6-maya2017 bash /tmp/usd-build/AL_USDMaya/docker/build_alusdmaya.sh"
+                        }
+
+                        currentBuild.result = 'SUCCESS'
+                    }
+                }
+                catch(Exception e) {
+                    currentBuild.result = 'FAILURE'
+                    global.notifyResult(currentBuild.result,
+                                        'HipChat-JenkinsUsdBuilds-Token',
+                                        'JenkinsUsdBuilds',
+                                        '')
+                    throw e
+                }
+                finally {
+                    algit.reportCurrentStatusToGitHub()
+                    cleanWs notFailBuild: true
+                }
+            } // node
+        } // "Docker"
+    ) // parallel
 
 } // End timeout
