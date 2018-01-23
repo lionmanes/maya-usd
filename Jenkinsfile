@@ -15,8 +15,7 @@ def rootFolder = ""
 //def dependentJobs = [["dependentTest1",'JOBPARM1=value;JOBPARM2=value2'] ,
 //                    "dependent test 2"],
 def dependentJobs = [
-    // Disabled while waiting for https://github.al.com.au/rnd/AL_jenkins_pipeline_library/pull/62
-    // "AL_USDMayaTranslators"
+    "AL_bond_usd"
 ]
 
 // String, whitespace separated
