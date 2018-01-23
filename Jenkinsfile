@@ -75,7 +75,6 @@ timeout(time: 45)
                     // Sets the status as 'PENDING'
                     algit.reportStatusToGitHub('PENDING', 'Docker build pending', "Docker_build_and_tests")
 
-                    def githubStatus = 'FAILURE'
                     try {
                         ansiColor('xterm')
                         {
@@ -89,15 +88,15 @@ timeout(time: 45)
                                 sh "sudo docker run --rm -e \"BUILD_PROCS=8\" -v $workspace:/tmp/usd-build/AL_USDMaya knockout:5000/usd-docker/usd:latest-centos6-maya2017 bash /tmp/usd-build/AL_USDMaya/docker/build_alusdmaya.sh"
                             }
 
-                            currentBuild.result = githubStatus = 'SUCCESS'
+                            algit.reportStatusToGitHub('SUCCESS', 'Docker build success', "Docker_build_and_tests")
                         }
                     }
                     catch(Exception e) {
                         currentBuild.result = 'UNSTABLE'
+                        algit.reportStatusToGitHub(githubStatus, 'Docker build error', "Docker_build_and_tests")
                         throw e
                     }
                     finally {
-                        algit.reportStatusToGitHub(githubStatus, 'Docker build pending', "Docker_build_and_tests")
                         cleanWs notFailBuild: true
                     }
                 } // node
