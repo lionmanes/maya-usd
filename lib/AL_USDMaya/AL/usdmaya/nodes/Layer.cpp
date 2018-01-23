@@ -66,7 +66,6 @@ MObject Layer::m_nameOnLoad = MObject::kNullObj;
 MObject Layer::m_serialized = MObject::kNullObj;
 MObject Layer::m_hasBeenEditTarget = MObject::kNullObj;
 
-
 //----------------------------------------------------------------------------------------------------------------------
 MStatus Layer::initialise()
 {

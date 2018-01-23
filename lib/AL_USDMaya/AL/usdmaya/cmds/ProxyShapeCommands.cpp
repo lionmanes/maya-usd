@@ -177,7 +177,7 @@ UsdStageRefPtr ProxyShapeCommandBase::getShapeNodeStage(const MArgDatabase& args
 {
   TF_DEBUG(ALUSDMAYA_COMMANDS).Msg("ProxyShapeCommandBase::getShapeNodeStage\n");
   nodes::ProxyShape* node = getShapeNode(args);
-  return node ? node->getUsdStage() : UsdStageRefPtr();
+  return node ? node->usdStage() : UsdStageRefPtr();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -657,7 +657,7 @@ MStatus ProxyShapeImportAllTransforms::doIt(const MArgList& args)
       throw MS::kFailure;
     }
 
-    UsdStageRefPtr stage = shapeNode->getUsdStage();
+    UsdStageRefPtr stage = shapeNode->usdStage();
     if(!stage)
     {
       throw MS::kFailure;
@@ -762,7 +762,7 @@ MStatus ProxyShapeRemoveAllTransforms::doIt(const MArgList& args)
       db.getFlagArgument("-pp", 0, primPath);
     }
 
-    UsdStageRefPtr stage = shapeNode->getUsdStage();
+    UsdStageRefPtr stage = shapeNode->usdStage();
     if(!stage)
     {
       throw MS::kFailure;
@@ -1235,7 +1235,7 @@ MStatus ProxyShapeImportPrimPathAsMaya::doIt(const MArgList& args)
       throw MS::kFailure;
     }
 
-    UsdPrim usdPrim = shapeNode->getUsdStage()->GetPrimAtPath(m_path);
+    UsdPrim usdPrim = shapeNode->usdStage()->GetPrimAtPath(m_path);
     if(!usdPrim)
     {
       throw MS::kFailure;

@@ -209,7 +209,7 @@ MStatus LayerGetLayers::doIt(const MArgList& argList)
     AL_MAYA_COMMAND_HELP(args, g_helpText);
 
     nodes::ProxyShape* proxyShape = getShapeNode(args);
-    UsdStageRefPtr stage = proxyShape->getUsdStage();
+    UsdStageRefPtr stage = proxyShape->usdStage();
     MStringArray results;
 
     auto push = [](MStringArray& results, const MString& newLayer)

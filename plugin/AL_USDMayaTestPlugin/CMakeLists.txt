@@ -13,8 +13,13 @@ list(APPEND AL_maya_test_headers
         AL/maya/tests/NodeHelperUnitTest.h
         test_usdmaya.h
 )
+
 list(APPEND AL_maya_test_source
 		AL/UnitTestHarness.cpp
+        AL/maya/test_EventHandler.cpp
+        AL/maya/test_MayaEventManager.cpp
+        AL/maya/test_MenuBuilder.cpp
+        AL/maya/test_NodeHelper.cpp
         AL/maya/tests/CommandGuiHelperTest.cpp
         AL/maya/tests/NodeHelperUnitTest.cpp
         AL/usdmaya/commands/test_ExportCommands.cpp
@@ -22,6 +27,11 @@ list(APPEND AL_maya_test_source
         AL/usdmaya/commands/test_ProxyShapeSelect.cpp
         AL/usdmaya/commands/test_InternalProxySelection.cpp
         AL/usdmaya/commands/test_ProxyShapeImport.cpp
+        AL/usdmaya/fileio/export_blendshape.cpp
+        AL/usdmaya/fileio/export_constraints.cpp
+        AL/usdmaya/fileio/export_ik.cpp
+        AL/usdmaya/fileio/export_lattice.cpp
+        AL/usdmaya/fileio/export_nonlinear.cpp
         AL/usdmaya/nodes/test_ActiveInactive.cpp
         AL/usdmaya/nodes/test_LayerManager.cpp
         AL/usdmaya/nodes/test_ProxyShape.cpp
@@ -32,8 +42,6 @@ list(APPEND AL_maya_test_source
         AL/usdmaya/nodes/proxy/test_DrivenTransforms.cpp
         AL/usdmaya/nodes/proxy/test_PrimFilter.cpp
         AL/usdmaya/test_SelectabilityDB.cpp
-        test_maya_MenuBuilder.cpp
-        test_maya_NodeHelper.cpp
         test_translators_AnimationTranslator.cpp
         test_translators_CameraTranslator.cpp
         test_translators_DgTranslator.cpp
