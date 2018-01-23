@@ -76,7 +76,7 @@ timeout(time: 45)
                 checkout scm
 
                 // Sets the status as 'PENDING'
-                algit.reportStatusToGitHub('PENDING', '')
+                algit.reportStatusToGitHub('PENDING', 'Docker build pending', "Docker_build_and_tests")
 
                 try {
                     ansiColor('xterm')
@@ -103,7 +103,7 @@ timeout(time: 45)
                     throw e
                 }
                 finally {
-                    algit.reportCurrentStatusToGitHub()
+                    algit.setBuildStatusAndReportToGitHub(currentBuild.result, "Docker_build_and_tests")
                     cleanWs notFailBuild: true
                 }
             } // node
