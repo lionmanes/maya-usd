@@ -15,7 +15,7 @@ def rootFolder = ""
 //def dependentJobs = [["dependentTest1",'JOBPARM1=value;JOBPARM2=value2'] ,
 //                    "dependent test 2"],
 def dependentJobs = [
-    "AL_bond_usd"
+    "AL_bond_usd", "TRIGGER_DOWNSTREAM_JOBS=true"
 ]
 
 // String, whitespace separated
