@@ -81,6 +81,7 @@ find_package(PythonLibs)
 find_package(Boost COMPONENTS
                 python # initialises Boost_PYTHON_LIBRARY
                 thread # initialises Boost_THREAD_LIBRARY
+                filesystem # initialises Boost_FILESYSTEM_LIBRARY
                 REQUIRED
 )
 
