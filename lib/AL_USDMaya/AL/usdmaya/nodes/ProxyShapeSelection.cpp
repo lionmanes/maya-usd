@@ -683,7 +683,8 @@ void ProxyShape::removeUsdTransformChain_internal(
   MObject object = MObject::kNullObj;
   while(parentPrim)
   {
-    auto it = m_requiredPaths.find(parentPrim.GetPath());
+    SdfPath primPath = parentPrim.GetPath();
+    auto it = m_requiredPaths.find(primPath);
     if(it == m_requiredPaths.end())
     {
       return;
@@ -697,6 +698,7 @@ void ProxyShape::removeUsdTransformChain_internal(
         modifier.reparentNode(object);
         modifier.deleteNode(object);
       }
+      m_currentLockedPrims.erase(primPath);
     }
 
     parentPrim = parentPrim.GetParent();
@@ -729,6 +731,7 @@ void ProxyShape::removeUsdTransformChain(
         modifier.reparentNode(object);
         modifier.deleteNode(object);
       }
+      m_currentLockedPrims.erase(parentPrim);
       m_requiredPaths.erase(it);
     }
 
@@ -876,6 +879,7 @@ void SelectionUndoHelper::doIt()
     MGlobal::setActiveSelectionList(m_newSelection, MGlobal::kReplaceList);
   }
   m_proxy->m_pleaseIgnoreSelection = false;
+  m_proxy->constructLockPrims();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -893,6 +897,7 @@ void SelectionUndoHelper::undoIt()
     MGlobal::setActiveSelectionList(m_previousSelection, MGlobal::kReplaceList);
   }
   m_proxy->m_pleaseIgnoreSelection = false;
+  m_proxy->constructLockPrims();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1244,7 +1249,6 @@ bool ProxyShape::doSelect(SelectionUndoHelper& helper, const SdfPathVector& orde
   }
 
   m_pleaseIgnoreSelection = false;
-
   return true;
 }
 

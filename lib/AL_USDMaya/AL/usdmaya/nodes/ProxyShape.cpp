@@ -46,6 +46,7 @@
 #include "maya/MItDependencyNodes.h"
 #include "maya/MPlugArray.h"
 #include "maya/MNodeClass.h"
+#include "maya/MCommandResult.h"
 
 #include "pxr/base/arch/systemInfo.h"
 #include "pxr/base/tf/fileUtils.h"
@@ -91,7 +92,7 @@ static std::string resolvePath(const std::string& filePath)
 }
 
 //----------------------------------------------------------------------------------------------------------------------
- AL_MAYA_DEFINE_NODE(ProxyShape, AL_USDMAYA_PROXYSHAPE, AL_usdmaya);
+AL_MAYA_DEFINE_NODE(ProxyShape, AL_USDMAYA_PROXYSHAPE, AL_usdmaya);
 
 MObject ProxyShape::m_filePath = MObject::kNullObj;
 MObject ProxyShape::m_primPath = MObject::kNullObj;
@@ -124,9 +125,8 @@ MObject ProxyShape::m_transformRotate = MObject::kNullObj;
 MObject ProxyShape::m_transformScale = MObject::kNullObj;
 MObject ProxyShape::m_stageDataDirty = MObject::kNullObj;
 
-std::vector<MObjectHandle> ProxyShape::m_unloadedProxyShapes;
-
 //----------------------------------------------------------------------------------------------------------------------
+std::vector<MObjectHandle> ProxyShape::m_unloadedProxyShapes;
 
 //----------------------------------------------------------------------------------------------------------------------
 UsdPrim ProxyShape::getUsdPrim(MDataBlock& dataBlock) const
@@ -800,6 +800,7 @@ void ProxyShape::onObjectsChanged(UsdNotice::ObjectsChanged const& notice, UsdSt
       return;
 
   TF_DEBUG(ALUSDMAYA_EVENTS).Msg("ProxyShape::onObjectsChanged called m_compositionHasChanged=%i\n", m_compositionHasChanged);
+
   // These paths are subtree-roots representing entire subtrees that may have
   // changed. In this case, we must dump all cached data below these points
   // and repopulate those trees.
@@ -818,7 +819,7 @@ void ProxyShape::onObjectsChanged(UsdNotice::ObjectsChanged const& notice, UsdSt
 
   SdfPathVector newUnselectables;
   SdfPathVector removeUnselectables;
-  auto recordSelectablePrims = [&newUnselectables, &removeUnselectables, this] (const SdfPath& objectPath, const UsdPrim& prim){
+  auto recordSelectablePrims = [&newUnselectables, &removeUnselectables, this](const UsdPrim& prim){
     if(!prim.IsValid())
     {
       return;
@@ -842,7 +843,7 @@ void ProxyShape::onObjectsChanged(UsdNotice::ObjectsChanged const& notice, UsdSt
   SdfPathSet lockTransformPrims;
   SdfPathSet lockInheritedPrims;
   SdfPathSet unlockedPrims;
-  auto recordPrimsLockStatus = [&lockTransformPrims, &lockInheritedPrims, &unlockedPrims] (const SdfPath& objectPath, const UsdPrim& prim) {
+  auto recordPrimsLockStatus = [&lockTransformPrims, &lockInheritedPrims, &unlockedPrims](const UsdPrim& prim) {
     if (!prim.IsValid())
     {
       return;
@@ -852,20 +853,20 @@ void ProxyShape::onObjectsChanged(UsdNotice::ObjectsChanged const& notice, UsdSt
     {
       if (lockPropertyValue == Metadata::lockTransform)
       {
-        lockTransformPrims.insert(objectPath);
+        lockTransformPrims.insert(prim.GetPath());
       }
       else if (lockPropertyValue == Metadata::lockInherited)
       {
-        lockInheritedPrims.insert(objectPath);
+        lockInheritedPrims.insert(prim.GetPath());
       }
       else if (lockPropertyValue == Metadata::lockUnlocked)
       {
-        unlockedPrims.insert(objectPath);
+        unlockedPrims.insert(prim.GetPath());
       }
     }
     else
     {
-      lockInheritedPrims.insert(objectPath);
+      lockInheritedPrims.insert(prim.GetPath());
     }
   };
 
@@ -873,8 +874,8 @@ void ProxyShape::onObjectsChanged(UsdNotice::ObjectsChanged const& notice, UsdSt
   for(const SdfPath& path : resyncedPaths)
   {
     UsdPrim newPrim = m_stage->GetPrimAtPath(path);
-    recordSelectablePrims(path, newPrim);
-    recordPrimsLockStatus(path, newPrim);
+    recordSelectablePrims(newPrim);
+    recordPrimsLockStatus(newPrim);
   }
 
   const SdfPathVector& changedInfoOnlyPaths = notice.GetChangedInfoOnlyPaths();
@@ -889,8 +890,8 @@ void ProxyShape::onObjectsChanged(UsdNotice::ObjectsChanged const& notice, UsdSt
     {
       changedPrim = m_stage->GetPrimAtPath(path);
     }
-    recordSelectablePrims(path, changedPrim);
-    recordPrimsLockStatus(path, changedPrim);
+    recordSelectablePrims(changedPrim);
+    recordPrimsLockStatus(changedPrim);
   }
 
   if(!removeUnselectables.empty())
@@ -1253,7 +1254,16 @@ void ProxyShape::constructExcludedPrims()
 //----------------------------------------------------------------------------------------------------------------------
 bool ProxyShape::lockTransformAttribute(const SdfPath& path, const bool lock)
 {
+  TF_DEBUG(ALUSDMAYA_EVALUATION).Msg("ProxyShape::lockTransformAttribute\n");
+
   UsdPrim prim = m_stage->GetPrimAtPath(path);
+  if(!prim.IsValid())
+  {
+    TF_DEBUG_MSG(ALUSDMAYA_EVALUATION,"ProxyShape::lockTransformAttribute prim path not valid '%s'\n", prim.GetPath().GetString().c_str());
+    return false;
+  }
+
+
   VtValue mayaPath = prim.GetCustomDataByKey(TfToken("MayaPath"));
   MObject lockObject;
   if (!mayaPath.IsEmpty())
@@ -1283,21 +1293,31 @@ bool ProxyShape::lockTransformAttribute(const SdfPath& path, const bool lock)
       }
     }
   }
+
   if (lockObject.isNull())
     return false;
-  MPlug(lockObject, m_transformTranslate).setLocked(lock);
-  MPlug(lockObject, m_transformRotate).setLocked(lock);
-  MPlug(lockObject, m_transformScale).setLocked(lock);
+
+
+  MPlug t(lockObject, m_transformTranslate);
+  MPlug r(lockObject, m_transformRotate);
+  MPlug s(lockObject, m_transformScale);
+
+  t.setLocked(lock);
+  r.setLocked(lock);
+  s.setLocked(lock);
+
   if (lock && MFnDependencyNode(lockObject).typeId() == AL_USDMAYA_TRANSFORM)
   {
     MPlug(lockObject, Transform::pushToPrim()).setBool(false);
   }
+  TF_DEBUG_MSG(ALUSDMAYA_EVALUATION,"ProxyShape::lockTransformAttribute Setting lock for '%s'\n", prim.GetPath().GetString().c_str());
   return true;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 void ProxyShape::constructLockPrims()
 {
+  TF_DEBUG(ALUSDMAYA_EVALUATION).Msg("ProxyShape::constructLockPrims\n");
   SdfPathSet primsNeedLock = m_lockTransformPrims;
 
   // add inherited lock prims if their parents are already in.
@@ -1342,6 +1362,8 @@ void ProxyShape::constructLockPrims()
 //----------------------------------------------------------------------------------------------------------------------
 void ProxyShape::onAttributeChanged(MNodeMessage::AttributeMessage msg, MPlug& plug, MPlug&, void* clientData)
 {
+  TF_DEBUG(ALUSDMAYA_EVALUATION).Msg("ProxyShape::onAttributeChanged\n");
+
   const SdfPath rootPath(std::string("/"));
   ProxyShape* proxy = (ProxyShape*)clientData;
   if(msg & MNodeMessage::kAttributeSet)
