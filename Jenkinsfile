@@ -47,21 +47,9 @@ timeout(time: 45)
 
                 node ('CentOS-6.6&&Sydney&&!restricted&&!devbuild10')
                 {
-                    try {
-                        ansiColor('xterm')
-                        {
-                            testing.runRepositoryTests(testingParams)
-                        }
-                    }
-                    catch(Exception e) {
-                        currentBuild.result = 'FAILURE'
-                        throw e
-                    }
-                    finally {
-                        algit.reportCurrentStatusToGitHub()
-                        stage ('Clean Workspace') {
-                            cleanWs notFailBuild: true
-                        }
+                    ansiColor('xterm')
+                    {
+                        testing.runRepositoryTests(testingParams)
                     }
                 } // node
             }, // "Internal"
@@ -104,6 +92,7 @@ timeout(time: 45)
         ) // parallel
     }
     catch (Exception e) {
+        currentBuild.result = "FAILURE"
         global.notifyResult(currentBuild.result,
                             'HipChat-JenkinsUsdBuilds-Token',
                             'JenkinsUsdBuilds',
