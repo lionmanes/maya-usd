@@ -1,7 +1,9 @@
+// @Library('AL@develop') _
+
 def gitHubRepo = "https://github.al.com.au/rnd/AL_USDMaya.git"
 
 // The list of packages that will be executed, the mode will determine if the stages can be executed in parallel or in serial.
-def packages = []
+def packages = ['AL_Utils', ['AL_MayaUtils', 'AL_USDUtils'], ['AL_USDMayaUtils'], ['.']]
 
 // the root folder where the package will be built
 def rootFolder = ""
@@ -22,11 +24,7 @@ def dependentJobs = [
 def upstreamJobs = "AL_USDSchemas"
 
 // flags passed to the rez build -- -- all_tests
-def rezBuildOptions = "-i --variants 0 1 -- -- -j8"
-
-// test only Maya 2017 and 2018 variants
-// (Maya 2016 variant will hang because of the tbb USD issue)
-def rezTestOptions = "--variants 0 1 -- --"
+def rezBuildOptions = "-i -- -- -j8"
 
 def testingParams = new al.TestingParameters()
 testingParams.gitHubRepo = gitHubRepo
@@ -37,7 +35,6 @@ testingParams.triggerDownstreamJobs = false
 testingParams.rootFolder = rootFolder
 testingParams.buildOptions = rezBuildOptions
 testingParams.testTargetName = "all_tests"
-testingParams.testOptions = rezTestOptions
 testingParams.createBuildArtifacts = true
 
 timeout(time: 45)
@@ -105,3 +102,4 @@ timeout(time: 45)
     }
 
 } // End timeout
+

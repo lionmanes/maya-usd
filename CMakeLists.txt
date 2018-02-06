@@ -18,6 +18,7 @@ configure_file(Version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/lib/AL_USDMaya/AL/us
 set(BOOST_ROOT ${boost_ROOT})
 
 add_definitions("-DUSE_AL_DEFAULT=1")
+add_definitions("-DAL_MAYA_ENABLE_SIMD=0")
 
 
 IF(DEFINED boost_NAMESPACE)
@@ -33,8 +34,6 @@ IF(NOT DEFINED BOOST_LIBRARY_DIRS)
       set(Boost_LIBRARY_DIR ${AL_boost_LIBRARY_DIRS} ${AL_boost_python_LIBRARY_DIRS})
   ENDIF()
 ENDIF()
-
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/modules")
 
 #set cmake modules - ";" separated not ":"!
 list(APPEND CMAKE_MODULE_PATH
