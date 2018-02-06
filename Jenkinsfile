@@ -90,13 +90,14 @@ timeout(time: 45)
                 } // node
             } // "Docker"
         ) // parallel
-    }
+    } // try
     catch (Exception e) {
         currentBuild.result = "FAILURE"
         global.notifyResult(currentBuild.result,
                             'HipChat-JenkinsUsdBuilds-Token',
                             'JenkinsUsdBuilds',
                             '')
+        throw e
     }
     finally {
 
