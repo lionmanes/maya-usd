@@ -33,6 +33,7 @@ testingParams.gitHubRepo = gitHubRepo
 testingParams.packagesList = packages
 testingParams.dependentJobs = dependentJobs
 testingParams.upstreamJobs = upstreamJobs
+testingParams.triggerDownstreamJobs = false
 testingParams.rootFolder = rootFolder
 testingParams.buildOptions = rezBuildOptions
 testingParams.testTargetName = "all_tests"
