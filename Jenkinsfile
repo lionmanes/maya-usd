@@ -82,7 +82,7 @@ timeout(time: 45)
                     }
                     catch(Exception e) {
                         currentBuild.result = 'UNSTABLE'
-                        algit.reportStatusToGitHub(githubStatus, 'Docker build error', "Docker_build_and_tests")
+                        algit.reportStatusToGitHub(currentBuild.result, 'Docker build error', "Docker_build_and_tests")
                         throw e
                     }
                     finally {
