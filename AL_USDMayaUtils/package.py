@@ -11,7 +11,7 @@ private_build_requires = [
 ]
 
 requires = [
-    'AL_Utils-0.0.1+<0.1',
+    'AL_EventSystem-0.0.1+<0.1',
     'AL_MayaUtils-0.0.1+<0.1',
     'AL_USDUtils-0.0.1+<0.1',
     'usdBase-0.8.al4',

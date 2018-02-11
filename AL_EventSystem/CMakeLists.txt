@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 2.8.12)
 include(RezBuild)
 rez_find_packages(PREFIX pkgs AUTO)
 
-set(UTILS_INCLUDE_LOCATION ${CMAKE_CURRENT_LIST_DIR}/src)
+set(EVENTS_INCLUDE_LOCATION ${CMAKE_CURRENT_LIST_DIR}/src)
 
 list(APPEND CMAKE_MODULE_PATH
     ${CMAKE_CURRENT_SOURCE_DIR}/cmake/defaults
@@ -21,7 +21,7 @@ set(CMAKE_CXX_FLAGS
 add_subdirectory(src)
 
 add_custom_target(all_tests
-    COMMAND echo -e "\n 'all_tests' : AL_Utils has no tests\n"
+    COMMAND echo -e "\n 'all_tests' : AL_EventSystem has no tests\n"
 )
 
 ####################################################################################################

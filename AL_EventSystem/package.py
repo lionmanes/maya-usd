@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-name = 'AL_Utils'
+name = 'AL_EventSystem'
 
 version = '0.0.1'
 

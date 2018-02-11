@@ -33,7 +33,7 @@ requires = [
     'AL_MayaUtils-0.0.1+<0.1',
     'AL_USDUtils-0.0.1+<0.1',
     'AL_USDMayaUtils-0.0.1+<0.1',
-    'AL_Utils-0.0.1+<0.1',
+    'AL_EventSystem-0.0.1+<0.1',
     'AL_boost-1.55',
     'AL_boost_python-1.55',
     'Qt_vfx-5.6'
