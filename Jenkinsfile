@@ -3,7 +3,7 @@
 def gitHubRepo = "https://github.al.com.au/rnd/AL_USDMaya.git"
 
 // The list of packages that will be executed, the mode will determine if the stages can be executed in parallel or in serial.
-def packages = ['AL_EventManager', ['AL_MayaUtils', 'AL_USDUtils'], ['AL_USDMayaUtils'], ['.']]
+def packages = ['AL_EventSystem', ['AL_MayaUtils', 'AL_USDUtils'], ['AL_USDMayaUtils'], ['.']]
 
 // the root folder where the package will be built
 def rootFolder = ""
