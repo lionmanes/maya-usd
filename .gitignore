@@ -5,6 +5,7 @@ build/
 .pydevproject
 .settings/
 .vscode/
+Testing
 *~
 *.orig
 *.pyc
