@@ -23,7 +23,7 @@ add_subdirectory(src)
     
 
 add_custom_target(all_tests
-    ${CMAKE_CTEST_COMMAND}
+    ${CMAKE_CTEST_COMMAND} --output-on-failure
 )
 
 ####################################################################################################
