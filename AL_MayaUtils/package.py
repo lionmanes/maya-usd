@@ -11,7 +11,8 @@ private_build_requires = [
     'AL_MTypeId-1.41+',
     'gdb-7.10',
     'doxygen-1',
-    'googletest'
+    'googletest',
+    'AL_maya_startup-1'
 ]
 
 requires = [
