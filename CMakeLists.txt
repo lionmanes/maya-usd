@@ -81,9 +81,14 @@ find_package(PythonLibs)
 find_package(Boost COMPONENTS
                 python # initialises Boost_PYTHON_LIBRARY
                 thread # initialises Boost_THREAD_LIBRARY
-                filesystem # initialises Boost_FILESYSTEM_LIBRARY
                 REQUIRED
 )
+
+if(CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.3)
+    find_package(Boost COMPONENTS
+                    filesystem # initialises Boost_FILESYSTEM_LIBRARY
+                    REQUIRED)
+endif()
 
 set(CMAKE_VERBOSE_MAKEFILE OFF)
 
