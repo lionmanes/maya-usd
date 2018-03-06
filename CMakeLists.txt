@@ -84,10 +84,18 @@ find_package(Boost COMPONENTS
                 REQUIRED
 )
 
-if(CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.3)
-    find_package(Boost COMPONENTS
-                    filesystem # initialises Boost_FILESYSTEM_LIBRARY
-                    REQUIRED)
+if(CMAKE_COMPILER_IS_GNUCC)
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.3)
+        find_package(Boost COMPONENTS
+                        filesystem # initialises Boost_FILESYSTEM_LIBRARY
+                        REQUIRED)
+    endif()
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5)
+        find_package(Boost COMPONENTS
+                        filesystem # initialises Boost_FILESYSTEM_LIBRARY
+                        REQUIRED)
+    endif()
 endif()
 
 set(CMAKE_VERBOSE_MAKEFILE OFF)
