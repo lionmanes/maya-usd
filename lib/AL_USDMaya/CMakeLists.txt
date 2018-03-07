@@ -195,6 +195,12 @@ target_link_libraries(${LIBRARY_NAME}
     ${MAYA_OpenMayaRender_LIBRARY}
 )
 
+if(NEED_BOOST_FILESYSTEM)
+    target_link_libraries(${LIBRARY_NAME}
+                        ${Boost_FILESYSTEM_LIBRARY})
+endif()
+
+
 if(${MAYA_API_VERSION} STRGREATER 2017)
     target_link_libraries(${LIBRARY_NAME}
         Qt5::Gui
