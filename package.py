@@ -1,6 +1,6 @@
 name = 'AL_USDMaya'
 
-version = '0.27.0'
+version = '0.27.1'
 
 authors = ['eoinm']
 
@@ -19,8 +19,8 @@ private_build_requires = [
 ]
 
 requires = [
-    'usdBase-0.8.al4',
-    'usdImaging-0.8.al5',
+    'usdBase-0.8.al5',
+    'usdImaging-0.8.al6',
     'glew-2.0',
     'googletest',
     'python-2.7+<3',

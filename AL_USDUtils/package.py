@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 name = 'AL_USDUtils'
 
-version = '0.0.1'
+version = '0.0.2'
 
 private_build_requires = [
     'AL_CMakeLib',
@@ -11,8 +11,7 @@ private_build_requires = [
 ]
 
 requires = [
-    'usdBase-0.8.al4',
-    'usdImaging-0.8.al5',
+    'usdBase-0.8.al5',
     'AL_boost-1.55',
     'AL_boost_python-1.55'
 ]
