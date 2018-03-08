@@ -19,8 +19,8 @@ private_build_requires = [
 ]
 
 requires = [
-    'usdBase-0.8.al5',
-    'usdImaging-0.8.al6',
+    'usdBase-0.8.al6',
+    'usdImaging-0.8.al7',
     'glew-2.0',
     'googletest',
     'python-2.7+<3',
@@ -61,3 +61,5 @@ def commands():
     # usd then wants to initialize tbb with (available cores) which leads to the warnings
     # manually set usd's limit to this empirically observed value
     env.PXR_WORK_THREAD_LIMIT='-3'
+
+
