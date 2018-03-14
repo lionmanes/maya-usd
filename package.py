@@ -61,5 +61,3 @@ def commands():
     # usd then wants to initialize tbb with (available cores) which leads to the warnings
     # manually set usd's limit to this empirically observed value
     env.PXR_WORK_THREAD_LIMIT='-3'
-
-
