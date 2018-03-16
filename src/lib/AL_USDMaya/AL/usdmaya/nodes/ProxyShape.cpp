@@ -82,6 +82,8 @@ namespace usdmaya {
 namespace nodes {
 typedef void (*proxy_function_prototype)(void* userData, AL::usdmaya::nodes::ProxyShape* proxyInstance);
 
+const char* ProxyShape::s_selectionMaskName = "al_ProxyShape";
+
 MDagPath ProxyShape::parentTransform()
 {
   MFnDagNode fn(thisMObject());
@@ -1295,7 +1297,7 @@ void ProxyShape::loadStage()
       AL_BEGIN_PROFILE_SECTION(OpenRootLayer);
 
       // Initialise the asset resolver
-      pxr::ArGetResolver().ConfigureResolverForAsset(fileString);
+      PXR_NS::ArGetResolver().ConfigureResolverForAsset(fileString);
 
       SdfLayerRefPtr rootLayer = SdfLayer::FindOrOpen(fileString);
       AL_END_PROFILE_SECTION();
