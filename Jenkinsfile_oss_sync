@@ -3,42 +3,54 @@
 *  WHEN USED IN PRODUCTION                               *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 node('CentOS-6.6&&!restricted'){
-    // Previous checkout has been cleared.
-    checkout scm
+    try {
+        // Previous checkout has been cleared.
+        checkout scm
 
-    // This script will update the external repository 'develop' branch by
-    // subtree-pushing to it.
-    stage('Update opensource develop branch'){
-        ansiColor('xterm') {
-            if ( env.DRY_RUN ) {
-                sh "./sync_scripts/push_develop_to_opensource.sh --dry-run"
-            }
-            else {
-                sh "./sync_scripts/push_develop_to_opensource.sh"
-            }
-        }
-    }
-
-    // Propagate our internal releases.
-    stage('Update opensource releases'){
-        ansiColor('xterm') {
-            if ( env.DRY_RUN ) {
-                sh "./sync_scripts/push_releases_to_opensource.sh --dry-run"
-            }
-            else {
-                sh "./sync_scripts/push_releases_to_opensource.sh"
+        // This script will update the external repository 'develop' branch by
+        // subtree-pushing to it.
+        stage('Update opensource develop branch'){
+            ansiColor('xterm') {
+                if ( env.DRY_RUN ) {
+                    sh "./sync_scripts/push_develop_to_opensource.sh --dry-run"
+                }
+                else {
+                    sh "./sync_scripts/push_develop_to_opensource.sh"
+                }
             }
         }
-    }
 
-    // This script will update the external wiki and doxygen docs.
-    stage('Update opensource docs'){
-        ansiColor('xterm') {
-            sh "./sync_scripts/push_docs_to_opensource.sh"
+        // Propagate our internal releases.
+        stage('Update opensource releases'){
+            ansiColor('xterm') {
+                if ( env.DRY_RUN ) {
+                    sh "./sync_scripts/push_releases_to_opensource.sh --dry-run"
+                }
+                else {
+                    sh "./sync_scripts/push_releases_to_opensource.sh"
+                }
+            }
         }
-    }
 
-    stage ('Clean Workspace') {
-        cleanWs notFailBuild: true
-    } // End stage ('Clean Workspace')
+        // This script will update the external wiki and doxygen docs.
+        stage('Update opensource docs'){
+            ansiColor('xterm') {
+                sh "./sync_scripts/push_docs_to_opensource.sh"
+            }
+        }
+
+    } // End try
+    catch (Exception e) {
+        currentBuild.result = "FAILURE"
+        global.notifyResult(currentBuild.result,
+                            'HipChat-JenkinsUsdBuilds-Token',
+                            'JenkinsUsdBuilds',
+                            '')
+        throw e
+    }
+    finally {
+        stage ('Clean Workspace') {
+            cleanWs notFailBuild: true
+        } // End stage ('Clean Workspace')
+    }
 } // End of Node
