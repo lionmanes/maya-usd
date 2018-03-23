@@ -521,6 +521,7 @@ bool ProxyShapeUI::select(MSelectInfo& selectInfo, MSelectionList& selectionList
           command += " \"";
           command += fn.name();
           command += "\"";
+
         }
 
         if(command.length() > 0) {
@@ -529,6 +530,7 @@ bool ProxyShapeUI::select(MSelectInfo& selectInfo, MSelectionList& selectionList
       }
       break;
 
+    case MGlobal::kAddToHeadOfList:
     case MGlobal::kAddToList:
       {
         MString command;
