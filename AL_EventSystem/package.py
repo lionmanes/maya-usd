@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 name = 'AL_EventSystem'
 
-version = '0.0.1'
+version = '0.0.2'
 
 private_build_requires = [
     'AL_CMakeLib',
