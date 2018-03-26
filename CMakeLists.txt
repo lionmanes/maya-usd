@@ -201,10 +201,7 @@ ELSE()
   add_custom_target(doc)
 ENDIF()
 
-rez_install_cmake(DESTINATION cmake
-  INCLUDE_DIRS include
-  LIBRARY_DIRS lib)
-    
+install(FILES cmake/AL_USDMaya.cmake DESTINATION cmake)
 
 get_property(LIBRARY_LOCATION GLOBAL PROPERTY GLOBAL_LIBRARY_LOCATION)
 get_property(PYTHON_LIBRARY_LOCATION GLOBAL PROPERTY GLOBAL_PYTHON_LIBRARY_LOCATION)
