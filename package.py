@@ -14,7 +14,7 @@ private_build_requires = [
     'AL_MTypeId-1.41+',
     'gdb-7.10',
     'doxygen-1',
-    'AL_USDSchemas-0.33.1+<1', # For the SdfMetadata only
+    'AL_USDSchemas-0.37.1+<1', # For the SdfMetadata only
     'AL_maya_startup-1+'      # To help cmake find "maya" executable
 ]
 
@@ -29,7 +29,7 @@ requires = [
     'zlib-1.2',
     'cppunit-1.12+<2',
     'AL_CMakeLibGitHub-0.1.0+<1',
-    '~AL_USDSchemas-0.33.1+<1', # For the SdfMetadata only
+    '~AL_USDSchemas-0.37.1+<1', # For the SdfMetadata only
     'AL_MayaUtils-0.0.1+<0.1',
     'AL_USDUtils-0.0.1+<0.1',
     'AL_USDMayaUtils-0.0.1+<0.1',
