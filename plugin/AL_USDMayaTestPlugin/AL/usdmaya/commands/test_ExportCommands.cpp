@@ -18,6 +18,7 @@
 #include "test_usdmaya.h"
 #include "maya/MGlobal.h"
 #include "maya/MFileIO.h"
+#include "maya/MFnDagNode.h"
 
 TEST(ExportCommands, exportUV)
 {
@@ -60,4 +61,51 @@ TEST(ExportCommands, exportUV)
     ASSERT_FLOAT_EQ(uv[0], faceUV[0]);
     ASSERT_FLOAT_EQ(uv[1], faceUV[1]);
   }
+}
+
+TEST(ExportCommands, extensiveAnimationCheck)
+{
+  MFileIO::newFile(true);
+  MGlobal::executeCommand(MString("createNode transform -n parent;polyCube -n child;parent child parent;"), false, true);
+  MGlobal::executeCommand(MString("createNode transform -n master;connectAttr master.tx parent.tx;select child;"), false, true);
+
+  const std::string temp_path = "/tmp/AL_USDMayaTests_extensiveAnimationCheck.usda";
+  MString exportCmd;
+
+  auto expectAnimation = [temp_path] (bool expectAnimation)
+  {
+    UsdStageRefPtr stage = UsdStage::Open(temp_path);
+    EXPECT_TRUE(stage);
+
+    UsdPrim prim = stage->GetPrimAtPath(SdfPath("/child"));
+    EXPECT_TRUE(prim.IsValid());
+
+    UsdGeomXform transform(prim);
+
+    bool resetsXformStack;
+    std::vector<UsdGeomXformOp> ops = transform.GetOrderedXformOps(&resetsXformStack);
+    if(expectAnimation)
+    {
+      EXPECT_FALSE(ops.empty());
+      for(auto op : ops)
+      {
+        auto attr = op.GetAttr();
+        EXPECT_EQ(10, attr.GetNumTimeSamples());
+      }
+    }
+    else
+    {
+      EXPECT_TRUE(ops.empty());
+    }
+  };
+
+  // Test default behavior:
+  exportCmd.format(MString("AL_usdmaya_ExportCommand -f \"^1s\" -sl 1 -frameRange 1 10"), AL::maya::utils::convert(temp_path));
+  MGlobal::executeCommand(exportCmd, true);
+  expectAnimation(true);
+
+  // Test turning off the extensiveAnimationCheck:
+  exportCmd.format(MString("AL_usdmaya_ExportCommand -f \"^1s\" -sl 1 -extensiveAnimationCheck 0 -frameRange 1 10"), AL::maya::utils::convert(temp_path));
+  MGlobal::executeCommand(exportCmd, true);
+  expectAnimation(false);
 }

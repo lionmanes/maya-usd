@@ -720,6 +720,7 @@ void Export::doExport()
   MObjectArray objects;
   const MSelectionList& sl = m_params.m_nodes;
   SdfPath defaultPrim;
+
   for(uint32_t i = 0, n = sl.length(); i < n; ++i)
   {
     MDagPath path;
@@ -818,22 +819,27 @@ MStatus ExportCommand::doIt(const MArgList& args)
   {
     AL_MAYA_CHECK_ERROR(argData.getFlagArgument("nc", 0, m_params.m_nurbsCurves), "ALUSDExport: Unable to fetch \"nurbs curves\" argument");
   }
+
   if(argData.isFlagSet("fr", &status))
   {
     AL_MAYA_CHECK_ERROR(argData.getFlagArgument("fr", 0, m_params.m_minFrame), "ALUSDExport: Unable to fetch \"frame range\" argument");
     AL_MAYA_CHECK_ERROR(argData.getFlagArgument("fr", 1, m_params.m_maxFrame), "ALUSDExport: Unable to fetch \"frame range\" argument");
     m_params.m_animation = true;
   }
-  else
-  if(argData.isFlagSet("ani", &status))
+  else if(argData.isFlagSet("ani", &status))
   {
     m_params.m_animation = true;
     m_params.m_minFrame = MAnimControl::minTime().value();
     m_params.m_maxFrame = MAnimControl::maxTime().value();
   }
+
   if (argData.isFlagSet("fs", &status))
   {
     AL_MAYA_CHECK_ERROR(argData.getFlagArgument("fs", 0, m_params.m_filterSample), "ALUSDExport: Unable to fetch \"filter sample\" argument");
+  }
+  if(argData.isFlagSet("eac", &status))
+  {
+    AL_MAYA_CHECK_ERROR(argData.getFlagArgument("eac", 0, m_params.m_extensiveAnimationCheck), "ALUSDExport: Unable to fetch \"extensive animation check\" argument");
   }
 
   if(m_params.m_animation)
@@ -920,6 +926,8 @@ MSyntax ExportCommand::createSyntax()
   status = syntax.addFlag("-fr", "-frameRange", MSyntax::kDouble, MSyntax::kDouble);
   AL_MAYA_CHECK_ERROR2(status, errorString);
   status = syntax.addFlag("-fs", "-filterSample", MSyntax::kBoolean);
+  AL_MAYA_CHECK_ERROR2(status, errorString);
+  status = syntax.addFlag("-eac", "-extensiveAnimationCheck", MSyntax::kBoolean);
   AL_MAYA_CHECK_ERROR2(status, errorString);
   syntax.enableQuery(false);
   syntax.enableEdit(false);
