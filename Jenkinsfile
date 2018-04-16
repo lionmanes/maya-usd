@@ -42,54 +42,50 @@ testingParams.createBuildArtifacts = true
 timeout(time: 45)
 {
     try {
-        parallel (
-            "Internal" : {
 
-                node ('CentOS-6.6&&Sydney&&!restricted&&!devbuild10')
+        // Standard build
+        node ('CentOS-6.6&&Sydney&&!restricted')
+        {
+            ansiColor('xterm')
+            {
+                testing.runRepositoryTests(testingParams)
+            }
+        } // node
+
+        // Docker build
+        node ('devbuild10')
+        {
+            checkout scm
+
+            // Sets the status as 'PENDING'
+            algit.reportStatusToGitHub('PENDING', 'Docker build pending', "Docker_build_and_tests")
+
+            try {
+                ansiColor('xterm')
                 {
-                    ansiColor('xterm')
+                    def workspace = pwd() + "/src"
+                    stage("Opensource Maya2016")
                     {
-                        testing.runRepositoryTests(testingParams)
+                        sh "sudo docker run --rm -e \"BUILD_PROCS=8\" -v $workspace:/tmp/usd-build/AL_USDMaya knockout:5000/usd-docker/usd:0.8.4-centos6-maya2016.5 bash /tmp/usd-build/AL_USDMaya/docker/build_alusdmaya.sh"
                     }
-                } // node
-            }, // "Internal"
-
-            "Docker" : {
-
-                node ('devbuild10')
-                {
-                    checkout scm
-
-                    // Sets the status as 'PENDING'
-                    algit.reportStatusToGitHub('PENDING', 'Docker build pending', "Docker_build_and_tests")
-
-                    try {
-                        ansiColor('xterm')
-                        {
-                            def workspace = pwd() + "/src"
-                            stage("Opensource Maya2016")
-                            {
-                                sh "sudo docker run --rm -e \"BUILD_PROCS=8\" -v $workspace:/tmp/usd-build/AL_USDMaya knockout:5000/usd-docker/usd:0.8.4-centos6-maya2016.5 bash /tmp/usd-build/AL_USDMaya/docker/build_alusdmaya.sh"
-                            }
-                            stage("Opensource Maya2017")
-                            {
-                                sh "sudo docker run --rm -e \"BUILD_PROCS=8\" -v $workspace:/tmp/usd-build/AL_USDMaya knockout:5000/usd-docker/usd:0.8.4-centos6-maya2017 bash /tmp/usd-build/AL_USDMaya/docker/build_alusdmaya.sh"
-                            }
-
-                            algit.reportStatusToGitHub('SUCCESS', 'Docker build success', "Docker_build_and_tests")
-                        }
+                    stage("Opensource Maya2017")
+                    {
+                        sh "sudo docker run --rm -e \"BUILD_PROCS=8\" -v $workspace:/tmp/usd-build/AL_USDMaya knockout:5000/usd-docker/usd:0.8.4-centos6-maya2017 bash /tmp/usd-build/AL_USDMaya/docker/build_alusdmaya.sh"
                     }
-                    catch(Exception e) {
-                        currentBuild.result = 'UNSTABLE'
-                        algit.reportStatusToGitHub(currentBuild.result, 'Docker build error', "Docker_build_and_tests")
-                        throw e
-                    }
-                    finally {
-                        cleanWs notFailBuild: true
-                    }
-                } // node
-            } // "Docker"
-        ) // parallel
+
+                    algit.reportStatusToGitHub('SUCCESS', 'Docker build success', "Docker_build_and_tests")
+                }
+            }
+            catch(Exception e) {
+                currentBuild.result = 'UNSTABLE'
+                algit.reportStatusToGitHub(currentBuild.result, 'Docker build error', "Docker_build_and_tests")
+                throw e
+            }
+            finally {
+                cleanWs notFailBuild: true
+            }
+        } // node
+
     } // try
     catch (Exception e) {
         currentBuild.result = "FAILURE"
@@ -101,7 +97,7 @@ timeout(time: 45)
     }
     finally {
 
-    }
+    } // finally
 
 } // End timeout
 
