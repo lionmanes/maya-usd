@@ -21,7 +21,9 @@ def dependentJobs = [
 ]
 
 // String, whitespace separated
-def upstreamJobs = "AL_USDSchemas"
+// Do not use upstream artifacts for now as "develop" artifacts of AL_USD are not compatible
+// def upstreamJobs = "AL_USDSchemas"
+def upstreamJobs = ""
 
 // flags passed to the rez build -- -- all_tests
 def rezBuildOptions = "-i -- -- -j8"
