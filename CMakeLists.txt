@@ -122,10 +122,6 @@ set(SCHEMAS_TOKENS_PREFIX AL_USDMayaSchemas)
 # Compare generated code
 set(VALIDATE_GENERATED_SCHEMAS "Generate schemas code and compare." ON)
 
-if(${MAYA_API_VERSION} STRLESS 2017)
-    set(QT_QTGUI_LIBRARY QtGui)
-endif()
-
 set(AL_USDMAYA_LOCATION_NAME
     "AL_USDMAYA_LOCATION"
     CACHE
