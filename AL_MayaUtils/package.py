@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 name = 'AL_MayaUtils'
 
-version = '0.0.4'
+version = '0.0.5'
 
 private_build_requires = [
     'AL_CMakeLib',
@@ -18,8 +18,8 @@ private_build_requires = [
 requires = [
     'stdlib-4.8',
     'Qt_vfx-5.6',
-    "AL_EventSystem-0.0.1+<0.1",
-    'AL_USDUtils-0.0.1+<0.1',
+    "AL_EventSystem-0.0.3+<0.1",
+    'AL_USDUtils-0.0.6+<0.1',
     "AL_boost-1.55",
     "AL_boost_python-1.55"]
 
