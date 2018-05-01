@@ -28,12 +28,6 @@ find_package(Maya REQUIRED)
 
 include_directories(${MAYA_INCLUDE_DIRS})
 
-if(${MAYA_API_VERSION} STRGREATER 2017)
-    find_package(Qt5Gui REQUIRED)
-else()
-    find_package(Qt4 REQUIRED QtGui)
-endif()
-
 include_directories(${PXR_INCLUDE_DIRS})
 
 # FindBoost is particularly buggy, and doesn't like custom boost locations.
@@ -42,14 +36,25 @@ include_directories(${PXR_INCLUDE_DIRS})
 find_package(Boost COMPONENTS
                 python
                 thread
+                chrono
+                filesystem
                 REQUIRED
 )
 
-set(CMAKE_CXX_FLAGS
-    -std=c++11
-    -msse3
-    "${_PXR_CXX_WARNING_FLAGS}"
-)
+set(NEED_BOOST_FILESYSTEM ON)
+
+if(WIN32)
+    set(CMAKE_CXX_FLAGS
+        -std=c++11
+        "${_PXR_CXX_FLAGS}"
+    )
+else()
+    set(CMAKE_CXX_FLAGS
+        -std=c++11
+        -msse3
+        "${_PXR_CXX_FLAGS}"
+    )
+endif()
 string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
 set(CMAKE_VERBOSE_MAKEFILE OFF)

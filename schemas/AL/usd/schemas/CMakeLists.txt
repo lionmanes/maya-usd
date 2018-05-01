@@ -81,6 +81,8 @@ install(
     TARGETS ${SCHEMAS_PACKAGE}
     LIBRARY
     DESTINATION ${library_install_path}
+    RUNTIME
+    DESTINATION ${library_install_path}
 )
 
 ####################################################################################################
@@ -100,9 +102,11 @@ add_library(${SCHEMAS_PYTHON_PACKAGE}
     wrapTokens.cpp
 )
 
-set_target_properties(${SCHEMAS_PYTHON_PACKAGE}
-    PROPERTIES COMPILE_DEFINITIONS
-        "MFB_PACKAGE_NAME=${SCHEMAS_PACKAGE};MFB_ALT_PACKAGE_NAME=${SCHEMAS_PACKAGE};MFB_PACKAGE_MODULE=${PYTHON_MODULE}"
+target_compile_definitions(${SCHEMAS_PYTHON_PACKAGE}
+    PRIVATE
+        MFB_PACKAGE_NAME=${SCHEMAS_PACKAGE}
+        MFB_ALT_PACKAGE_NAME=${SCHEMAS_PACKAGE}
+        MFB_PACKAGE_MODULE=${SCHEMAS_PYTHON_MODULE}
 )
 
 set_target_properties(${SCHEMAS_PYTHON_PACKAGE} 
@@ -110,10 +114,19 @@ set_target_properties(${SCHEMAS_PYTHON_PACKAGE}
         PREFIX ""
 )
 
+if(MSVC)
+set_target_properties(${SCHEMAS_PYTHON_PACKAGE}
+    PROPERTIES
+        SUFFIX ".pyd"
+)
+endif()
+
 target_link_libraries(${SCHEMAS_PYTHON_PACKAGE} ${SCHEMAS_PACKAGE} ${DEPENDANT_LIBRARIES})
 
 install(TARGETS ${SCHEMAS_PYTHON_PACKAGE}
     LIBRARY
+    DESTINATION ${bindings_install_path}
+    RUNTIME
     DESTINATION ${bindings_install_path}
 )
 
