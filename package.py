@@ -1,6 +1,6 @@
 name = 'AL_USDMaya'
 
-version = '0.27.7'
+version = '0.27.8'
 
 authors = ['eoinm']
 
