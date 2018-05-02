@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 name = 'AL_MayaUtils'
 
-version = '0.0.5'
+version = '0.0.6'
 
 private_build_requires = [
     'AL_CMakeLib',
