@@ -19,7 +19,6 @@ requires = [
     'stdlib-4.8',
     'Qt_vfx-5.6',
     "AL_EventSystem-0.0.3+<0.1",
-    'AL_USDUtils-0.0.6+<0.1',
     "AL_boost-1.55",
     "AL_boost_python-1.55"]
 
