@@ -30,9 +30,9 @@ requires = [
     'cppunit-1.12+<2',
     'AL_CMakeLibGitHub-0.1.0+<1',
     '~AL_USDSchemas-0.37.1+<1', # For the SdfMetadata only
-    'AL_MayaUtils-0.0.1+<0.1',
-    'AL_USDUtils-0.0.1+<0.1',
-    'AL_USDMayaUtils-0.0.1+<0.1',
+    'AL_MayaUtils-0.0.8+<0.1',
+    'AL_USDUtils-0.0.7+<0.1',
+    'AL_USDMayaUtils-0.0.9+<0.1',
     'AL_EventSystem-0.0.1+<0.1',
     'AL_boost-1.55',
     'AL_boost_python-1.55',
