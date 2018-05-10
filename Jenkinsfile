@@ -85,6 +85,35 @@ timeout(time: 45)
                 cleanWs notFailBuild: true
             }
         } // node
+        
+        // Windows build
+        node ('ferry')
+        {
+            checkout scm
+
+            // Sets the status as 'PENDING'
+            algit.reportStatusToGitHub('PENDING', 'Windows build pending', "Windows_build")
+
+            try {
+                ansiColor('xterm')
+                {
+                    stage("Windows build")
+                    {
+                        bat "if not exist T: (net use T: \\\\al.com.au\\dfs)"
+                        bat "build_scripts\\windows_build.bat"
+                        algit.reportStatusToGitHub('SUCCESS', 'Windows build success', "Windows_build")
+                    }
+                }
+            }
+            catch(Exception e) {
+                currentBuild.result = 'UNSTABLE'
+                algit.reportStatusToGitHub(currentBuild.result, 'Windows build error', "Windows_build")
+                throw e
+            }
+            finally {
+                cleanWs notFailBuild: true
+            }
+        } // node
 
     } // try
     catch (Exception e) {
