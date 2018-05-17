@@ -53,7 +53,7 @@ timeout(time: 45)
         } // node
 
         // Docker build
-        node ('devbuild10')
+        node ('CentOS-6.6&&Sydney&&!restricted&&docker')
         {
             checkout scm
 
