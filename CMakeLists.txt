@@ -222,3 +222,5 @@ else()
         ${CMAKE_CTEST_COMMAND} --output-on-failure
     )
 endif()
+
+install(DIRECTORY mel DESTINATION ${CMAKE_INSTALL_PREFIX})

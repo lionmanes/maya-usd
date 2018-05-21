@@ -55,7 +55,9 @@ def commands():
     prependenv('PXR_PLUGINPATH', '{root}/share/usd/plugins')
     prependenv('CMAKE_MODULE_PATH', '{root}/cmake')
     prependenv('DOXYGEN_TAGFILES', '{root}/doc/AL_USDMaya.tag=http://github.al.com.au/pages/documentation/AL_USDMaya')
-    
+    setenv('AL_USDMAYA_AUTOLOAD_MEL', '{root}/mel')
+    prependenv('AL_MAYA_AUTO_LOADVERSIONEDTOOL', 'al_usdmaya_autoload')
+
     # workaround for tbb-4.4 warnings
     # maya initializes tbb before usd with a value which seems to be (available cores - 3)
     # usd then wants to initialize tbb with (available cores) which leads to the warnings
