@@ -2,7 +2,7 @@
 
 name = 'AL_USDMayaUtils'
 
-version = '0.0.8'
+version = '0.0.9'
 
 private_build_requires = [
     'AL_CMakeLib',
