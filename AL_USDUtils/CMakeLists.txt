@@ -15,8 +15,10 @@ include(CXXDefaults)
 add_definitions(${_PXR_CXX_DEFINITIONS})
 
 set(CMAKE_CXX_FLAGS
-    -std=c++11
+    -std=c++11 
+    -msse3 
 )
+string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
 ####################################################################################################
 # General
