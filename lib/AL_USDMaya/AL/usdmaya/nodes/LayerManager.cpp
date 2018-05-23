@@ -169,18 +169,23 @@ bool LayerDatabase::removeLayer(SdfLayerRefPtr layer)
   return true;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 SdfLayerHandle LayerDatabase::findLayer(std::string identifier) const
 {
   auto foundIdAndLayer = m_idToLayer.find(identifier);
   if(foundIdAndLayer != m_idToLayer.end())
   {
-    return foundIdAndLayer->second;
+    // Non-dirty layers may be placed in the database "temporarily" -
+    // ie, current edit targets for proxyShape stages, that have not
+    // yet been edited. Filter those out.
+    if(foundIdAndLayer->second->IsDirty())
+    {
+      return foundIdAndLayer->second;
+    }
   }
-
 
   return SdfLayerHandle();
 }
+
 
 //----------------------------------------------------------------------------------------------------------------------
 void LayerDatabase::_addLayer(SdfLayerRefPtr layer, const std::string& identifier,
@@ -554,7 +559,7 @@ MStatus LayerManager::populateSerialisationAttributes()
   AL_MAYA_CHECK_ERROR(status, errorString);
   {
     boost::shared_lock_guard<boost::shared_mutex> lock(m_layersMutex);
-    MArrayDataBuilder builder(&dataBlock, layers(), m_layerDatabase.size(), &status);
+    MArrayDataBuilder builder(&dataBlock, layers(), m_layerDatabase.max_size(), &status);
     AL_MAYA_CHECK_ERROR(status, errorString);
     std::string temp;
     for (const auto& layerAndIds : m_layerDatabase)
