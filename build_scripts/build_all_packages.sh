@@ -1,8 +1,1 @@
-
-# run from the the AL_USDMaya directory
-cd AL_EventSystem; rez build --build-target RelWithDebInfo --install -- -- -j 46; if [ $? -ge 1 ]; then exit 1; fi ; cd -
-cd AL_MayaUtils; rez build --build-target RelWithDebInfo --install -- -- -j 46; if [ $? -ge 1 ]; then exit 1; fi ; cd -
-cd AL_USDUtils; rez build --build-target RelWithDebInfo --install -- -- -j 46; if [ $? -ge 1 ]; then exit 1; fi ; cd -
-cd AL_USDMayaUtils; rez build --build-target RelWithDebInfo --install -- -- -j 46; if [ $? -ge 1 ]; then exit 1; fi ; cd -
-rez build --build-target RelWithDebInfo --install -- -- -j 46
-
+echo "This is not needed anymore. AL_USDMaya is now made of a single package"
