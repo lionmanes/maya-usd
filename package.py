@@ -1,6 +1,6 @@
 name = 'AL_USDMaya'
 
-version = '0.27.12'
+version = '0.27.13'
 
 authors = ['eoinm']
 
@@ -30,7 +30,7 @@ requires = [
     'cppunit-1.12+<2',
     'AL_CMakeLibGitHub-0.1.0+<1',
     '~AL_USDSchemas-0.37.1+<1', # For the SdfMetadata only
-    'AL_MayaUtils-0.0.8+<0.1',
+    'AL_MayaUtils-0.1+<0.2',
     'AL_USDUtils-0.0.7+<0.1',
     'AL_USDMayaUtils-0.1+<0.2',
     'AL_EventSystem-0.0.1+<0.1',
