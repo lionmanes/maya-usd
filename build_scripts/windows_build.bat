@@ -6,7 +6,7 @@ cmake -DCMAKE_INSTALL_PREFIX=%WORKSPACE%\install ^
       -DCMAKE_BUILD_TYPE=Release ^
       -DBOOST_ROOT=T:\depts\rnd\dev\fabricem\Windows\USD_dependencies ^
       -DMAYA_LOCATION="C:\Program Files\Autodesk\Maya2017" ^
-      -DUSD_ROOT="T:\depts\rnd\dev\fabricem\Windows\USD\0.8.4" ^
+      -DUSD_ROOT="T:\depts\rnd\dev\fabricem\Windows\USD\0.8.5" ^
       -DGTEST_ROOT=T:\depts\rnd\dev\fabricem\Windows\googletest_install ^
       -G "Visual Studio 14 2015 Win64" ^
       ../src
