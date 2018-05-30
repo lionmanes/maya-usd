@@ -29,7 +29,7 @@ requires = [
     'zlib-1.2',
     'cppunit-1.12+<2',
     'AL_CMakeLibGitHub-0.1.0+<1',
-    '~AL_USDSchemas-0.37.1+<1', # For the SdfMetadata only
+    '~AL_USDSchemas-0.39+<1', # For the SdfMetadata only
     'AL_boost-1.55',
     'AL_boost_python-1.55',
 ]
