@@ -44,7 +44,7 @@ timeout(time: 45)
     try {
 
         // Standard build
-        node ('CentOS-6.6&&Sydney&&!restricted')
+        node ('CentOS-6.6&&Sydney&&!restricted&&!jukebox&&!testbed')
         {
             ansiColor('xterm')
             {
