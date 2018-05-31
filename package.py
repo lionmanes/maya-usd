@@ -1,6 +1,6 @@
 name = 'AL_USDMaya'
 
-version = '0.27.13'
+version = '0.28.0'
 
 authors = ['eoinm']
 
@@ -19,8 +19,8 @@ private_build_requires = [
 ]
 
 requires = [
-    'usdBase-0.8.al6',
-    'usdImaging-0.8.al7',
+    'usdBase-0.8.5',
+    'usdImaging-0.8.5',
     'glew-2.0',
     'googletest',
     'python-2.7+<3',
@@ -53,7 +53,7 @@ def commands():
     prependenv('DOXYGEN_TAGFILES', '{root}/doc/AL_USDMaya.tag=http://github.al.com.au/pages/documentation/AL_USDMaya')
     setenv('AL_USDMAYA_AUTOLOAD_MEL', '{root}/mel')
     prependenv('AL_MAYA_AUTO_LOADVERSIONEDTOOL', 'al_usdmaya_autoload')
-
+    
     # workaround for tbb-4.4 warnings
     # maya initializes tbb before usd with a value which seems to be (available cores - 3)
     # usd then wants to initialize tbb with (available cores) which leads to the warnings
