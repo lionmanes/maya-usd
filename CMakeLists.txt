@@ -101,6 +101,11 @@ set(CMAKE_CXX_FLAGS
 )
 string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
+option(SKIP_USDMAYA_TESTS "Skip test building" OFF)
+
+if(NOT SKIP_USDMAYA_TESTS)
+    enable_testing()
+endif()
 
 # Path to the input schemas templates
 set(USD_SCHEMA_PATH ${PXR_CMAKE_DIR}/schemas/usd/schema.usda)
