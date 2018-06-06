@@ -101,6 +101,11 @@ set(CMAKE_CXX_FLAGS
 )
 string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
+option(SKIP_USDMAYA_TESTS "Skip test building" OFF)
+
+if(NOT SKIP_USDMAYA_TESTS)
+    enable_testing()
+endif()
 
 # Path to the input schemas templates
 set(USD_SCHEMA_PATH ${PXR_CMAKE_DIR}/schemas/usd/schema.usda)
@@ -130,6 +135,15 @@ set(AL_USDMAYA_LOCATION_NAME
 )
 
 # Build our plugs... non-standard as we're building from another source tree
+set(EVENTS_INCLUDE_LOCATION ${CMAKE_CURRENT_LIST_DIR}/${SUBTREE_DIRECTORY}/utils)
+set(USDUTILS_INCLUDE_LOCATION ${CMAKE_CURRENT_LIST_DIR}/${SUBTREE_DIRECTORY}/usdutils)
+set(MAYAUTILS_INCLUDE_LOCATION ${CMAKE_CURRENT_LIST_DIR}/${SUBTREE_DIRECTORY}/mayautils)
+set(USDMAYAUTILS_INCLUDE_LOCATION ${CMAKE_CURRENT_LIST_DIR}/${SUBTREE_DIRECTORY}/usdmayautils)
+
+add_subdirectory(${SUBTREE_DIRECTORY}/utils)
+add_subdirectory(${SUBTREE_DIRECTORY}/usdutils)
+add_subdirectory(${SUBTREE_DIRECTORY}/mayautils)
+add_subdirectory(${SUBTREE_DIRECTORY}/usdmayautils)
 add_subdirectory(${SUBTREE_DIRECTORY}/lib)
 add_subdirectory(${SUBTREE_DIRECTORY}/plugin)
 add_subdirectory(${SUBTREE_DIRECTORY}/schemas)

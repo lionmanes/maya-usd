@@ -3,7 +3,7 @@
 def gitHubRepo = "https://github.al.com.au/rnd/AL_USDMaya.git"
 
 // The list of packages that will be executed, the mode will determine if the stages can be executed in parallel or in serial.
-def packages = ['AL_EventSystem', ['AL_USDUtils'], ['AL_MayaUtils'], ['AL_USDMayaUtils'], ['.']]
+def packages = ['.']
 
 // the root folder where the package will be built
 def rootFolder = ""
@@ -44,7 +44,7 @@ timeout(time: 45)
     try {
 
         // Standard build
-        node ('CentOS-6.6&&Sydney&&!restricted')
+        node ('CentOS-6.6&&Sydney&&!restricted&&!jukebox&&!testbed')
         {
             ansiColor('xterm')
             {
@@ -52,68 +52,67 @@ timeout(time: 45)
             }
         } // node
 
-        // Docker build
-        node ('CentOS-6.6&&Sydney&&!restricted&&docker')
+        if(env.BRANCH_NAME == "develop")
         {
-            checkout scm
+            // Docker build
+            node ('docker')
+            {
+                checkout scm
 
-            // Sets the status as 'PENDING'
-            algit.reportStatusToGitHub('PENDING', 'Docker build pending', "Docker_build_and_tests")
+                // Sets the status as 'PENDING'
+                algit.reportStatusToGitHub('PENDING', 'Docker build pending', "Docker_build_and_tests")
 
-            try {
-                ansiColor('xterm')
-                {
-                    def workspace = pwd() + "/src"
-                    stage("Opensource Maya2016")
+                try {
+                    ansiColor('xterm')
                     {
-                        sh "sudo docker run --rm -e \"BUILD_PROCS=8\" -v $workspace:/tmp/usd-build/AL_USDMaya curtain:5000/usd-docker/usd:0.8.4-centos6-maya2016.5 bash /tmp/usd-build/AL_USDMaya/docker/build_alusdmaya.sh"
-                    }
-                    stage("Opensource Maya2017")
-                    {
-                        sh "sudo docker run --rm -e \"BUILD_PROCS=8\" -v $workspace:/tmp/usd-build/AL_USDMaya curtain:5000/usd-docker/usd:0.8.4-centos6-maya2017 bash /tmp/usd-build/AL_USDMaya/docker/build_alusdmaya.sh"
-                    }
+                        def workspace = pwd() + "/src"
+                        stage("Opensource Maya2017")
+                        {
+                            sh "sudo docker run --rm -e \"BUILD_PROCS=8\" -v $workspace:/tmp/usd-build/AL_USDMaya curtain:5000/usd-docker/usd:0.8.5-centos6-maya2017 bash /tmp/usd-build/AL_USDMaya/docker/build_alusdmaya.sh"
+                        }
 
-                    algit.reportStatusToGitHub('SUCCESS', 'Docker build success', "Docker_build_and_tests")
-                }
-            }
-            catch(Exception e) {
-                currentBuild.result = 'UNSTABLE'
-                algit.reportStatusToGitHub(currentBuild.result, 'Docker build error', "Docker_build_and_tests")
-                throw e
-            }
-            finally {
-                cleanWs notFailBuild: true
-            }
-        } // node
-        
-        // Windows build
-        node ('ferry')
-        {
-            checkout scm
-
-            // Sets the status as 'PENDING'
-            algit.reportStatusToGitHub('PENDING', 'Windows build pending', "Windows_build")
-
-            try {
-                ansiColor('xterm')
-                {
-                    stage("Windows build")
-                    {
-                        bat "if not exist T: (net use T: \\\\al.com.au\\dfs)"
-                        bat "build_scripts\\windows_build.bat"
-                        algit.reportStatusToGitHub('SUCCESS', 'Windows build success', "Windows_build")
+                        algit.reportStatusToGitHub('SUCCESS', 'Docker build success', "Docker_build_and_tests")
                     }
                 }
-            }
-            catch(Exception e) {
-                currentBuild.result = 'UNSTABLE'
-                algit.reportStatusToGitHub(currentBuild.result, 'Windows build error', "Windows_build")
-                throw e
-            }
-            finally {
-                cleanWs notFailBuild: true
-            }
-        } // node
+                catch(Exception e) {
+                    currentBuild.result = 'UNSTABLE'
+                    algit.reportStatusToGitHub(currentBuild.result, 'Docker build error', "Docker_build_and_tests")
+                    throw e
+                }
+                finally {
+                    cleanWs notFailBuild: true
+                }
+            } // node
+            
+            // Windows build
+            node ('ferry')
+            {
+                checkout scm
+
+                // Sets the status as 'PENDING'
+                algit.reportStatusToGitHub('PENDING', 'Windows build pending', "Windows_build")
+
+                try {
+                    ansiColor('xterm')
+                    {
+                        stage("Windows build")
+                        {
+                            bat "if not exist T: (net use T: \\\\al.com.au\\dfs)"
+                            bat "build_scripts\\windows_build.bat"
+                            algit.reportStatusToGitHub('SUCCESS', 'Windows build success', "Windows_build")
+                        }
+                    }
+                }
+                catch(Exception e) {
+                    currentBuild.result = 'UNSTABLE'
+                    algit.reportStatusToGitHub(currentBuild.result, 'Windows build error', "Windows_build")
+                    throw e
+                }
+                finally {
+                    cleanWs notFailBuild: true
+                }
+            } // node
+        } // if(env.BRANCH_NAME == "develop")
 
     } // try
     catch (Exception e) {

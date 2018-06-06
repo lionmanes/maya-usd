@@ -53,11 +53,6 @@ We also have to take care of the eventual loading order.
 
 """
 
-try:
-    __import__('pkg_resources').declare_namespace(__name__)
-except:
-    pass
-
 import imp
 import os
 import sys
