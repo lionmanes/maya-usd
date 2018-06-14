@@ -43,17 +43,38 @@ timeout(time: 45)
 {
     try {
 
-        // Standard build
-        node ('CentOS-6.6&&Sydney&&!restricted&&!jukebox&&!testbed')
+        // Standard build - maya-2017
+        node ('CentOS-6.6&&Sydney&&!restricted&&!testbed')
         {
             ansiColor('xterm')
             {
+                testingParams.buildOptions = "-i --variants 0 -- -- -j8"
+                testingParams.testOptions = "--variants 0 -- --"
                 testing.runRepositoryTests(testingParams)
+                if(currentBuild.result in ["ERROR", "FAILURE"])
+                {
+                    error "Tests failed"
+                }
             }
         } // node
 
         if(env.BRANCH_NAME == "develop")
         {
+            // Standard build - maya-2018/2019
+            node ('dot||jukebox||curtain')
+            {
+                ansiColor('xterm')
+                {
+                    testingParams.buildOptions = "-i --variants 1 2 -- -- -j8"
+                    testingParams.testOptions = "--variants 1 2 -- --"
+                    testing.runRepositoryTests(testingParams)
+                    if(currentBuild.result in ["ERROR", "FAILURE"])
+                    {
+                        error "Tests failed"
+                    }
+                }
+            } // node
+
             // Docker build
             node ('docker')
             {

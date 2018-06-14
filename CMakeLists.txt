@@ -46,8 +46,7 @@ list(APPEND CMAKE_MODULE_PATH
 
 find_package(PythonInterp)
 
-include(ProjectDefaults)
-include(Public)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 include(CXXDefaults)
 
 add_definitions(${_PXR_CXX_DEFINITIONS})
