@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*-
 name = 'AL_USDMaya'
 
-version = '0.28.2'
+version = '0.28.3'
 
 authors = ['eoinm']
 
