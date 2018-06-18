@@ -96,6 +96,7 @@ set(CMAKE_VERBOSE_MAKEFILE OFF)
 set(CMAKE_CXX_FLAGS
     -std=c++11
     -msse3
+    -Werror
     "${_PXR_CXX_WARNING_FLAGS}"
 )
 string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
