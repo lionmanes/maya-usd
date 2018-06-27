@@ -16,9 +16,7 @@ def rootFolder = ""
 // so in the end it looks like
 //def dependentJobs = [["dependentTest1",'JOBPARM1=value;JOBPARM2=value2'] ,
 //                    "dependent test 2"],
-def dependentJobs = [
-    ["AL_bond_usd", "TRIGGER_DOWNSTREAM_JOBS=true"]
-]
+def dependentJobs = []
 
 // String, whitespace separated
 // Do not use upstream artifacts for now as "develop" artifacts of AL_USD are not compatible
