@@ -75,6 +75,7 @@ class AL_USDMayaChangeLog(ChangeLog):
                 logger.error('Unable to extract the latest changelog version')
                 sys.exit(1)
 
+        updatedLog = False
         with open(path, 'w') as ostream:
             for release in package.iter_releases(branch=branch):
                 if release.release_tag <= initial_version:
@@ -83,11 +84,15 @@ class AL_USDMayaChangeLog(ChangeLog):
                     
                 logger.info('Writing Entry for {}'.format(release.release_tag))
 
+                updatedLog = True
                 formatter = AL_USDMayaChangeLogFormatter(release)
                 ostream.write(formatter.format())
             ostream.write(previous)
 
-        logger.info('Wrote Change Log: {}'.format(path))
+        if updatedLog:
+            logger.info('Wrote Change Log: {}'.format(path))
+        else:
+            logger.info('Nothing added to changelog')
 
 
 def main():
@@ -108,7 +113,7 @@ def main():
     logger.addHandler(ch)
 
     maya_changelog = AL_USDMayaChangeLog()
-    maya_changelog.write(opts.output)
+    maya_changelog.write(opts.output, "develop")
 
 
 if __name__ == '__main__':
