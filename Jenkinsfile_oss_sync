@@ -2,7 +2,7 @@
 *  THIS WILL NEED SPECIAL USER/MACHINE WITH PERMISSIONS  *
 *  WHEN USED IN PRODUCTION                               *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-node('CentOS-6.6&&!restricted'){
+node('CentOS&&!restricted'){
     try {
         // Previous checkout has been cleared.
         checkout scm

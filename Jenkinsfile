@@ -42,7 +42,7 @@ timeout(time: 45)
     try {
 
         // Standard build - maya-2017
-        node ('CentOS-6.6&&Sydney&&!restricted&&!testbed')
+        node ('CentOS&&Sydney&&!restricted&&!testbed')
         {
             ansiColor('xterm')
             {
