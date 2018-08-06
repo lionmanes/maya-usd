@@ -63,8 +63,8 @@ timeout(time: 45)
             {
                 ansiColor('xterm')
                 {
-                    testingParams.buildOptions = "-i --variants 1 2 -- -- -j8"
-                    testingParams.testOptions = "--variants 1 2 -- --"
+                    testingParams.buildOptions = "-i --variants 1 -- -- -j8"
+                    testingParams.testOptions = "--variants 1 -- --"
                     testing.runRepositoryTests(testingParams)
                     if(currentBuild.result in ["ERROR", "FAILURE"])
                     {
