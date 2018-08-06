@@ -11,7 +11,7 @@ private_build_requires = [
     'AL_CMakeLib',
     'cmake-2.8+',
     'AL_CMakeLibPython-6.0.9+<7',
-    'gcc-4.8',
+    'gcc-4.8-3',
     'AL_MTypeId-1.41+',
     'gdb-7.10',
     'doxygen-1',
@@ -26,7 +26,7 @@ requires = [
     'googletest',
     'python-2.7+<3',
     'doubleConversion-1',
-    'stdlib-4.8',
+    'stdlib-4.8.3+',
     'zlib-1.2',
     'cppunit-1.12+<2',
     'AL_CMakeLibGitHub-0.1.0+<1',
@@ -36,8 +36,8 @@ requires = [
 ]
 
 variants = [
-    ['CentOS-6.2+<7', 'mayaDevKit-2017.0'],
-    ['CentOS-6.2+<7', 'mayaDevKit-2018.0'],
+    ['CentOS-6.9+<8', 'mayaDevKit-2017.0'],
+    ['CentOS-6.9+<8', 'mayaDevKit-2018.0'],
 ]
 
 help = [['API', '$BROWSER http://github.al.com.au/pages/documentation/AL_USDMaya']]
