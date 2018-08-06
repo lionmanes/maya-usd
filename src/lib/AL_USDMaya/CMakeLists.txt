@@ -77,11 +77,8 @@ list(APPEND AL_usdmaya_fileio_source
 )
 
 list(APPEND AL_usdmaya_fileio_translators_headers
-        AL/usdmaya/fileio/translators/CameraTranslator.h
         AL/usdmaya/fileio/translators/DagNodeTranslator.h
         AL/usdmaya/fileio/translators/DgNodeTranslator.h
-        AL/usdmaya/fileio/translators/MeshTranslator.h
-        AL/usdmaya/fileio/translators/NurbsCurveTranslator.h
         AL/usdmaya/fileio/translators/TransformTranslator.h
         AL/usdmaya/fileio/translators/TranslatorBase.h
         AL/usdmaya/fileio/translators/TranslatorContext.h
@@ -90,11 +87,8 @@ list(APPEND AL_usdmaya_fileio_translators_headers
 )
 
 list(APPEND AL_usdmaya_fileio_translators_source
-        AL/usdmaya/fileio/translators/CameraTranslator.cpp
         AL/usdmaya/fileio/translators/DagNodeTranslator.cpp
         AL/usdmaya/fileio/translators/DgNodeTranslator.cpp
-        AL/usdmaya/fileio/translators/MeshTranslator.cpp
-        AL/usdmaya/fileio/translators/NurbsCurveTranslator.cpp
         AL/usdmaya/fileio/translators/TransformTranslator.cpp
         AL/usdmaya/fileio/translators/TranslatorBase.cpp
         AL/usdmaya/fileio/translators/TranslatorContext.cpp
@@ -111,6 +105,7 @@ list(APPEND AL_usdmaya_nodes_headers
         AL/usdmaya/nodes/RendererManager.h
         AL/usdmaya/nodes/Transform.h
         AL/usdmaya/nodes/TransformationMatrix.h
+        #AL/usdmaya/nodes/translatorProxyShape.h
 )
 list(APPEND AL_usdmaya_nodes_proxy_headers
         AL/usdmaya/nodes/proxy/DrivenTransforms.h
@@ -128,6 +123,7 @@ list(APPEND AL_usdmaya_nodes_source
         AL/usdmaya/nodes/TransformationMatrix.cpp
         AL/usdmaya/nodes/proxy/DrivenTransforms.cpp
         AL/usdmaya/nodes/proxy/PrimFilter.cpp
+        #AL/usdmaya/nodes/translatorProxyShape.cpp
 )
 
 list(APPEND AL_usdmaya_public_headers
@@ -146,6 +142,7 @@ add_library(${LIBRARY_NAME}
         ${AL_usdmaya_fileio_source}
         ${AL_usdmaya_fileio_translators_source}
         ${AL_usdmaya_nodes_source}
+        #usdTranslator.cpp
 )
 
 target_compile_definitions(${LIBRARY_NAME}

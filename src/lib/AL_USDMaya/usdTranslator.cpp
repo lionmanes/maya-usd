@@ -12,29 +12,18 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+#include "AL/usdmaya/nodes/translatorProxyShape.h"
+#include "usdMaya/primWriterRegistry.h"
 
-#pragma once
+#include "pxr/pxr.h"
 
-#include <string>
 
-#define xstr(a) stringify(a)
-#define stringify(a) #a
+PXR_NAMESPACE_OPEN_SCOPE
 
-#define AL_USDMAYA_VERSION_MAJOR 0
-#define AL_USDMAYA_VERSION_MINOR 29
-#define AL_USDMAYA_VERSION_PATCH 0
-
-#define AL_USDMAYA_VERSION_STR xstr(AL_USDMAYA_VERSION_MAJOR) "." \
-                               xstr(AL_USDMAYA_VERSION_MINOR) "." \
-                               xstr(AL_USDMAYA_VERSION_PATCH)
-
-namespace AL {
-namespace usdmaya {
-
-inline std::string getVersion()
+PXRUSDMAYA_DEFINE_WRITER(AL_usdmaya_ProxyShape, args, context)
 {
-    return AL_USDMAYA_VERSION_STR;
+  return AL_USDMayaTranslatorProxyShape::Create(args, context);
 }
 
-} // namespace AL
-} // namespace usdmaya
+PXR_NAMESPACE_CLOSE_SCOPE
