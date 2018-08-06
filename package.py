@@ -9,7 +9,7 @@ description = 'USD to Maya Bridge'
 
 private_build_requires = [
     'AL_CMakeLib',
-    'cmake-2.8+',
+    'cmake-3',
     'AL_CMakeLibPython-6.0.9+<7',
     'gcc-4.8-3',
     'AL_MTypeId-1.41+',
