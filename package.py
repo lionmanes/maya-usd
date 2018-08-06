@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 name = 'AL_USDMaya'
 
-version = '0.28.5'
+version = '0.29.0'
 
 authors = ['eoinm']
 
@@ -38,7 +38,6 @@ requires = [
 variants = [
     ['CentOS-6.2+<7', 'mayaDevKit-2017.0'],
     ['CentOS-6.2+<7', 'mayaDevKit-2018.0'],
-    ['CentOS-6.2+<7', 'mayaDevKit-2019.b92']
 ]
 
 help = [['API', '$BROWSER http://github.al.com.au/pages/documentation/AL_USDMaya']]
