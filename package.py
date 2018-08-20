@@ -20,8 +20,8 @@ private_build_requires = [
 ]
 
 requires = [
-    'usdBase-0.8.5',
-    'usdImaging-0.8.5',
+    'usdBase-0.18.9',
+    'usdImaging-0.18.9',
     'glew-2.0',
     'googletest',
     'python-2.7+<3',
@@ -48,7 +48,7 @@ def commands():
     prependenv('LD_LIBRARY_PATH', '{root}/lib')
     prependenv('MAYA_PLUG_IN_PATH', '{root}/plugin')
     prependenv('MAYA_SCRIPT_PATH', '{root}/lib:{root}/share/usd/plugins/usdMaya/resources')
-    prependenv('PXR_PLUGINPATH', '{root}/share/usd/plugins')
+    prependenv('PXR_PLUGINPATH', '{root}/lib/usd')
     prependenv('CMAKE_MODULE_PATH', '{root}/cmake')
     prependenv('DOXYGEN_TAGFILES', '{root}/doc/AL_USDMaya.tag=http://github.al.com.au/pages/documentation/AL_USDMaya')
     setenv('AL_USDMAYA_AUTOLOAD_MEL', '{root}/mel')
