@@ -1,5 +1,9 @@
 name = "AL_USDMayaIntegrationTests"
 
+private_build_requires = [
+    'cmake'
+]
+
 def commands():
     prependenv('PATH', '{root}/tests')
 
