@@ -1,0 +1,16 @@
+{
+    "stages" : [
+        {
+            "stageNumber" : 1,
+            "stageName" : "AL_USDMaya",
+            "packagePath" : ".",
+            "rezBuildOptions" : "-i -- -- -j8",
+        },
+        {
+            "stageNumber" : 2,
+            "stageName" : "Integration tests",
+            "packagePath" : "integration_tests",
+            "useRezTest" : true
+        }
+    ]
+}
