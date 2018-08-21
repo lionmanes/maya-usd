@@ -3,10 +3,11 @@
 def config = [:]
 
 config.dependencySuite = 'USD'
+config.rezBuildOptions = '-i -- -- -j8'
 config.cleanup = true
 config.buildOnlyChanged = false
-config.createBuildArtifacts = false
-config.reuseArtifacts = false
+config.createBuildArtifacts = true
+config.reuseArtifacts = true
 config.nodeLabel = 'CentOS-7&&!restricted&&HeavyTests'
 config.globalLogLevel = 'Debug'
 config.useRezTest = false
