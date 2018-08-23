@@ -11,6 +11,8 @@ config.reuseArtifacts = true
 config.nodeLabel = 'CentOS-7&&!restricted&&HeavyTests'
 config.globalLogLevel = 'Debug'
 config.useRezTest = false
+config.hipChatCredentialId = 'HipChat-JenkinsUsdBuilds-Token'
+config.hipChatRoom = 'JenkinsUsdBuilds'
 
 def runConditionals(){
     if(env.BRANCH_NAME == "develop")
@@ -37,6 +39,10 @@ def runConditionals(){
             }
             catch(Exception e) {
                 currentBuild.result = 'UNSTABLE'
+                global.notifyResult(currentBuild.result,
+                                    'HipChat-JenkinsUsdBuilds-Token',
+                                    'JenkinsUsdBuilds',
+                                    '')
                 algit.reportStatusToGitHub(currentBuild.result, 'Docker build error', "Docker_build_and_tests")
                 throw e
             }
@@ -66,6 +72,10 @@ def runConditionals(){
             }
             catch(Exception e) {
                 currentBuild.result = 'UNSTABLE'
+                global.notifyResult(currentBuild.result,
+                                    'HipChat-JenkinsUsdBuilds-Token',
+                                    'JenkinsUsdBuilds',
+                                    '')
                 algit.reportStatusToGitHub(currentBuild.result, 'Windows build error', "Windows_build")
                 throw e
             }
