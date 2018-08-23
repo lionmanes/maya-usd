@@ -48,7 +48,7 @@ def commands():
     prependenv('LD_LIBRARY_PATH', '{root}/lib')
     prependenv('MAYA_PLUG_IN_PATH', '{root}/plugin')
     prependenv('MAYA_SCRIPT_PATH', '{root}/lib:{root}/share/usd/plugins/usdMaya/resources')
-    prependenv('PXR_PLUGINPATH', '{root}/lib/usd')
+    prependenv('PXR_PLUGINPATH_NAME', '{root}/lib/usd')
     prependenv('CMAKE_MODULE_PATH', '{root}/cmake')
     prependenv('DOXYGEN_TAGFILES', '{root}/doc/AL_USDMaya.tag=http://github.al.com.au/pages/documentation/AL_USDMaya')
     setenv('AL_USDMAYA_AUTOLOAD_MEL', '{root}/mel')
