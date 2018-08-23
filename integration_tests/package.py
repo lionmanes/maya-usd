@@ -1,5 +1,7 @@
 name = "AL_USDMayaIntegrationTests"
 
+version = "1.0.0"
+
 private_build_requires = [
     'cmake'
 ]
