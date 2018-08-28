@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 name = 'AL_USDMaya'
 
-version = '0.29.0'
+version = '0.29.1'
 
 authors = ['eoinm']
 
@@ -20,8 +20,8 @@ private_build_requires = [
 ]
 
 requires = [
-    'usdBase-0.8.5',
-    'usdImaging-0.8.5',
+    'usdBase-0.18.9',
+    'usdImaging-0.18.9',
     'glew-2.0',
     'googletest',
     'python-2.7+<3',
@@ -33,6 +33,7 @@ requires = [
     '~AL_USDSchemas-0.39+<1', # For the SdfMetadata only
     'AL_boost-1.55',
     'AL_boost_python-1.55',
+    'usdMaya-0.18.9',
 ]
 
 variants = [
@@ -48,7 +49,7 @@ def commands():
     prependenv('LD_LIBRARY_PATH', '{root}/lib')
     prependenv('MAYA_PLUG_IN_PATH', '{root}/plugin')
     prependenv('MAYA_SCRIPT_PATH', '{root}/lib:{root}/share/usd/plugins/usdMaya/resources')
-    prependenv('PXR_PLUGINPATH', '{root}/share/usd/plugins')
+    prependenv('PXR_PLUGINPATH_NAME', '{root}/lib/usd:{root}/plugin')
     prependenv('CMAKE_MODULE_PATH', '{root}/cmake')
     prependenv('DOXYGEN_TAGFILES', '{root}/doc/AL_USDMaya.tag=http://github.al.com.au/pages/documentation/AL_USDMaya')
     setenv('AL_USDMAYA_AUTOLOAD_MEL', '{root}/mel')

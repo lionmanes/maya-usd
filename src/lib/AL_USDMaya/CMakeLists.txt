@@ -105,7 +105,6 @@ list(APPEND AL_usdmaya_nodes_headers
         AL/usdmaya/nodes/RendererManager.h
         AL/usdmaya/nodes/Transform.h
         AL/usdmaya/nodes/TransformationMatrix.h
-        #AL/usdmaya/nodes/translatorProxyShape.h
 )
 list(APPEND AL_usdmaya_nodes_proxy_headers
         AL/usdmaya/nodes/proxy/DrivenTransforms.h
@@ -123,7 +122,6 @@ list(APPEND AL_usdmaya_nodes_source
         AL/usdmaya/nodes/TransformationMatrix.cpp
         AL/usdmaya/nodes/proxy/DrivenTransforms.cpp
         AL/usdmaya/nodes/proxy/PrimFilter.cpp
-        #AL/usdmaya/nodes/translatorProxyShape.cpp
 )
 
 list(APPEND AL_usdmaya_public_headers
@@ -142,7 +140,6 @@ add_library(${LIBRARY_NAME}
         ${AL_usdmaya_fileio_source}
         ${AL_usdmaya_fileio_translators_source}
         ${AL_usdmaya_nodes_source}
-        #usdTranslator.cpp
 )
 
 target_compile_definitions(${LIBRARY_NAME}
@@ -247,11 +244,11 @@ target_link_libraries(${PYTHON_LIBRARY_NAME}
     ${LIBRARY_NAME}
 )
 
-set(libFile ${CMAKE_SHARED_LIBRARY_PREFIX}${libName}${CMAKE_SHARED_LIBRARY_SUFFIX})
+set(libFile ${CMAKE_SHARED_LIBRARY_PREFIX}${LIBRARY_NAME}${CMAKE_SHARED_LIBRARY_SUFFIX})
 set(PLUG_INFO_RESOURCE_PATH "resources")
 set(PLUG_INFO_ROOT "..")
 set(PLUG_INFO_PLUGIN_NAME "pxr.${LIBRARY_NAME}")
-set(PLUG_INFO_LIBRARY_PATH "../../../../lib/${libFile}")
+set(PLUG_INFO_LIBRARY_PATH "../../${libFile}")
 configure_file(
     plugInfo.json
     ${CMAKE_CURRENT_BINARY_DIR}/plugInfo.json
@@ -278,10 +275,10 @@ install(CODE
 )
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/plugInfo.json
-    DESTINATION ${CMAKE_INSTALL_PREFIX}/share/usd/plugins/${LIBRARY_NAME}/resources
+    DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/usd/${LIBRARY_NAME}/resources
 )
 install(CODE
-    "file(WRITE \"${CMAKE_INSTALL_PREFIX}/share/usd/plugins/plugInfo.json\" \"{\n    \\\"Includes\\\": [ \\\"*/resources/\\\" ]\n}\")"
+    "file(WRITE \"${CMAKE_INSTALL_PREFIX}/lib/usd/plugInfo.json\" \"{\n    \\\"Includes\\\": [ \\\"*/resources/\\\" ]\n}\")"
 )
 
 # install public headers

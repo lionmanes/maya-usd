@@ -147,6 +147,14 @@ add_subdirectory(${SUBTREE_DIRECTORY}/usdmayautils)
 add_subdirectory(${SUBTREE_DIRECTORY}/lib)
 add_subdirectory(${SUBTREE_DIRECTORY}/plugin)
 add_subdirectory(${SUBTREE_DIRECTORY}/schemas)
+
+# pxrUsd translator uses this
+set(PROJECT_SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
+# Build usdMaya pxr translator
+set(USD_MAYA_ROOT ${usdMaya_ROOT})
+set(USD_ROOT ${usdBase_ROOT})
+find_package(USD)
+
 add_subdirectory(${SUBTREE_DIRECTORY}/translators)
 
 # The opensource build has our these custom SdfMetadata in the schema plugInfo.json:
