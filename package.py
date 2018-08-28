@@ -33,6 +33,7 @@ requires = [
     '~AL_USDSchemas-0.39+<1', # For the SdfMetadata only
     'AL_boost-1.55',
     'AL_boost_python-1.55',
+    'usdMaya-0.18.9',
 ]
 
 variants = [
