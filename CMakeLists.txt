@@ -124,9 +124,6 @@ set(TRANSLATORS_PACKAGE AL_USDMayaTranslators_opensource)
 # code) because AL_Schemas is already used by our internal schemas.
 set(SCHEMAS_TOKENS_PREFIX AL_USDMayaSchemas) 
 
-# Compare generated code
-set(VALIDATE_GENERATED_SCHEMAS "Generate schemas code and compare." ON)
-
 set(AL_USDMAYA_LOCATION_NAME
     "AL_USDMAYA_LOCATION"
     CACHE
