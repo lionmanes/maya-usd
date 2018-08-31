@@ -1,5 +1,3 @@
-@Library('AL@fabricem_USD_suite')
-
 def config = [:]
 
 config.dependencySuite = 'USD'
