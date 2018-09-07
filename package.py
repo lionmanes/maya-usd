@@ -7,25 +7,32 @@ authors = ['eoinm']
 
 description = 'USD to Maya Bridge'
 
-private_build_requires = [
-    'AL_CMakeLib',
-    'cmake-3',
-    'AL_CMakeLibPython-6.0.9+<7',
-    'gcc-4.8-3',
-    'AL_MTypeId-1.41+',
-    'gdb-7.10',
-    'doxygen-1',
-    'AL_USDSchemas-0.37.1+<1', # For the SdfMetadata only
-    'AL_maya_startup-1+'      # To help cmake find "maya" executable
-]
-
+@late()
+def private_build_requires():
+    def _checkPackageRequirement(req):
+        for pkgReq in this.requires:
+            if str(pkgReq).startswith(req):
+                return True
+        return False
+    return [
+        'AL_CMakeLib',
+        'cmake-3',
+        'AL_CMakeLibPython-6.0.9+<7',
+        'gcc-6.3.1' if _checkPackageRequirement('mayaDevKit-2019.0')
+                    else 'gcc-4.8.3',
+        'AL_MTypeId-1.41+',
+        'gdb',
+        'doxygen-1',
+        'AL_USDSchemas-0.37.1+<1', # For the SdfMetadata only
+        'AL_maya_startup-1+', # To get mayapy and make tests work
+    ]
+    
 requires = [
     'usdBase-0.18.9',
     'usdImaging-0.18.9',
     'glew-2.0',
     'googletest',
     'python-2.7+<3',
-    'doubleConversion-1',
     'stdlib-4.8.3+',
     'zlib-1.2',
     'cppunit-1.12+<2',
@@ -39,6 +46,7 @@ requires = [
 variants = [
     ['CentOS-6.9+<8', 'mayaDevKit-2017.0'],
     ['CentOS-6.9+<8', 'mayaDevKit-2018.0'],
+    ['CentOS-6.9+<8', 'mayaDevKit-2019.0.b95'],
 ]
 
 help = [['API', '$BROWSER http://github.al.com.au/pages/documentation/AL_USDMaya']]
