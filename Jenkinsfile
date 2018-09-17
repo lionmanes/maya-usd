@@ -1,6 +1,5 @@
 def config = [:]
 
-config.rezBuildOptions = '-i -- -- -j8'
 config.cleanup = true
 config.buildOnlyChanged = false
 config.createBuildArtifacts = true
