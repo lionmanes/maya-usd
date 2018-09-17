@@ -33,7 +33,6 @@ requires = [
     'glew-2.0',
     'googletest',
     'python-2.7+<3',
-    'stdlib-4.8.3+',
     'zlib-1.2',
     'cppunit-1.12+<2',
     'AL_CMakeLibGitHub-0.1.0+<1',
@@ -44,9 +43,9 @@ requires = [
 ]
 
 variants = [
-    ['CentOS-6.9+<8', 'mayaDevKit-2017.0'],
-    ['CentOS-6.9+<8', 'mayaDevKit-2018.0'],
-    ['CentOS-6.9+<8', 'mayaDevKit-2019.0.b95'],
+    ['CentOS-6.9+<8', 'mayaDevKit-2017.0', 'stdlib-4.8.3+'],
+    ['CentOS-6.9+<8', 'mayaDevKit-2018.0', 'stdlib-4.8.3+'],
+    ['CentOS-6.9+<8', 'mayaDevKit-2019.0.b95', 'stdlib-6.3.1+'],
 ]
 
 help = [['API', '$BROWSER http://github.al.com.au/pages/documentation/AL_USDMaya']]
