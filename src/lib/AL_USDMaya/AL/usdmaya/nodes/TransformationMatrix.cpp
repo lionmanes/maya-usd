@@ -16,10 +16,12 @@
 #include "AL/maya/utils/CommandGuiHelper.h"
 #include "AL/usdmaya/TypeIDs.h"
 #include "AL/usdmaya/DebugCodes.h"
+#include "AL/usdmaya/nodes/ProxyShape.h"
 #include "AL/usdmaya/nodes/Transform.h"
 #include "AL/usdmaya/nodes/TransformationMatrix.h"
 
 #include "maya/MFileIO.h"
+#include "maya/MViewport2Renderer.h"
 #include "AL/usdmaya/utils/AttributeType.h"
 #include "AL/usdmaya/utils/Utils.h"
 
@@ -1210,7 +1212,7 @@ MStatus TransformationMatrix::translateTo(const MVector& vector, MSpace::Space s
       // helping the branch predictor
     }
     else
-    if(!pushPrimToMatrix())
+    if(!pushPrimToMatrix() && vector != MVector(0.0, 0.0, 0.0))
     {
       insertTranslateOp();
     }
@@ -1255,7 +1257,7 @@ MStatus TransformationMatrix::scaleTo(const MVector& scale, MSpace::Space space)
       // helping the branch predictor
     }
     else
-    if(!pushPrimToMatrix())
+    if(!pushPrimToMatrix() && scale != MVector(1.0, 1.0, 1.0))
     {
       // rare case: add a new scale op into the prim
       insertScaleOp();
@@ -1290,7 +1292,7 @@ MStatus TransformationMatrix::shearTo(const MVector& shear, MSpace::Space space)
   MStatus status = MPxTransformationMatrix::shearTo(shear, space);
   if(status)
   {
-    m_scaleTweak = MPxTransformationMatrix::shearValue - m_shearFromUsd;
+    m_shearTweak = MPxTransformationMatrix::shearValue - m_shearFromUsd;
   }
   if(pushToPrimAvailable())
   {
@@ -1299,7 +1301,7 @@ MStatus TransformationMatrix::shearTo(const MVector& shear, MSpace::Space space)
       // helping the branch predictor
     }
     else
-    if(!pushPrimToMatrix())
+    if(!pushPrimToMatrix() && shear != MVector(0.0, 0.0, 0.0))
     {
       // rare case: add a new scale op into the prim
       insertShearOp();
@@ -1349,7 +1351,7 @@ MStatus TransformationMatrix::setScalePivot(const MPoint& sp, MSpace::Space spac
     {
     }
     else
-    if(!pushPrimToMatrix())
+    if(!pushPrimToMatrix() && sp != MPoint(0.0, 0.0, 0.0, 1.0))
     {
       insertScalePivotOp();
     }
@@ -1389,7 +1391,7 @@ MStatus TransformationMatrix::setScalePivotTranslation(const MVector& sp, MSpace
     {
     }
     else
-    if(!pushPrimToMatrix())
+    if(!pushPrimToMatrix() && sp != MVector(0.0, 0.0, 0.0))
     {
       insertScalePivotTranslationOp();
     }
@@ -1439,7 +1441,7 @@ MStatus TransformationMatrix::setRotatePivot(const MPoint& pivot, MSpace::Space 
     {
     }
     else
-    if(!pushPrimToMatrix())
+    if(!pushPrimToMatrix() && pivot != MPoint(0.0, 0.0, 0.0, 1.0))
     {
       insertRotatePivotOp();
     }
@@ -1479,7 +1481,7 @@ MStatus TransformationMatrix::setRotatePivotTranslation(const MVector &vector, M
     {
     }
     else
-    if(!pushPrimToMatrix())
+    if(!pushPrimToMatrix() && vector != MPoint(0.0, 0.0, 0.0, 1.0))
     {
       insertRotatePivotTranslationOp();
     }
@@ -1556,7 +1558,7 @@ MStatus TransformationMatrix::rotateTo(const MQuaternion &q, MSpace::Space space
     {
     }
     else
-    if(!pushPrimToMatrix())
+    if(!pushPrimToMatrix() && q != MQuaternion(0.0, 0.0, 0.0, 1.0))
     {
       insertRotateOp();
     }
@@ -1584,7 +1586,7 @@ MStatus TransformationMatrix::rotateTo(const MEulerRotation &e, MSpace::Space sp
     {
     }
     else
-    if(!pushPrimToMatrix())
+    if(!pushPrimToMatrix() && e != MEulerRotation(0.0, 0.0, 0.0, MEulerRotation::kXYZ))
     {
       insertRotateOp();
     }
@@ -1633,7 +1635,7 @@ MStatus TransformationMatrix::setRotateOrientation(const MQuaternion &q, MSpace:
     {
     }
     else
-    if(!pushPrimToMatrix())
+    if(!pushPrimToMatrix() && q != MQuaternion(0.0, 0.0, 0.0, 1.0))
     {
       insertRotateAxesOp();
     }
@@ -1657,7 +1659,7 @@ MStatus TransformationMatrix::setRotateOrientation(const MEulerRotation& euler, 
     {
     }
     else
-    if(!pushPrimToMatrix())
+    if(!pushPrimToMatrix() && euler != MEulerRotation(0.0, 0.0, 0.0, MEulerRotation::kXYZ))
     {
       insertRotateAxesOp();
     }
@@ -1673,6 +1675,10 @@ void TransformationMatrix::pushToPrim()
   if(!m_prim)
     return;
   TF_DEBUG(ALUSDMAYA_EVALUATION).Msg("TransformationMatrix::pushToPrim\n");
+
+  GfMatrix4d oldMatrix;
+  bool oldResetsStack;
+  m_xform.GetLocalTransformation(&oldMatrix, &oldResetsStack, getTimeCode());
 
   auto opIt = m_orderedOps.begin();
   for(std::vector<UsdGeomXformOp>::iterator it = m_xformops.begin(), e = m_xformops.end(); it != e; ++it, ++opIt)
@@ -1797,6 +1803,37 @@ void TransformationMatrix::pushToPrim()
       break;
     }
   }
+
+
+  // Anytime we update the xform, we need to tell the proxy shape that it
+  // needs to redraw itself
+  if (!m_transformNode.isNull())
+  {
+    MStatus status;
+    MFnDependencyNode mfn(m_transformNode, &status);
+    if (status && mfn.typeId() == Transform::kTypeId)
+    {
+      auto xform = static_cast<Transform*>(mfn.userNode());
+      MObject proxyObj = xform->getProxyShape();
+      if (!proxyObj.isNull())
+      {
+        MFnDependencyNode proxyMfn(proxyObj);
+        if (proxyMfn.typeId() == ProxyShape::kTypeId)
+        {
+          // We check that the matrix actually HAS changed, as this function will be
+          // called when, ie, pushToPrim is toggled, which often happens on node
+          // creation, when nothing has actually changed
+          GfMatrix4d newMatrix;
+          bool newResetsStack;
+          m_xform.GetLocalTransformation(&newMatrix, &newResetsStack, getTimeCode());
+          if (newMatrix != oldMatrix || newResetsStack != oldResetsStack)
+          {
+            MHWRender::MRenderer::setGeometryDrawDirty(proxyObj);
+          }
+        }
+      }
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1862,33 +1899,38 @@ void TransformationMatrix::enableReadAnimatedValues(bool enabled)
   // of nothing. This will call my code that will magically construct the transform ops in the right order.
   if(enabled)
   {
+    const MVector nullVec(0, 0, 0);
+    const MVector oneVec(1.0, 1.0, 1.0);
+    const MPoint nullPoint(0, 0, 0);
+    const MQuaternion nullQuat(0, 0, 0, 1.0);
+
     if(!pushPrimToMatrix())
     {
-      if(primHasTranslation() || translation() != MVector::zero)
-        translateBy(MVector::zero);
+      if(primHasTranslation() || translation() != nullVec)
+        translateBy(nullVec);
 
-      if(primHasScale() || scale() != MVector::one)
-        scaleBy(MVector::one);
+      if(primHasScale() || scale() != oneVec)
+        scaleBy(oneVec);
 
-      if(primHasShear() || shear() != MVector::zero)
-        shearBy(MVector::zero);
+      if(primHasShear() || shear() != nullVec)
+        shearBy(nullVec);
 
-      if(primHasScalePivot() || scalePivot() != MPoint::origin)
+      if(primHasScalePivot() || scalePivot() != nullPoint)
         setScalePivot(scalePivot(), MSpace::kTransform, false);
 
-      if(primHasScalePivot() || scalePivot() != MPoint::origin)
+      if(primHasScalePivotTranslate() || scalePivotTranslation() != nullVec)
         setScalePivotTranslation(scalePivotTranslation(), MSpace::kTransform);
 
-      if(primHasRotatePivot() || rotatePivot() != MPoint::origin)
+      if(primHasRotatePivot() || rotatePivot() != nullPoint)
         setRotatePivot(rotatePivot(), MSpace::kTransform, false);
 
-      if(primHasRotatePivotTranslate() || rotatePivotTranslation() != MVector::zero)
+      if(primHasRotatePivotTranslate() || rotatePivotTranslation() != nullVec)
         setRotatePivotTranslation(rotatePivotTranslation(), MSpace::kTransform);
 
-      if(primHasRotation() || rotation() != MQuaternion::identity)
-        rotateBy(MQuaternion::identity);
+      if(primHasRotation() || rotation() != nullQuat)
+        rotateBy(nullQuat);
 
-      if(primHasRotateAxes() || rotateOrientation() != MQuaternion::identity)
+      if(primHasRotateAxes() || rotateOrientation() != nullQuat)
         setRotateOrientation(rotateOrientation(), MSpace::kTransform, false);
     }
     else
@@ -1926,33 +1968,38 @@ void TransformationMatrix::enablePushToPrim(bool enabled)
   // of nothing. This will call my code that will magically construct the transform ops in the right order.
   if(enabled && getTimeCode() == UsdTimeCode::Default())
   {
+    const MVector nullVec(0, 0, 0);
+    const MVector oneVec(1.0, 1.0, 1.0);
+    const MPoint nullPoint(0, 0, 0);
+    const MQuaternion nullQuat(0, 0, 0, 1.0);
+
     if(!pushPrimToMatrix())
     {
-      if(primHasTranslation() || translation() != MVector::zero)
-        translateBy(MVector::zero);
+      if(primHasTranslation() || translation() != nullVec)
+        translateBy(nullVec);
 
-      if(primHasScale() || scale() != MVector::one)
-        scaleBy(MVector::one);
+      if(primHasScale() || scale() != oneVec)
+        scaleBy(oneVec);
 
-      if(primHasShear() || shear() != MVector::zero)
-        shearBy(MVector::zero);
+      if(primHasShear() || shear() != nullVec)
+        shearBy(nullVec);
 
-      if(primHasScalePivot() || scalePivot() != MPoint::origin)
+      if(primHasScalePivot() || scalePivot() != nullPoint)
         setScalePivot(scalePivot(), MSpace::kTransform, false);
 
-      if(primHasScalePivotTranslate() || scalePivotTranslation() != MPoint::origin)
+      if(primHasScalePivotTranslate() || scalePivotTranslation() != nullVec)
         setScalePivotTranslation(scalePivotTranslation(), MSpace::kTransform);
 
-      if(primHasRotatePivot() || rotatePivot() != MPoint::origin)
+      if(primHasRotatePivot() || rotatePivot() != nullPoint)
         setRotatePivot(rotatePivot(), MSpace::kTransform, false);
 
-      if(primHasRotatePivotTranslate() || rotatePivotTranslation() != MVector::zero)
+      if(primHasRotatePivotTranslate() || rotatePivotTranslation() != nullVec)
         setRotatePivotTranslation(rotatePivotTranslation(), MSpace::kTransform);
 
-      if(primHasRotation() || rotation() != MQuaternion::identity)
-        rotateBy(MQuaternion::identity);
+      if(primHasRotation() || rotation() != nullQuat)
+        rotateBy(nullQuat);
 
-      if(primHasRotateAxes() || rotateOrientation() != MQuaternion::identity)
+      if(primHasRotateAxes() || rotateOrientation() != nullQuat)
         setRotateOrientation(rotateOrientation(), MSpace::kTransform, false);
     }
     else
