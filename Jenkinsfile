@@ -1,9 +1,5 @@
-@Library('AL@fabricem_USD_suite')
-
 def config = [:]
 
-config.dependencySuite = 'USD'
-config.rezBuildOptions = '-i -- -- -j8'
 config.cleanup = true
 config.buildOnlyChanged = false
 config.createBuildArtifacts = true

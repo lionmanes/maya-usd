@@ -99,6 +99,9 @@ set(CMAKE_CXX_FLAGS
     -Werror
     "${_PXR_CXX_WARNING_FLAGS}"
 )
+if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 6)
+    list(APPEND CMAKE_CXX_FLAGS -D_GLIBCXX_USE_CXX11_ABI=0)
+endif()
 string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
 option(SKIP_USDMAYA_TESTS "Skip test building" OFF)
@@ -124,9 +127,6 @@ set(TRANSLATORS_PACKAGE AL_USDMayaTranslators_opensource)
 # code) because AL_Schemas is already used by our internal schemas.
 set(SCHEMAS_TOKENS_PREFIX AL_USDMayaSchemas) 
 
-# Compare generated code
-set(VALIDATE_GENERATED_SCHEMAS "Generate schemas code and compare." ON)
-
 set(AL_USDMAYA_LOCATION_NAME
     "AL_USDMAYA_LOCATION"
     CACHE
@@ -140,14 +140,6 @@ set(USDUTILS_INCLUDE_LOCATION ${CMAKE_CURRENT_LIST_DIR}/${SUBTREE_DIRECTORY}/usd
 set(MAYAUTILS_INCLUDE_LOCATION ${CMAKE_CURRENT_LIST_DIR}/${SUBTREE_DIRECTORY}/mayautils)
 set(USDMAYAUTILS_INCLUDE_LOCATION ${CMAKE_CURRENT_LIST_DIR}/${SUBTREE_DIRECTORY}/usdmayautils)
 
-add_subdirectory(${SUBTREE_DIRECTORY}/utils)
-add_subdirectory(${SUBTREE_DIRECTORY}/usdutils)
-add_subdirectory(${SUBTREE_DIRECTORY}/mayautils)
-add_subdirectory(${SUBTREE_DIRECTORY}/usdmayautils)
-add_subdirectory(${SUBTREE_DIRECTORY}/lib)
-add_subdirectory(${SUBTREE_DIRECTORY}/plugin)
-add_subdirectory(${SUBTREE_DIRECTORY}/schemas)
-
 # pxrUsd translator uses this
 set(PROJECT_SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
 # Build usdMaya pxr translator
@@ -155,6 +147,13 @@ set(USD_MAYA_ROOT ${usdMaya_ROOT})
 set(USD_ROOT ${usdBase_ROOT})
 find_package(USD)
 
+add_subdirectory(${SUBTREE_DIRECTORY}/utils)
+add_subdirectory(${SUBTREE_DIRECTORY}/usdutils)
+add_subdirectory(${SUBTREE_DIRECTORY}/mayautils)
+add_subdirectory(${SUBTREE_DIRECTORY}/usdmayautils)
+add_subdirectory(${SUBTREE_DIRECTORY}/lib)
+add_subdirectory(${SUBTREE_DIRECTORY}/plugin)
+add_subdirectory(${SUBTREE_DIRECTORY}/schemas)
 add_subdirectory(${SUBTREE_DIRECTORY}/translators)
 
 # The opensource build has our these custom SdfMetadata in the schema plugInfo.json:
