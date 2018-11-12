@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 name = 'AL_USDMaya'
 
-version = '0.29.4'
+version = '0.29.4.1'
 
 authors = ['eoinm']
 
@@ -43,8 +43,8 @@ requires = [
 ]
 
 variants = [
-    ['CentOS-6.9+<8', 'mayaDevKit-2017.0', 'stdlib-4.8.3+'],
-    ['CentOS-6.9+<8', 'mayaDevKit-2018.0', 'stdlib-4.8.3+'],
+    ['CentOS-6.9+<8', 'mayaDevKit-2017.0', 'stdlib-4.8.3+<6.3.1'],
+    ['CentOS-6.9+<8', 'mayaDevKit-2018.0', 'stdlib-4.8.3+<6.3.1'],
     ['CentOS-6.9+<8', 'mayaDevKit-2019.0', 'stdlib-6.3.1+'],
 ]
 
