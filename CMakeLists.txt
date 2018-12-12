@@ -128,6 +128,7 @@ set(EVENTS_INCLUDE_LOCATION ${CMAKE_CURRENT_LIST_DIR}/${SUBTREE_DIRECTORY}/utils
 set(USDUTILS_INCLUDE_LOCATION ${CMAKE_CURRENT_LIST_DIR}/${SUBTREE_DIRECTORY}/usdutils)
 set(MAYAUTILS_INCLUDE_LOCATION ${CMAKE_CURRENT_LIST_DIR}/${SUBTREE_DIRECTORY}/mayautils)
 set(USDMAYAUTILS_INCLUDE_LOCATION ${CMAKE_CURRENT_LIST_DIR}/${SUBTREE_DIRECTORY}/usdmayautils)
+set(USDMAYATEST_INCLUDE_LOCATION ${CMAKE_CURRENT_LIST_DIR}/${SUBTREE_DIRECTORY}/usdmayatest)
 
 # pxrUsd translator uses this
 set(PROJECT_SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
@@ -140,6 +141,7 @@ add_subdirectory(${SUBTREE_DIRECTORY}/utils)
 add_subdirectory(${SUBTREE_DIRECTORY}/usdutils)
 add_subdirectory(${SUBTREE_DIRECTORY}/mayautils)
 add_subdirectory(${SUBTREE_DIRECTORY}/usdmayautils)
+add_subdirectory(${SUBTREE_DIRECTORY}/usdmayatest)
 add_subdirectory(${SUBTREE_DIRECTORY}/lib)
 add_subdirectory(${SUBTREE_DIRECTORY}/plugin)
 add_subdirectory(${SUBTREE_DIRECTORY}/schemas)
