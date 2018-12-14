@@ -251,4 +251,4 @@ else()
     )
 endif()
 
-install(DIRECTORY mel DESTINATION ${CMAKE_INSTALL_PREFIX})
+rez_install_files(mel/${MAYA_MAJOR_VERSION}/al_usdmaya_autoload.mel RELATIVE mel/${MAYA_MAJOR_VERSION} DESTINATION mel)
