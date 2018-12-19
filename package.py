@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 name = 'AL_USDMaya'
 
-version = '0.29.8'
+version = '0.29.9'
 
 authors = ['eoinm']
 
@@ -23,7 +23,7 @@ def private_build_requires():
         'AL_MTypeId-1.41+',
         'gdb',
         'doxygen-1',
-        'AL_USDSchemas-0.37.1+<1', # For the SdfMetadata only
+        'AL_USDCommonSchemas-0.2.0+<1', # For the SdfMetadata only
         'AL_maya_startup-1+', # To get mayapy and make tests work
     ]
 
@@ -36,10 +36,11 @@ requires = [
     'zlib-1.2',
     'cppunit-1.12+<2',
     'AL_CMakeLibGitHub-0.1.0+<1',
-    '~AL_USDSchemas-0.39+<1', # For the SdfMetadata only
+    '~AL_USDCommonSchemas-0.2.0+<1', # For the SdfMetadata only
     'AL_boost-1.55',
     'AL_boost_python-1.55',
     'usdMaya-0.18.11',
+    '!AL_USDSchemas'
 ]
 
 variants = [

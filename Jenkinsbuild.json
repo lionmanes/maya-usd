@@ -6,12 +6,6 @@
             "packagePath" : ".",
             "rezBuildOptions" : "--variants 0 1 -i -- -- -j8",
             "rezTestOptions" : "--variants 1 -- --"
-        },
-        {
-            "stageNumber" : 2,
-            "stageName" : "Integration tests",
-            "packagePath" : "integration_tests",
-            "useRezTest" : true
         }
     ]
 }
