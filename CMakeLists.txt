@@ -113,19 +113,8 @@ endif()
 # Path to the input schemas templates
 set(USD_SCHEMA_PATH ${PXR_CMAKE_DIR}/schemas/usd/schema.usda)
 
-# An intermediate python package is added (compared to the opensource cmake config)
-# to be able to merge internal and opensource in the same AL.usd.schemas python package.
-set(SCHEMAS_PYTHON_MODULE AL.usd.schemas.opensource)
-set(SCHEMAS_PYTHON_PATH AL/usd/schemas/opensource)
-
 # This will drive the schemas library and binding library names
-set(SCHEMAS_PACKAGE AL_USDMayaSchemas)
-set(SCHEMAS_PYTHON_PACKAGE _AL_USDMayaSchemas)
 set(TRANSLATORS_PACKAGE AL_USDMayaTranslators_opensource)
-
-# Use another token prefix (defined in the usd layer used to generate schemas source
-# code) because AL_Schemas is already used by our internal schemas.
-set(SCHEMAS_TOKENS_PREFIX AL_USDMayaSchemas) 
 
 set(AL_USDMAYA_LOCATION_NAME
     "AL_USDMAYA_LOCATION"
@@ -160,10 +149,10 @@ add_subdirectory(${SUBTREE_DIRECTORY}/translators)
 #   - al_usdmaya_transformType
 #   - al_usdmaya_importAsNative
 #   - al_usdmaya_excludeFromProxyShape
-# Internally, these metadatas have been kept in AL_USDSchemas for the cases we want to access them
+# Internally, these metadatas have been kept in AL_USDCommonSchemas for the cases we want to access them
 # without depending on AL_USDMaya therefore we're going to filter these metadatas out.
 set(to_filter
-    ${CMAKE_CURRENT_BINARY_DIR}/src/schemas/AL/usd/schemas/plugInfo.json
+    ${CMAKE_CURRENT_BINARY_DIR}/src/schemas/AL/usd/schemas/maya/plugInfo.json
 )
 
 message(
@@ -185,15 +174,6 @@ if(filter_pluginfo)
         "An error occured while filtering ${to_filter}"
     )
 endif()
-
-# Overwrite AL/usd/schemas/__init__.py to handle merging with our internal AL_USDSchemas.
-file(REMOVE ${CMAKE_BINARY_DIR}/AL/usd/schemas/__init__.py)
-file(GENERATE
-    OUTPUT
-    ${CMAKE_BINARY_DIR}/AL/usd/schemas/__init__.py
-    INPUT
-    ${CMAKE_CURRENT_SOURCE_DIR}/schemas/__init__.py
-    )
 
 IF ($ENV{REZ_BUILD_VARIANT_NUMBER} STREQUAL "0")
     set(doxygen_dirs
