@@ -84,6 +84,8 @@ list(APPEND AL_usdmaya_fileio_translators_headers
         AL/usdmaya/fileio/translators/TranslatorContext.h
         AL/usdmaya/fileio/translators/TranslatorTestPlugin.h
         AL/usdmaya/fileio/translators/TranslatorTestType.h
+        AL/usdmaya/fileio/translators/ExtraDataPlugin.h
+        AL/usdmaya/fileio/translators/TestExtraDataPlugin.h
 )
 
 list(APPEND AL_usdmaya_fileio_translators_source
@@ -94,6 +96,8 @@ list(APPEND AL_usdmaya_fileio_translators_source
         AL/usdmaya/fileio/translators/TranslatorContext.cpp
         AL/usdmaya/fileio/translators/TranslatorTestPlugin.cpp
         AL/usdmaya/fileio/translators/TranslatorTestType.cpp
+        AL/usdmaya/fileio/translators/ExtraDataPlugin.cpp
+        AL/usdmaya/fileio/translators/TestExtraDataPlugin.cpp
 )
 
 list(APPEND AL_usdmaya_nodes_headers
@@ -192,7 +196,6 @@ target_link_libraries(${LIBRARY_NAME}
     ${Boost_LINK_LIBRARIES}
     ${MAYA_Foundation_LIBRARY}
     ${MAYA_OpenMayaAnim_LIBRARY}
-    ${MAYA_OpenMayaFX_LIBRARY}
     ${MAYA_OpenMayaUI_LIBRARY}
     ${MAYA_OpenMaya_LIBRARY}
     ${MAYA_OpenMayaRender_LIBRARY}

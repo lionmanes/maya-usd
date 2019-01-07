@@ -563,6 +563,18 @@ void Export::copyTransformParams(UsdPrim prim, MFnTransform& fnTransform)
   {
     translators::DgNodeTranslator::copyDynamicAttributes(fnTransform.object(), prim);
   }
+
+  // handle the special case of exporting 
+  {
+    auto dataPlugins = m_translatorManufacture.getExtraDataPlugins(fnTransform.object());
+    for(auto dataPlugin : dataPlugins)
+    {
+      if(dataPlugin->getFnType() == MFn::kTransform)
+      {
+        dataPlugin->exportObject(prim, fnTransform.object(), ExporterParams());
+      }
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -670,6 +682,12 @@ void Export::exportShapesCommonProc(MDagPath shapePath, MFnTransform& fnTransfor
     }
 
     transformPrim = translatorPtr->exportObject(m_impl->stage(), shapePath, shapeUsdPath, m_params);
+    auto dataPlugins = m_translatorManufacture.getExtraDataPlugins(shapePath.node());
+    for(auto dataPlugin : dataPlugins)
+    {
+      dataPlugin->exportObject(transformPrim, shapePath.node(), m_params);
+    }
+
     copyTransform = (refType == kNoReference);
   }
   else // no translator register for this Maya type

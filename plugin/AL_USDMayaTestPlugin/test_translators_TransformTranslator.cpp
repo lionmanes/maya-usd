@@ -30,6 +30,10 @@ using AL::usdmaya::fileio::ImporterParams;
 using AL::usdmaya::fileio::translators::DagNodeTranslator;
 using AL::usdmaya::fileio::translators::TransformTranslator;
 using AL::usdmaya::fileio::AnimationTranslator;
+using AL::maya::test::randomNode;
+using AL::maya::test::compareNodes;
+using AL::maya::test::randomAnimatedNode;
+
 
 //----------------------------------------------------------------------------------------------------------------------
 /// \brief  Test some of the functionality of the alUsdNodeHelper.

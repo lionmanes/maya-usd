@@ -101,9 +101,13 @@ set(EVENTS_INCLUDE_LOCATION ${CMAKE_CURRENT_LIST_DIR}/utils)
 set(USDUTILS_INCLUDE_LOCATION ${CMAKE_CURRENT_LIST_DIR}/usdutils)
 set(MAYAUTILS_INCLUDE_LOCATION ${CMAKE_CURRENT_LIST_DIR}/mayautils)
 set(USDMAYAUTILS_INCLUDE_LOCATION ${CMAKE_CURRENT_LIST_DIR}/usdmayautils)
+set(MAYATEST_INCLUDE_LOCATION ${CMAKE_CURRENT_LIST_DIR}/mayatest)
 
 add_subdirectory(utils)
 add_subdirectory(usdutils)
+if(NOT SKIP_USDMAYA_TESTS)
+	add_subdirectory(mayatest)
+endif()	
 add_subdirectory(mayautils)
 add_subdirectory(usdmayautils)
 

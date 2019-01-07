@@ -128,6 +128,20 @@ void Import::doImport()
           }
           TF_DEBUG(ALUSDMAYA_COMMANDS).Msg("Import::doImport::createParentTransform prim=%s transformType=%s\n", prim.GetPath().GetText(), transformType);
           MObject obj = factory.createNode(prim, transformType, parent);
+
+          // handle the special case of importing custom transform params
+          {
+            auto dataPlugins = manufacture.getExtraDataPlugins(obj);
+            for(auto dataPlugin : dataPlugins)
+            {
+              // special case
+              if(dataPlugin->getFnType() == MFn::kTransform)
+              {
+                dataPlugin->import(prim, parent);
+              }
+            }
+          }
+          
           it.append(obj);
           return obj;
         };
