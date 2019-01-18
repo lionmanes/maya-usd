@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 name = 'AL_USDMaya'
 
-version = '0.30.3'
+version = '0.30.4'
 
 authors = ['eoinm']
 
@@ -31,7 +31,7 @@ requires = [
     'usdBase-0.18.11',
     'usdImaging-0.18.11',
     'glew-2.0',
-    'googletest',
+    'googletest-1.8',
     'python-2.7+<3',
     'zlib-1.2',
     'cppunit-1.12+<2',
