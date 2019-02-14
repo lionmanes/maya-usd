@@ -15,8 +15,7 @@ configure_file(Version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/lib/AL_USDMaya/AL/us
 
 set(BOOST_ROOT ${boost_ROOT})
 
-add_definitions("-DUSE_AL_DEFAULT=1")
-add_definitions("-DAL_MAYA_ENABLE_SIMD=0")
+add_definitions("-DAL_MAYA_ENABLE_SIMD=1")
 
 if(${MAYA_MAJOR_VERSION} GREATER 2018)
     set(UFE_VERSION 1.0.0)
