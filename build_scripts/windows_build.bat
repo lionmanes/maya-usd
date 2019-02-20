@@ -1,6 +1,6 @@
 if not exist T: (net use T: \\al.com.au\dfs & cd /D T:\depts\rnd\dev & C:)
 @call "%VS140COMNTOOLS%VsDevCmd.bat"
-set USD_VERSION=0.18.11
+set USD_VERSION=0.19.1
 set USD_ROOT=T:\depts\rnd\dev\fabricem\Windows\USD\%USD_VERSION%
 set USD_DEPENDENCIES_ROOT=T:\depts\rnd\dev\fabricem\Windows\USD_dependencies
 set PYTHONPATH=%USD_ROOT%\lib\python;%PYTHONPATH%

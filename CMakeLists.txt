@@ -1,12 +1,10 @@
-#This is a modified version of the cmake file from usd/sdk/maya/CMakeLists.txt 
+#This is a modified version of the cmake file from usd/sdk/maya/CMakeLists.txt
 cmake_minimum_required(VERSION 2.8.8)
 
 SET(SUBTREE_DIRECTORY "src")
 
 include ( RezBuild )
 rez_find_packages ( PREFIX pkgs AUTO )
-
-include(pxrConfig)
 
 # Bake version
 string(REPLACE "." ";" AL_USDMAYA_VERSION $ENV{REZ_BUILD_PROJECT_VERSION})
@@ -49,7 +47,7 @@ IF(DEFINED boost_NAMESPACE)
 ELSE()
   add_definitions("-DBOOST_NAMESPACE=boost")
 ENDIF()
- 
+
 IF(NOT DEFINED BOOST_LIBRARY_DIRS)
   IF(boost_LIBRARY_DIRS AND boost_python_LIBRARY_DIRS)
       set(Boost_LIBRARY_DIR ${boost_LIBRARY_DIRS} ${boost_python_LIBRARY_DIRS})
@@ -75,25 +73,6 @@ include(CXXDefaults)
 add_definitions(${_PXR_CXX_DEFINITIONS})
 
 find_package(Maya REQUIRED)
-# tf has a baked requirement on python system's library.
-# Because Maya has its own python lib replace it here to avoid
-# CMake warnings. This is safe to do so for now as Maya 2017 and 2018
-# use python 2.7(.11).
-string(TOUPPER ${CMAKE_BUILD_TYPE} _BUILD_TYPE)
-get_target_property(tflibs tf
-IMPORTED_LINK_INTERFACE_LIBRARIES_${_BUILD_TYPE})
-set(tmplibs)
-foreach(tflib ${tflibs})
-    if(NOT tflib MATCHES .*libpython.*)
-        list(APPEND tmplibs ${tflib})
-    endif()
-endforeach(tflib)
-set(tflibs ${tmplibs})
-set_target_properties(
-    tf
-    PROPERTIES
-        IMPORTED_LINK_INTERFACE_LIBRARIES_${_BUILD_TYPE} "${tflibs}"
-)
 set(PYTHON_LIBRARY $ENV{MAYA_LOCATION}/lib/libpython2.7.so CACHE STRING "" FORCE)
 find_package(PythonLibs)
 
@@ -219,7 +198,7 @@ IF ($ENV{REZ_BUILD_VARIANT_NUMBER} STREQUAL "0")
         SKIP_INSTALL
     )
     push_docs_to_gh_pages(
-    	REPOSITORY AL_USDMaya 
+    	REPOSITORY AL_USDMaya
     )
 ELSE()
   add_custom_target(doc)
