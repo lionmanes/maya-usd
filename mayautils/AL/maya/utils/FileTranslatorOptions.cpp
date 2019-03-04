@@ -468,16 +468,13 @@ MStatus FileTranslatorOptions::initParser(OptionsParser& optionParser)
       }
     }
   }
+  return MS::kSuccess;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 MStatus FileTranslatorOptions::generateScript(OptionsParser& optionParser, MString& defaultOptionString)
 {
-  MStatus status = initParser(optionParser);
-  if(!status)
-  {
-    return status;
-  }
+  initParser(optionParser);
 
   // first generate a collection of methods to create, edit, and query each separate option. For each exporter/importer
   // option, we will generate three methods:
@@ -565,7 +562,6 @@ MStatus FileTranslatorOptions::generateScript(OptionsParser& optionParser, MStri
   //
   m_code += MString("global proc int ") + m_translatorName + "(string $parent, string $action, string $initialSettings, string $resultCallback)\n{\n";
   m_code += "  int $result = 1;\n"
-            "  print(\"parent: \" + $parent + \"\\naction: \" + $action + \"\\n\");\n"
             "  string $currentOptions;\n"
             "  string $optionList[];\n"
             "  string $optionBreakDown[];\n"

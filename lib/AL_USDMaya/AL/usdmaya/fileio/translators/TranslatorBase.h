@@ -167,6 +167,10 @@ public:
   virtual ExportFlag canExport(const MObject& obj)
     { return ExportFlag::kNotSupported; }
 
+  /// \brief  The translator plugins that ship with AL_USDMaya specify this flag as true so that they can be overridden
+  virtual bool canBeOverridden()
+    { return false; }
+
   /// \brief After exporting the current obj/dagPath, should we proceed to it's children?
   virtual bool exportDescendants() const
   { return true; }
@@ -387,7 +391,6 @@ PlugClass::create(TranslatorContextPtr context) {                               
                                                                                 \
 TF_REGISTRY_FUNCTION(TfType)                                                    \
 {                                                                               \
-std::cout << "TF_REGISTRY_FUNCTION " << #PlugClass << std::endl; \
     TfType::Define<PlugClass, TfType::Bases<TranslatorBase>>()                  \
         .SetFactory<TranslatorFactory<PlugClass>>();                            \
 }
