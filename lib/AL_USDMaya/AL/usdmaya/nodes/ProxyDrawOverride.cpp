@@ -417,15 +417,22 @@ void ProxyDrawOverride::draw(const MHWRender::MDrawContext& context, const MUser
 		// Draw selection highlighting for all USD items in the UFE selection.
         SdfPathVector ufePaths;
         auto ufeSelList = Ufe::GlobalSelection::get();
+
+        Ufe::PathSegment proxyUfePath = ptr->m_shape->ufePathSegment();
         for (const auto& sceneItem : *ufeSelList)
         {
             if (sceneItem->runTimeId() == USD_UFE_RUNTIME_ID)
             {
                 const Ufe::Path& itemPath = sceneItem->path();
-                Ufe::PathSegment leaf = itemPath.getSegments().back();
-                if (leaf.runTimeId() == USD_UFE_RUNTIME_ID)
+                const Ufe::PathSegment& usdPathSegment = itemPath.getSegments().back();
+                if (usdPathSegment.runTimeId() == USD_UFE_RUNTIME_ID
+                    && itemPath.getSegments().size() == 2)
                 {
-                    ufePaths.emplace_back(leaf.string());
+                  const Ufe::PathSegment& mayaPathSegment = itemPath.getSegments().front();
+                  if(mayaPathSegment == proxyUfePath)
+                  {
+                    ufePaths.emplace_back(usdPathSegment.string());
+                  }
                 }
             }
         }
@@ -594,17 +601,16 @@ bool ProxyDrawOverride::userSelect(
     MStringArray nodes;
     MGlobal::executeCommand(command, nodes, false, true);
     
-    uint32_t i = 0;
-    for(auto it = hitBatch.begin(), e = hitBatch.end(); it != e; ++it, ++i)
+    for(const auto& it : hitBatch)
     {
-      auto path = getHitPath(*it).StripAllVariantSelections();
+      auto path = getHitPath(it).StripAllVariantSelections();
       auto obj = proxyShape->findRequiredPath(path);
       if (obj != MObject::kNullObj) 
       {
         MFnDagNode dagNode(obj);
         MDagPath dg;
         dagNode.getPath(dg);
-        const double* p = it->second.worldSpaceHitPoint.GetArray();
+        const double* p = it.second.worldSpaceHitPoint.GetArray();
         
         selectionList.add(dg);
         worldSpaceHitPts.append(MPoint(p[0], p[1], p[2]));
@@ -651,9 +657,9 @@ bool ProxyDrawOverride::userSelect(
       case MGlobal::kAddToHeadOfList: /* should never get here */ break;
       }
 
-      for(auto it = hitBatch.begin(), e = hitBatch.end(); it != e; ++it)
+      for(const auto& it : hitBatch)
       {
-        auto path = getHitPath(*it);
+        auto path = getHitPath(it);
         command += " -pp \"";
         command += path.GetText();
         command += "\"";
@@ -744,7 +750,7 @@ bool ProxyDrawOverride::userSelect(
       {
         auto globalSelection = Ufe::GlobalSelection::get();
 
-        for (auto it : paths)
+        for (const auto& it : paths)
         {
           // Build a path segment of the USD picked object
           Ufe::PathSegment ps_usd(it.GetText(), 2, '/');
@@ -824,7 +830,7 @@ bool ProxyDrawOverride::userSelect(
         if(paths.size())
         {
           command = "AL_usdmaya_ProxyShapeSelect -i -a ";
-          for(auto it : paths)
+          for(const auto& it : paths)
           {
             command += " -pp \"";
             command += it.GetText();
@@ -849,7 +855,7 @@ bool ProxyDrawOverride::userSelect(
         if(!proxyShape->selectedPaths().empty() && paths.size())
         {
           MString command = "AL_usdmaya_ProxyShapeSelect -d ";
-          for(auto it : paths)
+          for(const auto& it : paths)
           {
             command += " -pp \"";
             command += it.GetText();
@@ -873,7 +879,7 @@ bool ProxyDrawOverride::userSelect(
 
         MString selectcommand = "AL_usdmaya_ProxyShapeSelect -i -a ";
         MString deselectcommand = "AL_usdmaya_ProxyShapeSelect -d ";
-        for(auto it : paths)
+        for(const auto& it : paths)
         {
           bool flag = false;
           for(auto sit : slpaths)
