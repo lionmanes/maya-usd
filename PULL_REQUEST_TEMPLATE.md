@@ -29,3 +29,4 @@
 - [ ] Have you added, updated tests to cover new features and behaviour changes
 - [ ] Do all the commits in this PR have a meaningful message?
 - [ ] Can ChangeLog info be extracted from the PR description or commit messages
+- [ ] If your change will break the API or ABI, please add the "Breaks ABI" or "Breaks API" label. You can check ABI compatibility y running [this](https://github.al.com.au/rnd/AL_USDMaya/wiki/ABI-manual-tests)
