@@ -16,13 +16,15 @@
 
 #pragma once
 
+#include "AL/usdmaya/utils/Api.h"
+
 #include "maya/MFnNurbsCurve.h"
+
+#if MAYA_API_VERSION < 201800
 #include "maya/MFnDoubleArrayData.h"
-#include "maya/MObject.h"
-#include "maya/MPlug.h"
+#endif
 
 #include "pxr/usd/usd/attribute.h"
-#include "pxr/usd/usd/timeCode.h"
 #include "pxr/usd/usdGeom/nurbsCurves.h"
 
 PXR_NAMESPACE_USING_DIRECTIVE

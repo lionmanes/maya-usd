@@ -15,15 +15,8 @@
 //
 #pragma once
 
-#include "./Api.h"
+#include "AL/maya/utils/Api.h"
 
-#include "maya/MString.h"
-
-#include <map>
-#include <vector>
-#include <string>
-
-#include "AL/maya/utils/ForwardDeclares.h"
 #include "AL/maya/utils/PluginTranslatorOptions.h"
 
 namespace AL {
