@@ -151,9 +151,14 @@ add_subdirectory(${SUBTREE_DIRECTORY}/schemas)
 add_subdirectory(${SUBTREE_DIRECTORY}/translators)
 
 # The opensource build has our these custom SdfMetadata in the schema plugInfo.json:
-#   - al_usdmaya_transformType
+
+#   - al_usdmaya_mergedTransform
+#   - al_usdmaya_selectability
+#   - al_usdmaya_lock
 #   - al_usdmaya_importAsNative
 #   - al_usdmaya_excludeFromProxyShape
+#   - al_usdmaya_transformType
+#   - al_usdmaya_*
 # Internally, these metadatas have been kept in AL_USDCommonSchemas for the cases we want to access them
 # without depending on AL_USDMaya therefore we're going to filter these metadatas out.
 set(to_filter
