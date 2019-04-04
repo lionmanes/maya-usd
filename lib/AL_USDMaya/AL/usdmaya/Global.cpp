@@ -460,6 +460,7 @@ static void postFileSave(void*)
 //----------------------------------------------------------------------------------------------------------------------
 static void preFileExport(void* p)
 {
+  storeSelection();
   nodes::ProxyShape::serializeAll();
 }
 
