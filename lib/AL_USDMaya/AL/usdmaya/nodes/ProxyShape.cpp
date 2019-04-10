@@ -218,7 +218,6 @@ MObject ProxyShape::m_displayRenderGuides = MObject::kNullObj;
 MObject ProxyShape::m_layers = MObject::kNullObj;
 MObject ProxyShape::m_serializedSessionLayer = MObject::kNullObj;
 MObject ProxyShape::m_sessionLayerName = MObject::kNullObj;
-MObject ProxyShape::m_serializedArCtx = MObject::kNullObj;
 MObject ProxyShape::m_serializedTrCtx = MObject::kNullObj;
 MObject ProxyShape::m_unloaded = MObject::kNullObj;
 MObject ProxyShape::m_ambient = MObject::kNullObj;
@@ -765,7 +764,6 @@ MStatus ProxyShape::initialise()
     m_serializedSessionLayer = addStringAttr("serializedSessionLayer", "ssl", kCached|kReadable|kWritable|kStorable|kHidden);
     m_sessionLayerName = addStringAttr("sessionLayerName", "sln", kCached|kReadable|kWritable|kStorable|kHidden);
 
-    m_serializedArCtx = addStringAttr("serializedArCtx", "arcd", kCached|kReadable|kWritable|kStorable|kHidden);
     // m_filePath / m_primPath / m_excludePrimPaths are internal just so we get notification on change
     m_filePath = addFilePathAttr("filePath", "fp", kCached | kReadable | kWritable | kStorable | kAffectsAppearance | kInternal, kLoad, "USD Files (*.usd*) (*.usd*);;Alembic Files (*.abc)");
 
@@ -811,7 +809,7 @@ MStatus ProxyShape::initialise()
 
     m_stageCacheId = addInt32Attr("stageCacheId", "stcid", -1, kCached | kConnectable | kReadable  );
 
-    m_assetResolverConfig = addStringAttr("assetResolverConfig", "arc", kReadable | kWritable | kConnectable | kStorable | kAffectsAppearance);
+    m_assetResolverConfig = addStringAttr("assetResolverConfig", "arc", kReadable | kWritable | kConnectable | kStorable | kAffectsAppearance | kInternal);
 
     AL_MAYA_CHECK_ERROR(attributeAffects(m_time, m_outTime), errorString);
     AL_MAYA_CHECK_ERROR(attributeAffects(m_timeOffset, m_outTime), errorString);
@@ -1309,7 +1307,6 @@ void ProxyShape::loadStage()
   // Get input attr values
   const MString file = inputStringValue(dataBlock, m_filePath);
   const MString sessionLayerName = inputStringValue(dataBlock, m_sessionLayerName);
-  const MString serializedArCtx = inputStringValue(dataBlock, m_serializedArCtx);
 
   const MString populationMaskIncludePaths = inputStringValue(dataBlock, m_populationMaskIncludePaths);
   UsdStagePopulationMask mask = constructStagePopulationMask(populationMaskIncludePaths);
@@ -1870,8 +1867,8 @@ bool ProxyShape::setInternalValue(const MPlug& plug, const MDataHandle& dataHand
     
     // can't use dataHandle.datablock(), as this is a temporary datahandle
     MDataBlock datablock = forceCache();
-    AL_MAYA_CHECK_ERROR_RETURN_VAL(outputStringValue(datablock, m_filePath, dataHandle.asString()),
-        false, "ProxyShape::setInternalValue - error setting filePath");
+    AL_MAYA_CHECK_ERROR_RETURN_VAL(outputStringValue(datablock, plug, dataHandle.asString()),
+        false, "ProxyShape::setInternalValue - error setting filePath or assetResolverConfig");
 
     if (MFileIO::isReadingFile())
     {
