@@ -483,7 +483,8 @@ public:
       TransformReason reason,
       MDGModifier* modifier2 = 0,
       uint32_t* createCount = 0,
-      bool pushToPrim = true);
+      bool pushToPrim = true,
+      bool readAnimatedValues = MGlobal::optionVarIntValue("AL_usdmaya_readAnimatedValues"));
 
   /// \brief  Will construct AL_usdmaya_Transform nodes for all of the prims from the specified usdPrim and down.
   /// \param  usdPrim the root for the transforms to be created
@@ -879,7 +880,8 @@ private:
       MDGModifier* modifier2 = 0,
       uint32_t* createCount = 0,
       MString* newPath = 0,
-      bool pushToPrim = true);
+      bool pushToPrim = true,
+      bool readAnimatedValues = MGlobal::optionVarIntValue("AL_usdmaya_readAnimatedValues"));
 
   void removeUsdTransformChain_internal(
       const UsdPrim& usdPrim,
@@ -896,7 +898,8 @@ private:
       MDGModifier* modifier2,
       uint32_t* createCount,
       MString* newPath = 0,
-      bool pushToPrim = true);
+      bool pushToPrim = true,
+      bool readAnimatedValues = MGlobal::optionVarIntValue("AL_usdmaya_readAnimatedValues"));
 
   void makeUsdTransformsInternal(
       const UsdPrim& usdPrim,
@@ -904,7 +907,8 @@ private:
       MDagModifier& modifier,
       TransformReason reason,
       MDGModifier* modifier2,
-      bool pushToPrim = true);
+      bool pushToPrim = true,
+      bool readAnimatedValues = MGlobal::optionVarIntValue("AL_usdmaya_readAnimatedValues"));
 
   void removeUsdTransformsInternal(
       const UsdPrim& usdPrim,
@@ -1013,7 +1017,7 @@ private:
   void onEditTargetChanged(UsdNotice::StageEditTargetChanged const& notice, UsdStageWeakPtr const& sender);
   void trackEditTargetLayer(LayerManager* layerManager=nullptr);
   void validateTransforms();
-
+  void onRedraw() { m_requestedRedraw = false; }
 
   TfToken getTypeForPath(const SdfPath& path) override
     { return m_context->getTypeForPath(path); }
@@ -1074,6 +1078,7 @@ private:
   bool m_pleaseIgnoreSelection = false;
   bool m_hasChangedSelection = false;
   bool m_filePathDirty = false;
+  bool m_requestedRedraw = false;
 };
 
 //----------------------------------------------------------------------------------------------------------------------
