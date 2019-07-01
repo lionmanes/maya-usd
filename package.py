@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 name = 'AL_USDMaya'
 
-version = '0.32.28'
+version = '0.32.29'
 
 authors = ['eoinm']
 
@@ -36,7 +36,7 @@ requires = [
 ]
 
 variants = [
-    ['mayaDevKit-2018.0', 'tbb-4.4'],
+    ['mayaDevKit-2018.0.al3+<2019', 'tbb-4.4'],
     ['mayaDevKit-2019.0', 'tbb-2017']
 ]
 
