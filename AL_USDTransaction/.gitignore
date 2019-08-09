@@ -1,0 +1,11 @@
+/build/
+/nbproject/
+.project
+.cproject
+.pydevproject
+.settings/
+*~
+*.orig
+*.pyc
+*.dot
+*.swp
