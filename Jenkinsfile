@@ -1,5 +1,6 @@
 def config = [:]
 
+config.packages = ['AL_USDTransaction']
 config.cleanup = true
 config.buildOnlyChanged = false
 config.createBuildArtifacts = true
