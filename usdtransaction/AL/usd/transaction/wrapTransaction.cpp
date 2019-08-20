@@ -12,29 +12,29 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+#include "AL/usd/transaction/Transaction.h"
 
-#pragma once
+#include <pxr/base/tf/pyPtrHelpers.h>
+#include <pxr/base/tf/makePyConstructor.h>
+#include <pxr/base/tf/pyResultConversions.h>
 
-#include <string>
+#include <boost/python.hpp>
 
-#define xstr(a) stringify(a)
-#define stringify(a) #a
+using namespace boost::python;
 
-#define AL_USDMAYA_VERSION_MAJOR 0
-#define AL_USDMAYA_VERSION_MINOR 34
-#define AL_USDMAYA_VERSION_PATCH 0
+PXR_NAMESPACE_USING_DIRECTIVE
 
-#define AL_USDMAYA_VERSION_STR xstr(AL_USDMAYA_VERSION_MAJOR) "." \
-                               xstr(AL_USDMAYA_VERSION_MINOR) "." \
-                               xstr(AL_USDMAYA_VERSION_PATCH)
-
-namespace AL {
-namespace usdmaya {
-
-inline const char* getVersion()
+void wrapTransaction()
 {
-    return AL_USDMAYA_VERSION_STR;
+  {
+    typedef AL::usd::transaction::Transaction This;
+    class_<This>("Transaction", no_init)
+      .def(init<const UsdStageWeakPtr&, const SdfLayerHandle&>((arg("stage"), arg("layer"))))
+      .def("Open", &This::Open)
+      .def("Close", &This::Close)
+      .def("InProgress", &This::InProgress)
+    ;
+  }
 }
 
-} // namespace AL
-} // namespace usdmaya

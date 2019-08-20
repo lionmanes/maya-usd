@@ -12,29 +12,15 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+#include "AL/usd/transaction/Notice.h"
 
-#pragma once
+PXR_NAMESPACE_OPEN_SCOPE
 
-#include <string>
-
-#define xstr(a) stringify(a)
-#define stringify(a) #a
-
-#define AL_USDMAYA_VERSION_MAJOR 0
-#define AL_USDMAYA_VERSION_MINOR 34
-#define AL_USDMAYA_VERSION_PATCH 0
-
-#define AL_USDMAYA_VERSION_STR xstr(AL_USDMAYA_VERSION_MAJOR) "." \
-                               xstr(AL_USDMAYA_VERSION_MINOR) "." \
-                               xstr(AL_USDMAYA_VERSION_PATCH)
-
-namespace AL {
-namespace usdmaya {
-
-inline const char* getVersion()
+TF_REGISTRY_FUNCTION(TfType)
 {
-    return AL_USDMAYA_VERSION_STR;
+  TfType::Define<AL::usd::transaction::OpenNotice, TfType::Bases<TfNotice> >();
+  TfType::Define<AL::usd::transaction::CloseNotice, TfType::Bases<TfNotice> >();
 }
 
-} // namespace AL
-} // namespace usdmaya
+PXR_NAMESPACE_CLOSE_SCOPE
