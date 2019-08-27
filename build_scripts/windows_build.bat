@@ -11,6 +11,7 @@ cd build
 cmake -DCMAKE_INSTALL_PREFIX=%WORKSPACE%\install ^
       -DCMAKE_BUILD_TYPE=Release ^
       -DBOOST_ROOT=%USD_DEPENDENCIES_ROOT% ^
+      -Dboost_NAMESPACE=boost ^
       -DMAYA_LOCATION="C:\Program Files\Autodesk\Maya2017" ^
       -DUSD_ROOT=%USD_ROOT% ^
       -DUSD_MAYA_ROOT=%USD_ROOT% ^
