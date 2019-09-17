@@ -894,15 +894,13 @@ void TransformationMatrix::initialiseToPrim(bool readFromPrim, Transform* transf
         }
         if(readFromPrim)
         {
-          MVector tempTranslation;
-          internal_readVector(tempTranslation, op);
+          internal_readVector(m_translationFromUsd, op);
           if(transformNode)
           {
-            MPlug(transformNode->thisMObject(), MPxTransform::translateX).setValue(tempTranslation.x);
-            MPlug(transformNode->thisMObject(), MPxTransform::translateY).setValue(tempTranslation.y);
-            MPlug(transformNode->thisMObject(), MPxTransform::translateZ).setValue(tempTranslation.z);
+            MPlug(transformNode->thisMObject(), MPxTransform::translateX).setValue(m_translationFromUsd.x);
+            MPlug(transformNode->thisMObject(), MPxTransform::translateY).setValue(m_translationFromUsd.y);
+            MPlug(transformNode->thisMObject(), MPxTransform::translateZ).setValue(m_translationFromUsd.z);
           }
-          m_translationFromUsd = tempTranslation;
         }
       }
       break;
@@ -1044,15 +1042,13 @@ void TransformationMatrix::initialiseToPrim(bool readFromPrim, Transform* transf
         }
         if(readFromPrim)
         {
-          MVector tempShear;
-          internal_readShear(tempShear, op);
+          internal_readShear(m_shearFromUsd, op);
           if(transformNode)
           {
-            MPlug(transformNode->thisMObject(), MPxTransform::shearXY).setValue(tempShear.x);
-            MPlug(transformNode->thisMObject(), MPxTransform::shearXZ).setValue(tempShear.y);
-            MPlug(transformNode->thisMObject(), MPxTransform::shearYZ).setValue(tempShear.z);
+            MPlug(transformNode->thisMObject(), MPxTransform::shearXY).setValue(m_shearFromUsd.x);
+            MPlug(transformNode->thisMObject(), MPxTransform::shearXZ).setValue(m_shearFromUsd.y);
+            MPlug(transformNode->thisMObject(), MPxTransform::shearYZ).setValue(m_shearFromUsd.z);
           }
-          m_shearFromUsd = tempShear;
         }
       }
       break;
@@ -1066,15 +1062,13 @@ void TransformationMatrix::initialiseToPrim(bool readFromPrim, Transform* transf
         }
         if(readFromPrim)
         {
-          MVector tempScale(1.0,1.0,1.0);
-          internal_readVector(tempScale, op);
+          internal_readVector(m_scaleFromUsd, op);
           if(transformNode)
           {
-            MPlug(transformNode->thisMObject(), MPxTransform::scaleX).setValue(tempScale.x);
-            MPlug(transformNode->thisMObject(), MPxTransform::scaleY).setValue(tempScale.y);
-            MPlug(transformNode->thisMObject(), MPxTransform::scaleZ).setValue(tempScale.z);
+            MPlug(transformNode->thisMObject(), MPxTransform::scaleX).setValue(m_scaleFromUsd.x);
+            MPlug(transformNode->thisMObject(), MPxTransform::scaleY).setValue(m_scaleFromUsd.y);
+            MPlug(transformNode->thisMObject(), MPxTransform::scaleZ).setValue(m_scaleFromUsd.z);
           }
-          m_scaleFromUsd = tempScale;
         }
         
       }
