@@ -920,7 +920,7 @@ void SelectionUndoHelper::doIt()
     MGlobal::setActiveSelectionList(m_newSelection, MGlobal::kReplaceList);
   }
   m_proxy->m_pleaseIgnoreSelection = false;
-  if(!MGlobal::optionVarIntValue("AL_usdmaya_slowSelectionHack"))
+  if(!MGlobal::optionVarIntValue("AL_usdmaya_ignoreLockPrims"))
   {
     m_proxy->constructLockPrims();
   }
@@ -941,7 +941,7 @@ void SelectionUndoHelper::undoIt()
     MGlobal::setActiveSelectionList(m_previousSelection, MGlobal::kReplaceList);
   }
   m_proxy->m_pleaseIgnoreSelection = false;
-  if(!MGlobal::optionVarIntValue("AL_usdmaya_slowSelectionHack"))
+  if(!MGlobal::optionVarIntValue("AL_usdmaya_ignoreLockPrims"))
   {
     m_proxy->constructLockPrims();
   }
