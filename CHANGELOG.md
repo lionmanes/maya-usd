@@ -1,3 +1,11 @@
+## v0.34.4 (2019-09-18)
+
+### Added
++ The optionVar 'AL_usdmaya_slowSelectionHack' to prevent constructLockPrims running on selection
+
+### Changed
++ reverted PR-159 that caused breaking change in animated transform tests
+
 ## v0.34.3 (2019-09-11)
 
 ### Added
