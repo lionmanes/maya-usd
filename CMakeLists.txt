@@ -1,7 +1,7 @@
 #This is a modified version of the cmake file from usd/sdk/maya/CMakeLists.txt
 cmake_minimum_required(VERSION 2.8.8)
 
-SET(SUBTREE_DIRECTORY "src")
+SET(SUBTREE_DIRECTORY "src/plugin/al")
 
 include ( RezBuild )
 rez_find_packages ( PREFIX pkgs AUTO )
@@ -11,7 +11,7 @@ string(REPLACE "." ";" AL_USDMAYA_VERSION $ENV{REZ_BUILD_PROJECT_VERSION})
 list(GET AL_USDMAYA_VERSION 0 AL_USDMAYA_VERSION_MAJOR)
 list(GET AL_USDMAYA_VERSION 1 AL_USDMAYA_VERSION_MINOR)
 list(GET AL_USDMAYA_VERSION 2 AL_USDMAYA_VERSION_PATCH)
-configure_file(Version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/lib/AL_USDMaya/AL/usdmaya/Version.h)
+configure_file(Version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/${SUBTREE_DIRECTORY}/lib/AL_USDMaya/AL/usdmaya/Version.h)
 
 set(BOOST_ROOT ${boost_ROOT})
 
@@ -22,7 +22,7 @@ if(${MAYA_MAJOR_VERSION} GREATER 2018)
     set(UFE_LIB_ROOT $ENV{REZ_MAYADEVKIT_ROOT}/maya/devkitBase/devkit/ufe)
     set(UFE_INCLUDE_ROOT $ENV{REZ_MAYADEVKIT_ROOT}/maya/devkitBase/devkit/ufe)
 
-    list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/src/cmake/modules)
+    list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/${SUBTREE_DIRECTORY}/cmake/modules)
     message("UFE_LIB_ROOT=${UFE_LIB_ROOT}")
     add_definitions(-DWANT_UFE_BUILD)
     message(STATUS "UFE Build Enabled")
@@ -57,9 +57,9 @@ ENDIF()
 
 #set cmake modules - ";" separated not ":"!
 list(APPEND CMAKE_MODULE_PATH
-    ${CMAKE_CURRENT_SOURCE_DIR}/${SUBTREE_DIRECTORY}/cmake/defaults
-    ${CMAKE_CURRENT_SOURCE_DIR}/${SUBTREE_DIRECTORY}/cmake/macros
-    ${CMAKE_CURRENT_SOURCE_DIR}/${SUBTREE_DIRECTORY}/cmake/modules
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/cmake
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/cmake/defaults
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/cmake/modules
 )
 
 # to get PYTHON_EXECUTABLE
@@ -132,7 +132,7 @@ set(USDMAYAUTILS_INCLUDE_LOCATION ${CMAKE_CURRENT_LIST_DIR}/${SUBTREE_DIRECTORY}
 set(MAYATEST_INCLUDE_LOCATION ${CMAKE_CURRENT_LIST_DIR}/${SUBTREE_DIRECTORY}/mayatest)
 
 # pxrUsd translator uses this
-set(PROJECT_SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
+set(PROJECT_SOURCE_DIR "${CMAKE_SOURCE_DIR}/${SUBTREE_DIRECTORY}")
 # Build usdMaya pxr translator
 set(USD_MAYA_ROOT ${usdMaya_ROOT})
 set(USD_ROOT ${usdBase_ROOT})
@@ -162,7 +162,7 @@ add_subdirectory(${SUBTREE_DIRECTORY}/translators)
 # Internally, these metadatas have been kept in AL_USDCommonSchemas for the cases we want to access them
 # without depending on AL_USDMaya therefore we're going to filter these metadatas out.
 set(to_filter
-    ${CMAKE_CURRENT_BINARY_DIR}/src/schemas/AL/usd/schemas/maya/plugInfo.json
+    ${CMAKE_CURRENT_BINARY_DIR}/${SUBTREE_DIRECTORY}/schemas/AL/usd/schemas/maya/plugInfo.json
 )
 
 message(
@@ -187,15 +187,15 @@ endif()
 
 IF ($ENV{REZ_BUILD_VARIANT_NUMBER} STREQUAL "0")
     set(doxygen_dirs
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/lib/AL_USDMaya/AL
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/doxygen
+        ${CMAKE_CURRENT_SOURCE_DIR}/${SUBTREE_DIRECTORY}/lib/AL_USDMaya/AL
+        ${CMAKE_CURRENT_SOURCE_DIR}/${SUBTREE_DIRECTORY}/doxygen
     )
 
     rez_install_doxygen(
         doc
         FILES             ${doxygen_dirs}
         DESTINATION       doc
-        DOXYFILE          ${CMAKE_CURRENT_SOURCE_DIR}/src/doxygen/Doxyfile
+        DOXYFILE          ${CMAKE_CURRENT_SOURCE_DIR}/${SUBTREE_DIRECTORY}/doxygen/Doxyfile
         GENERATE_TAGFILE
         USE_TAGFILES
         INSTALL_DOXYFILE
@@ -212,7 +212,7 @@ install(FILES cmake/AL_USDMaya.cmake DESTINATION cmake)
 
 get_property(LIBRARY_LOCATION GLOBAL PROPERTY GLOBAL_LIBRARY_LOCATION)
 get_property(PYTHON_LIBRARY_LOCATION GLOBAL PROPERTY GLOBAL_PYTHON_LIBRARY_LOCATION)
-configure_file(src/ALUsdMayaConfig.cmake.in ${PROJECT_BINARY_DIR}/ALUsdMayaConfig.cmake @ONLY)
+configure_file(${SUBTREE_DIRECTORY}/ALUsdMayaConfig.cmake.in ${PROJECT_BINARY_DIR}/ALUsdMayaConfig.cmake @ONLY)
 
 install(FILES ${PROJECT_BINARY_DIR}/ALUsdMayaConfig.cmake
   DESTINATION ${CMAKE_INSTALL_PREFIX}
