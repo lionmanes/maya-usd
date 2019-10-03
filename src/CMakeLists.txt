@@ -16,7 +16,7 @@
 # =======================================================================
 #+
 
-cmake_minimum_required(VERSION 3.1.1)
+cmake_minimum_required(VERSION 2.8)
 
 #==============================================================================
 # Define common build variables
@@ -61,6 +61,9 @@ if(NOT WIN32)
     )
 endif()
 string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+
+include_directories(${USD_INCLUDE_DIR})
+
 
 #==============================================================================
 # PLUGINS

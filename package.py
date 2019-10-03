@@ -19,8 +19,8 @@ private_build_requires = [
 ]
 
 requires = [
-    'usdBase-0.19.10.dev.9.20',
-    'usdImaging-0.19.10',
+    'usdBase-0.19.1',
+    'usdImaging-0.19.1',
     'AL_USDTransaction-0.1',
     'glew-2.0',
     'googletest-1.8',
@@ -31,7 +31,7 @@ requires = [
     '~AL_USDCommonSchemas-0.4+<1', # For the SdfMetadata only
     'AL_boost-1.66',
     'AL_boost_python-1.66',
-    'usdMaya-0.19.10',
+    'usdMaya-0.19.1',
     '!AL_USDSchemas',
     'CentOS-7.4+<8'
 ]
