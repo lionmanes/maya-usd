@@ -1,134 +1,94 @@
-#This is a modified version of the cmake file from usd/sdk/maya/CMakeLists.txt
-cmake_minimum_required(VERSION 2.8.12)
-project(AL_USDMaya)
+#-
+# =======================================================================
+# Copyright 2019 Autodesk, Inc. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 
-#set cmake modules - ";" separated not ":"!
+#     http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# =======================================================================
+#+
+
+cmake_minimum_required(VERSION 2.8)
+
+#==============================================================================
+# Define common build variables
+#==============================================================================
+set(BUILD_PXR_PLUGIN ON CACHE BOOL "Build the Pixar USD plugin and libraries.")
+set(BUILD_AL_PLUGIN ON CACHE BOOL "Build the Animal Logic USD plugin and libraries.")
+
+#==============================================================================
+# Modules and Definitions
+#==============================================================================
 list(APPEND CMAKE_MODULE_PATH
-    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/defaults
-    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/macros
     ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/defaults
 )
 
-# AL_USDMAYA uses pxrConfig.cmake exported targets
-# find_package(USD) can use either ${USD_ROOT}, or ${USD_CONFIG_FILE} (which should be ${USD_ROOT}/pxrConfig.cmake)
-# to find USD, defined as either Cmake var or env var
+if (APPLE)
+   set(OSX_ARCHITECTURES "x86_64")
+   add_definitions(-DOSMac_ -DMAC_PLUGIN)
+   add_definitions(-D_BOOL -DREQUIRE_IOSTREAM)
+endif()
+
+include(cmake/python.cmake)
+include(cmake/utils.cmake)
+
 find_package(USD REQUIRED)
-include(${USD_CONFIG_FILE})
+include(cmake/usd.cmake)
 
-# to get PYTHON_EXECUTABLE
-find_package(PythonInterp)
-
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
+#==============================================================================
+# Compiler
+#==============================================================================
+# CXXDefaults will set a variety of variables for the project.
+# Consume them here. This is an effort to keep the most common
+# build files readable.
 include(CXXDefaults)
-
 add_definitions(${_PXR_CXX_DEFINITIONS})
+set(CMAKE_CXX_FLAGS "${_PXR_CXX_FLAGS} ${CMAKE_CXX_FLAGS}")
 
-find_package(Maya REQUIRED)
-
-if(CMAKE_WANT_UFE_BUILD)
-    add_definitions(-DWANT_UFE_BUILD)
-    message(STATUS "UFE Build Enabled")
-    find_package(UFE REQUIRED)
-    message(STATUS "Using UFE version : ${UFE_VERSION}")
-    message(STATUS "UFE Include directory: ${UFE_INCLUDE_DIR}")
-    message(STATUS "UFE Library directory: ${UFE_LIBRARY_DIR}")
-    include_directories(${UFE_INCLUDE_DIR})
-endif()
-
-
-include_directories(${MAYA_INCLUDE_DIRS})
-
-include_directories(${PXR_INCLUDE_DIRS})
-
-# FindBoost is particularly buggy, and doesn't like custom boost locations.
-# Adding specific components forces calls to _Boost_find_library, which
-# is the rationale for listing them here.
-set(Boost_FIND_COMPONENTS
-     python
-     thread
-     filesystem
-)
-if(WIN32)
-    list(APPEND Boost_FIND_COMPONENTS
-        chrono
-    )
-endif()
-
-find_package(Boost COMPONENTS
-                ${Boost_FIND_COMPONENTS}
-                REQUIRED
-)
-
-set(NEED_BOOST_FILESYSTEM ON)
-
-if(WIN32)
+if(NOT WIN32)
     set(CMAKE_CXX_FLAGS
-        "${_PXR_CXX_FLAGS}"
-    )
-else()
-    set(CMAKE_CXX_FLAGS
-        -std=c++11
         -msse3
-        "${_PXR_CXX_FLAGS}"
+        "${CMAKE_CXX_FLAGS} ${_PXR_CXX_FLAGS}"
     )
 endif()
 string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
-set(CMAKE_VERBOSE_MAKEFILE OFF)
+include_directories(${USD_INCLUDE_DIR})
 
-option(BUILD_USDMAYA_SCHEMAS "Build optional schemas." ON)
-option(BUILD_USDMAYA_TRANSLATORS "Build optional translators." ON)
-option(SKIP_USDMAYA_TESTS "Build tests" OFF)
 
-if(NOT SKIP_USDMAYA_TESTS)
-    enable_testing()
+#==============================================================================
+# PLUGINS
+#==============================================================================
+if (BUILD_PXR_PLUGIN)
+    add_subdirectory(plugin/pxr)
 endif()
 
-set(AL_USDMAYA_LOCATION_NAME
-    "AL_USDMAYA_LOCATION"
-    CACHE
-    STRING
-    "Name of the environment variable used to store AL_USDMaya installation location"
-)
+if (BUILD_AL_PLUGIN)
+    if(BUILD_USDMAYA_PXR_TRANSLATORS AND NOT BUILD_PXR_PLUGIN)
+        message(FATAL_ERROR "Animal logic's pixar translator depends on pixar plugin!")
+    endif()
 
-# Build all the utils
-set(EVENTS_INCLUDE_LOCATION ${CMAKE_CURRENT_LIST_DIR}/utils)
-set(USDUTILS_INCLUDE_LOCATION ${CMAKE_CURRENT_LIST_DIR}/usdutils)
-set(MAYAUTILS_INCLUDE_LOCATION ${CMAKE_CURRENT_LIST_DIR}/mayautils)
-set(USDMAYAUTILS_INCLUDE_LOCATION ${CMAKE_CURRENT_LIST_DIR}/usdmayautils)
-set(MAYATEST_INCLUDE_LOCATION ${CMAKE_CURRENT_LIST_DIR}/mayatest)
-set(USDTRANSACTION_INCLUDE_LOCATION ${CMAKE_CURRENT_LIST_DIR}/usdtransaction)
+    add_subdirectory(plugin/al)
 
-add_subdirectory(utils)
-add_subdirectory(usdutils)
-if(NOT SKIP_USDMAYA_TESTS)
-	add_subdirectory(mayatest)
-endif()	
-add_subdirectory(mayautils)
-add_subdirectory(usdmayautils)
-add_subdirectory(usdtransaction)
-
-add_subdirectory(lib)
-add_subdirectory(plugin)
-
-if(BUILD_USDMAYA_SCHEMAS)
-    message(STATUS "Building AL_USDMayaSchemas")
-    add_subdirectory(schemas)
-    if(BUILD_USDMAYA_TRANSLATORS)
-        message(STATUS "Building AL_USDMayaTranslators")
-        set(TRANSLATORS_PACKAGE AL_USDMayaTranslators)
-        add_subdirectory(translators)
+    if(BUILD_USDMAYA_PXR_TRANSLATORS)
+        add_dependencies(AL_USDMayaPxrTranslators usdMaya)
     endif()
 endif()
 
-get_property(LIBRARY_LOCATION GLOBAL PROPERTY GLOBAL_LIBRARY_LOCATION)
-get_property(PYTHON_LIBRARY_LOCATION GLOBAL PROPERTY GLOBAL_PYTHON_LIBRARY_LOCATION)
-configure_file(ALUsdMayaConfig.cmake.in ${PROJECT_BINARY_DIR}/ALUsdMayaConfig.cmake @ONLY)
 
-install(FILES ${PROJECT_BINARY_DIR}/ALUsdMayaConfig.cmake
-  DESTINATION ${CMAKE_INSTALL_PREFIX}
-  COMPONENT dev
+#==============================================================================
+# Install mayaUSD.mod
+#==============================================================================
+configure_file(mayaUSD.mod.template ${PROJECT_BINARY_DIR}/mayaUSD.mod)
+install(FILES ${PROJECT_BINARY_DIR}/mayaUSD.mod
+    DESTINATION ${CMAKE_INSTALL_PREFIX}
 )
-
-install(CODE "message(STATUS \"POST INSTALL: Compiling python/pyc for ${CMAKE_INSTALL_PREFIX} ... \")")
-install(CODE "execute_process(COMMAND python -m compileall ${CMAKE_INSTALL_PREFIX} )")

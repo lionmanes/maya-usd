@@ -1,34 +1,24 @@
 #
 # Copyright 2016 Pixar
 #
-# Licensed under the Apache License, Version 2.0 (the "Apache License")
-# with the following modification; you may not use this file except in
-# compliance with the Apache License and the following modification to it:
-# Section 6. Trademarks. is deleted and replaced with:
-#
-# 6. Trademarks. This License does not grant permission to use the trade
-#    names, trademarks, service marks, or product names of the Licensor
-#    and its affiliates, except as required to comply with Section 4(c) of
-#    the License and to reproduce the content of the NOTICE file.
-#
-# You may obtain a copy of the Apache License at
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
 #     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
-# distributed under the Apache License with the above modification is
-# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied. See the Apache License for the specific
-# language governing permissions and limitations under the Apache License.
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 #
 
 # Enable exception handling.
 set(_PXR_CXX_FLAGS "${_PXR_CXX_FLAGS} /EHsc")
 
 # Standards compliant.
-set(_PXR_CXX_FLAGS "${_PXR_CXX_FLAGS} /Zc:rvalueCast \
-                                      /Zc:strictStrings \
-                                      /Zc:inline")
+set(_PXR_CXX_FLAGS "${_PXR_CXX_FLAGS} /Zc:rvalueCast /Zc:strictStrings /Zc:inline")
 
 # Turn on all but informational warnings.
 set(_PXR_CXX_FLAGS "${_PXR_CXX_FLAGS} /W3")
@@ -82,8 +72,11 @@ _add_define("NOMINMAX")
 _add_define("YY_NO_UNISTD_H")
 
 # Forces all libraries that have separate source to be linked as
-# DLL's rather than static libraries on Microsoft Windows.
-_add_define("BOOST_ALL_DYN_LINK")
+# DLL's rather than static libraries on Microsoft Windows, unless
+# explicitly told otherwise.
+if (NOT Boost_USE_STATIC_LIBS)
+    _add_define("BOOST_ALL_DYN_LINK")
+endif()
 
 # Need half::_toFloat and half::_eLut.
 _add_define("OPENEXR_DLL")
