@@ -11,3 +11,4 @@ Testing
 *.pyc
 *.dot
 *.swp
+src/lib/AL_USDMaya/AL/usdmaya/Version.h
