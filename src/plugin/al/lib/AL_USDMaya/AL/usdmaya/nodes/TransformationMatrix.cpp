@@ -2,7 +2,7 @@
 // Copyright 2017 Animal Logic
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.//
+// you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
@@ -903,7 +903,6 @@ void TransformationMatrix::initialiseToPrim(bool readFromPrim, Transform* transf
             MPlug(transformNode->thisMObject(), MPxTransform::translateZ).setValue(tempTranslation.z);
             m_translationTweak[0] = m_translationTweak[1] = m_translationTweak[2] = 0;
           }
-          m_translationFromUsd = tempTranslation;
         }
       }
       break;
@@ -1054,7 +1053,6 @@ void TransformationMatrix::initialiseToPrim(bool readFromPrim, Transform* transf
             MPlug(transformNode->thisMObject(), MPxTransform::shearYZ).setValue(tempShear.z);
             m_shearTweak[0] = m_shearTweak[1] = m_shearTweak[2] = 0;
           }
-          m_shearFromUsd = tempShear;
         }
       }
       break;
@@ -1077,7 +1075,6 @@ void TransformationMatrix::initialiseToPrim(bool readFromPrim, Transform* transf
             MPlug(transformNode->thisMObject(), MPxTransform::scaleZ).setValue(tempScale.z);
             m_scaleTweak[0] = m_scaleTweak[1] = m_scaleTweak[2] = 0;
           }
-          m_scaleFromUsd = tempScale;
         }
         
       }
