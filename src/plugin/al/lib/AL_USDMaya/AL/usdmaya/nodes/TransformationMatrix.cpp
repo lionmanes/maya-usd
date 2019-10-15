@@ -72,6 +72,7 @@ TransformationMatrix::TransformationMatrix()
 {
   TF_DEBUG(ALUSDMAYA_EVALUATION).Msg("TransformationMatrix::TransformationMatrix\n");
   initialiseToPrim();
+  m_initialised = true;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -103,11 +104,13 @@ TransformationMatrix::TransformationMatrix(const UsdPrim& prim)
 {
   TF_DEBUG(ALUSDMAYA_TRANSFORM_MATRIX).Msg("TransformationMatrix::TransformationMatrix\n");
   initialiseToPrim();
+  m_initialised = true;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 void TransformationMatrix::setPrim(const UsdPrim& prim, Transform* transformNode)
 {
+  m_initialised = false;
   if(prim.IsValid())
   {
     TF_DEBUG(ALUSDMAYA_TRANSFORM_MATRIX).Msg("TransformationMatrix::setPrim %s\n", prim.GetName().GetText());
@@ -158,6 +161,7 @@ void TransformationMatrix::setPrim(const UsdPrim& prim, Transform* transformNode
     MPxTransformationMatrix::rotatePivotTranslationValue = m_rotatePivotTranslationFromUsd;
     MPxTransformationMatrix::rotateOrientationValue = m_rotateOrientationFromUsd;
   }
+  m_initialised = true;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1610,7 +1614,10 @@ MStatus TransformationMatrix::rotateTo(const MQuaternion &q, MSpace::Space space
     {
       insertRotateOp();
     }
-    pushRotateToPrim();
+    if(m_initialised)
+    {
+      pushRotateToPrim();
+    }
   }
   return status;
 }
@@ -1638,7 +1645,10 @@ MStatus TransformationMatrix::rotateTo(const MEulerRotation &e, MSpace::Space sp
     {
       insertRotateOp();
     }
-    pushRotateToPrim();
+    if(m_initialised)
+    {
+      pushRotateToPrim();
+    }
   }
   return status;
 }
@@ -1687,7 +1697,10 @@ MStatus TransformationMatrix::setRotateOrientation(const MQuaternion &q, MSpace:
     {
       insertRotateAxesOp();
     }
-    pushRotateAxisToPrim();
+    if(m_initialised)
+    {
+      pushRotateAxisToPrim();
+    }
   }
   return status;
 }
@@ -1711,7 +1724,10 @@ MStatus TransformationMatrix::setRotateOrientation(const MEulerRotation& euler, 
     {
       insertRotateAxesOp();
     }
-    pushRotateAxisToPrim();
+    if(m_initialised)
+    {
+      pushRotateAxisToPrim();
+    }
   }
   return status;
 }
@@ -1771,8 +1787,10 @@ void TransformationMatrix::pushTranslateToPrim()
       return;
     }
   }
-  // incase not found
-  pushTransformToPrim();
+  if(m_initialised)
+  {
+    pushTransformToPrim();
+  }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1794,8 +1812,10 @@ void TransformationMatrix::pushPivotToPrim()
       return;
     }
   }
-  // incase not found
-  pushTransformToPrim();
+  if(m_initialised)
+  {
+    pushTransformToPrim();
+  }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1814,8 +1834,10 @@ void TransformationMatrix::pushRotatePivotToPrim()
       return;
     }
   }
-  // incase not found
-  pushTransformToPrim();
+  if(m_initialised)
+  {
+    pushTransformToPrim();
+  }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1834,8 +1856,10 @@ void TransformationMatrix::pushRotatePivotTranslateToPrim()
       return;
     }
   }
-  // incase not found
-  pushTransformToPrim();
+  if(m_initialised)
+  {
+    pushTransformToPrim();
+  }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1854,8 +1878,10 @@ void TransformationMatrix::pushRotateToPrim()
       return;
     }
   }
-  // incase not found
-  pushTransformToPrim();
+  if(m_initialised)
+  {
+    pushTransformToPrim();
+  }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1875,8 +1901,10 @@ void TransformationMatrix::pushRotateAxisToPrim()
       return;
     }
   }
-  // incase not found
-  pushTransformToPrim();
+  if(m_initialised)
+  {
+    pushTransformToPrim();
+  }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1895,8 +1923,10 @@ void TransformationMatrix::pushScalePivotTranslateToPrim()
       return;
     }
   }
-  // incase not found
-  pushTransformToPrim();
+  if(m_initialised)
+  {
+    pushTransformToPrim();
+  }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1915,8 +1945,10 @@ void TransformationMatrix::pushScalePivotToPrim()
       return;
     }
   }
-  // incase not found
-  pushTransformToPrim();
+  if(m_initialised)
+  {
+    pushTransformToPrim();
+  }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1935,8 +1967,10 @@ void TransformationMatrix::pushScaleToPrim()
       return;
     }
   }
-  // incase not found
-  pushTransformToPrim();
+  if(m_initialised)
+  {
+    pushTransformToPrim();
+  }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1955,8 +1989,10 @@ void TransformationMatrix::pushShearToPrim()
       return;
     }
   }
-  // incase not found
-  pushTransformToPrim();
+  if(m_initialised)
+  {
+    pushTransformToPrim();
+  }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
