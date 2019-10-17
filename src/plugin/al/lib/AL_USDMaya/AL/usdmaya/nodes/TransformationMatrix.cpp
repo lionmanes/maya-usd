@@ -71,8 +71,6 @@ TransformationMatrix::TransformationMatrix()
     m_flags(0)
 {
   TF_DEBUG(ALUSDMAYA_EVALUATION).Msg("TransformationMatrix::TransformationMatrix\n");
-  initialiseToPrim();
-  m_initialised = true;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -103,14 +101,12 @@ TransformationMatrix::TransformationMatrix(const UsdPrim& prim)
     m_flags(0)
 {
   TF_DEBUG(ALUSDMAYA_TRANSFORM_MATRIX).Msg("TransformationMatrix::TransformationMatrix\n");
-  initialiseToPrim();
-  m_initialised = true;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 void TransformationMatrix::setPrim(const UsdPrim& prim, Transform* transformNode)
 {
-  m_initialised = false;
+  m_enableUsdWriteback = false;
   if(prim.IsValid())
   {
     TF_DEBUG(ALUSDMAYA_TRANSFORM_MATRIX).Msg("TransformationMatrix::setPrim %s\n", prim.GetName().GetText());
@@ -161,7 +157,7 @@ void TransformationMatrix::setPrim(const UsdPrim& prim, Transform* transformNode
     MPxTransformationMatrix::rotatePivotTranslationValue = m_rotatePivotTranslationFromUsd;
     MPxTransformationMatrix::rotateOrientationValue = m_rotateOrientationFromUsd;
   }
-  m_initialised = true;
+  m_enableUsdWriteback = true;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -906,6 +902,7 @@ void TransformationMatrix::initialiseToPrim(bool readFromPrim, Transform* transf
             MPlug(transformNode->thisMObject(), MPxTransform::translateY).setValue(tempTranslation.y);
             MPlug(transformNode->thisMObject(), MPxTransform::translateZ).setValue(tempTranslation.z);
             m_translationTweak[0] = m_translationTweak[1] = m_translationTweak[2] = 0;
+            m_translationFromUsd = tempTranslation;
           }
         }
       }
@@ -1078,6 +1075,7 @@ void TransformationMatrix::initialiseToPrim(bool readFromPrim, Transform* transf
             MPlug(transformNode->thisMObject(), MPxTransform::scaleY).setValue(tempScale.y);
             MPlug(transformNode->thisMObject(), MPxTransform::scaleZ).setValue(tempScale.z);
             m_scaleTweak[0] = m_scaleTweak[1] = m_scaleTweak[2] = 0;
+            m_scaleFromUsd = tempScale;
           }
         }
         
@@ -1614,7 +1612,7 @@ MStatus TransformationMatrix::rotateTo(const MQuaternion &q, MSpace::Space space
     {
       insertRotateOp();
     }
-    if(m_initialised)
+    if(m_enableUsdWriteback)
     {
       pushRotateToPrim();
     }
@@ -1645,7 +1643,7 @@ MStatus TransformationMatrix::rotateTo(const MEulerRotation &e, MSpace::Space sp
     {
       insertRotateOp();
     }
-    if(m_initialised)
+    if(m_enableUsdWriteback)
     {
       pushRotateToPrim();
     }
@@ -1697,7 +1695,7 @@ MStatus TransformationMatrix::setRotateOrientation(const MQuaternion &q, MSpace:
     {
       insertRotateAxesOp();
     }
-    if(m_initialised)
+    if(m_enableUsdWriteback)
     {
       pushRotateAxisToPrim();
     }
@@ -1724,7 +1722,7 @@ MStatus TransformationMatrix::setRotateOrientation(const MEulerRotation& euler, 
     {
       insertRotateAxesOp();
     }
-    if(m_initialised)
+    if(m_enableUsdWriteback)
     {
       pushRotateAxisToPrim();
     }
@@ -1787,7 +1785,7 @@ void TransformationMatrix::pushTranslateToPrim()
       return;
     }
   }
-  if(m_initialised)
+  if(m_enableUsdWriteback)
   {
     pushTransformToPrim();
   }
@@ -1812,7 +1810,7 @@ void TransformationMatrix::pushPivotToPrim()
       return;
     }
   }
-  if(m_initialised)
+  if(m_enableUsdWriteback)
   {
     pushTransformToPrim();
   }
@@ -1834,7 +1832,7 @@ void TransformationMatrix::pushRotatePivotToPrim()
       return;
     }
   }
-  if(m_initialised)
+  if(m_enableUsdWriteback)
   {
     pushTransformToPrim();
   }
@@ -1856,7 +1854,7 @@ void TransformationMatrix::pushRotatePivotTranslateToPrim()
       return;
     }
   }
-  if(m_initialised)
+  if(m_enableUsdWriteback)
   {
     pushTransformToPrim();
   }
@@ -1878,7 +1876,7 @@ void TransformationMatrix::pushRotateToPrim()
       return;
     }
   }
-  if(m_initialised)
+  if(m_enableUsdWriteback)
   {
     pushTransformToPrim();
   }
@@ -1901,7 +1899,7 @@ void TransformationMatrix::pushRotateAxisToPrim()
       return;
     }
   }
-  if(m_initialised)
+  if(m_enableUsdWriteback)
   {
     pushTransformToPrim();
   }
@@ -1923,7 +1921,7 @@ void TransformationMatrix::pushScalePivotTranslateToPrim()
       return;
     }
   }
-  if(m_initialised)
+  if(m_enableUsdWriteback)
   {
     pushTransformToPrim();
   }
@@ -1945,7 +1943,7 @@ void TransformationMatrix::pushScalePivotToPrim()
       return;
     }
   }
-  if(m_initialised)
+  if(m_enableUsdWriteback)
   {
     pushTransformToPrim();
   }
@@ -1967,7 +1965,7 @@ void TransformationMatrix::pushScaleToPrim()
       return;
     }
   }
-  if(m_initialised)
+  if(m_enableUsdWriteback)
   {
     pushTransformToPrim();
   }
@@ -1989,7 +1987,7 @@ void TransformationMatrix::pushShearToPrim()
       return;
     }
   }
-  if(m_initialised)
+  if(m_enableUsdWriteback)
   {
     pushTransformToPrim();
   }
