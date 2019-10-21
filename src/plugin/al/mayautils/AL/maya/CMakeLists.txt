@@ -60,6 +60,7 @@ target_include_directories(${MAYAUTILS_LIBRARY_NAME}
     ${MAYAUTILS_INCLUDE_LOCATION}
     ${MAYA_INCLUDE_DIRS}
     ${MAYAUSD_INCLUDE_DIR}
+    ${USD_INCLUDE_DIR}
 )
 
 target_link_libraries(${MAYAUTILS_LIBRARY_NAME}
