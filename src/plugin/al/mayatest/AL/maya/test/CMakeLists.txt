@@ -46,7 +46,6 @@ target_include_directories(${MAYA_TEST_LIBRARY_NAME}
     ${MAYATEST_INCLUDE_LOCATION}
     ${MAYA_INCLUDE_DIRS}
     ${GTEST_INCLUDE_DIRS}
-    ${USD_INCLUDE_DIR}
 )
 
 # install the public headers

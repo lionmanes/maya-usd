@@ -19,8 +19,6 @@ find_path(USD_INCLUDE_DIR
         "USD Include directory"
 )
 
-MESSAGE("USD_INCLUDE_DIR=================================================${USD_INCLUDE_DIR}") 
-
 find_library(USD_LIBRARY
     NAMES
         usd
