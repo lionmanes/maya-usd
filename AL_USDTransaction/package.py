@@ -11,7 +11,7 @@ private_build_requires = [
 ]
 
 requires = [
-    'usdBase-0.19.1',
+    'usdBase-0.19.7',
     'AL_boost_python-1.66',
     'python-2.7',
 ]
