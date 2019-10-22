@@ -21,7 +21,7 @@ private_build_requires = [
 requires = [
     'usdBase-0.19.7',
     'usdImaging-0.19.7',
-    'AL_USDTransaction-0.1',
+    'AL_USDTransaction-0.2',
     'glew-2.0',
     'googletest-1.8',
     'python-2.7+<3',
