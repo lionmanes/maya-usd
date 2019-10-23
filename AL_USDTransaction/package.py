@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 name = 'AL_USDTransaction'
 
-version = '0.1.0'
+version = '0.2.0'
 
 private_build_requires = [
     'cmake-2.8+',
@@ -11,7 +11,7 @@ private_build_requires = [
 ]
 
 requires = [
-    'usdBase-0.19.1',
+    'usdBase-0.19.7',
     'AL_boost_python-1.66',
     'python-2.7',
 ]
