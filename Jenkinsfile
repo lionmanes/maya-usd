@@ -28,7 +28,7 @@ def runConditionals(){
                     def workspace = pwd()
                     stage("Opensource Maya2017")
                     {
-                        sh "docker run --rm -e \"BUILD_PROCS=8\" -v $workspace/src:/tmp/usd-build/AL_USDMaya -v $workspace/docker:/tmp/usd-build/docker /sydharbor01.al.com.au/usd/usd-docker/usd:19.01-centos7-maya2017 bash /tmp/usd-build/docker/build_alusdmaya.sh"
+                        sh "docker run --rm -e \"BUILD_PROCS=8\" -v $workspace/src:/tmp/usd-build/AL_USDMaya -v $workspace/docker:/tmp/usd-build/docker sydharbor01.al.com.au/usd/usd-docker/usd:19.01-centos7-maya2017 bash /tmp/usd-build/docker/build_alusdmaya.sh"
                     }
 
                     algit.reportStatusToGitHub('SUCCESS', 'Docker build success', "Docker_build_and_tests")
