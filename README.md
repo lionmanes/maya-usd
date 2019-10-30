@@ -1,20 +1,27 @@
-This page is part of the internal Animal Logic Repository, but not the Open Source distribution [here](https://github.com/AnimalLogic/AL_USDMaya)  which is subtree'd from the "src" folder in the root of this repository.
+# What is USD for Maya?
 
-The main project README.md is [here](src/README.md)
+USD for Maya is a project to create a Maya plugin, as well as reusable libraries, that provide translation and editing capabilities for Pixar Animation Studios Universal Scene Description (USD).
 
-This Animal Logic specific part of the repo contains:
-+ Rez package files
-+ Other build related files
-+ An additional organisation of the libraries which symlinks to the "real" files
+Read more about Pixar's USD [here](http://openusd.org)
 
-Every time a push is made to the _develop_ branch of this repository, the Jenkins job will run an extra [step](https://github.al.com.au/rnd/AL_USDMaya/blob/develop/Jenkinsfile#L48): it will extract the commits made in **src** and push that to an [internal repo](https://github.al.com.au/rnd/AL_USDMaya_oss_ready.git) (a clone of the opensource one). This means the develop branch of this internal repo will always be ready to be pushed to the opensource repo.
-([more details](https://github.al.com.au/rnd/AL_USDMaya/wiki/Synchronizing-with-the-open-source-project))
 
-> Only a few people have the permissions and machine authorized to push to the opensource repository.
+## Motivation
+*Why yet another Maya plugin?*
 
-# Animal-Specific build additions
-Our internal, rez-driven build uses [this CMake file](https://github.al.com.au/rnd/AL_USDMaya/blob/develop/CMakeLists.txt), whereas the opensource build uses [this](https://github.al.com.au/rnd/AL_USDMaya/blob/develop/src/CMakeLists.txt)
+As USD gains in popularity many studios have been wondering what plugin they should deploy within their pipelines.  Two popular choices, used individually as well as together, have been the Pixar USDMaya plugin that has been part of USD itself, and Animal Logic's, which was separately released as Open Source.  Both plugins have a strong community of users, but some have questioned when Autodesk would eventually release an officially supported plugin themselves.  The goal of this project is to work directly with Pixar and Animal Logic, as well as other key contributors, in order to merge the best of both into a single supported plugin.  
 
-What are some of the differences? (This is not exhaustive, please add to this)
-+ To avoid having a dependency on AL_USDMaya when working with USD files, some of the schema metadata defined [here](https://github.al.com.au/rnd/AL_USDMaya/blob/04d93c252459788deb36e90af76d2407530fe1d8/src/schemas/AL/usd/schemas/maya/plugInfo.json.in#L8)  is filtered out of the relevant pluginInfo.json file, and is expected to be part of the AL_USDCommonSchemas. See [here](https://github.al.com.au/rnd/AL_USDMaya/blob/04d93c252459788deb36e90af76d2407530fe1d8/CMakeLists.txt#L153). AL_USDCommonSchemas is included by our tests, but not when running a standard environment, so please be aware of this when attempting to use functionality which relies on ths metadata (There is an argument for adding this dependency) 
+Pixar maintains a list of contributors to USD in their documentation [here](https://graphics.pixar.com/usd/docs/USD-Contributors.html), and as we start working together to merge the two existing plugins it is also important to acknowledge the amount of work that individuals put in on the Animal Logic plugin as well.  The list of those contributors is kept [here](doc/AL_CONTRIBUTORS.md).
 
+## Getting Help
+Both Animal Logic and Pixar have their own Google interest groups which will remain great places to go with questions.
+
+Pixar forum is [here](https://groups.google.com/forum/#!forum/usd-interest)  
+Animal Logic forum is [here](https://groups.google.com/forum/#!forum/al_usdmaya-discussion)
+
+
+## Detailed Documentation
+
++ [Contributing](doc/CONTRIBUTING.md)
++ [Building](doc/build.md)
++ [License](doc/LICENSE.md)
++ [Developer](doc/DEVELOPER.md)

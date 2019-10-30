@@ -1,239 +1,92 @@
-#This is a modified version of the cmake file from usd/sdk/maya/CMakeLists.txt
-cmake_minimum_required(VERSION 2.8.8)
+#-
+# =======================================================================
+# Copyright 2019 Autodesk, Inc. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 
-SET(SUBTREE_DIRECTORY "src/plugin/al")
+#     http://www.apache.org/licenses/LICENSE-2.0
 
-include ( RezBuild )
-rez_find_packages ( PREFIX pkgs AUTO )
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# =======================================================================
+#+
 
-# Bake version
-string(REPLACE "." ";" AL_USDMAYA_VERSION $ENV{REZ_BUILD_PROJECT_VERSION})
-list(GET AL_USDMAYA_VERSION 0 AL_USDMAYA_VERSION_MAJOR)
-list(GET AL_USDMAYA_VERSION 1 AL_USDMAYA_VERSION_MINOR)
-list(GET AL_USDMAYA_VERSION 2 AL_USDMAYA_VERSION_PATCH)
-configure_file(Version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/${SUBTREE_DIRECTORY}/lib/AL_USDMaya/AL/usdmaya/Version.h)
+cmake_minimum_required(VERSION 3.1.1)
 
-set(BOOST_ROOT ${boost_ROOT})
+#==============================================================================
+# Define common build variables
+#==============================================================================
+set(BUILD_PXR_PLUGIN ON CACHE BOOL "Build the Pixar USD plugin and libraries.")
+set(BUILD_AL_PLUGIN ON CACHE BOOL "Build the Animal Logic USD plugin and libraries.")
 
-add_definitions("-DAL_MAYA_ENABLE_SIMD=1")
-
-if(${MAYA_MAJOR_VERSION} GREATER 2018)
-    set(UFE_VERSION 1.0.0)
-    set(UFE_LIB_ROOT $ENV{REZ_MAYADEVKIT_ROOT}/maya/devkitBase/devkit/ufe)
-    set(UFE_INCLUDE_ROOT $ENV{REZ_MAYADEVKIT_ROOT}/maya/devkitBase/devkit/ufe)
-
-    list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/src/cmake/modules)
-    message("UFE_LIB_ROOT=${UFE_LIB_ROOT}")
-    add_definitions(-DWANT_UFE_BUILD)
-    message(STATUS "UFE Build Enabled")
-    if (NOT UFE_VERSION)
-        message(FATAL_ERROR "UFE_VERSION must be defined when WANT_UFE_BUILD is enabled")
-    endif()
-    message(STATUS "Using UFE version : ${UFE_VERSION}")
-    string(REPLACE "." ";" UFE_VERSION_LIST ${UFE_VERSION})
-    list(GET UFE_VERSION_LIST 0 UFE_MAJOR_VERSION)
-    list(GET UFE_VERSION_LIST 1 UFE_MINOR_VERSION)
-    list(GET UFE_VERSION_LIST 2 UFE_PATCH_LEVEL)
-    find_package(UFE REQUIRED)
-    include_directories(${UFE_INCLUDE_DIR})
-    rez_install_files(ufe/maya-ufe-usd-plugin.py RELATIVE ufe DESTINATION plugin)
-    rez_install_files(ufe/maya-ufe-cmd-plugin.py RELATIVE ufe DESTINATION plugin)
-    rez_install_dirs(ufe/ufeScripts DESTINATION lib/python)
-endif()
-
-IF(DEFINED boost_NAMESPACE)
-  add_definitions("-DBOOST_NAMESPACE=${boost_NAMESPACE}")
-ELSE()
-  add_definitions("-DBOOST_NAMESPACE=boost")
-ENDIF()
-
-IF(NOT DEFINED BOOST_LIBRARY_DIRS)
-  IF(boost_LIBRARY_DIRS AND boost_python_LIBRARY_DIRS)
-      set(Boost_LIBRARY_DIR ${boost_LIBRARY_DIRS} ${boost_python_LIBRARY_DIRS})
-  ELSEIF(AL_boost_LIBRARY_DIRS AND AL_boost_python_LIBRARY_DIRS)
-      set(Boost_LIBRARY_DIR ${AL_boost_LIBRARY_DIRS} ${AL_boost_python_LIBRARY_DIRS})
-  ENDIF()
-ENDIF()
-
-#set cmake modules - ";" separated not ":"!
+#==============================================================================
+# Modules and Definitions
+#==============================================================================
 list(APPEND CMAKE_MODULE_PATH
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/cmake
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/cmake/defaults
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/cmake/modules
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/defaults
 )
 
-# to get PYTHON_EXECUTABLE
-
-find_package(PythonInterp)
-
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-include(CXXDefaults)
-
-add_definitions(${_PXR_CXX_DEFINITIONS})
-
-find_package(Maya REQUIRED)
-set(PYTHON_LIBRARY $ENV{MAYA_LOCATION}/lib/libpython2.7.so CACHE STRING "" FORCE)
-find_package(PythonLibs)
-
-# FindBoost is particularly buggy, and doesn't like custom boost locations.
-# Adding specific components forces calls to _Boost_find_library, which
-# is the rationale for listing them here.
-find_package(Boost COMPONENTS
-                python # initialises Boost_PYTHON_LIBRARY
-                thread # initialises Boost_THREAD_LIBRARY
-                REQUIRED
-)
-
-if((CMAKE_COMPILER_IS_GNUCC AND (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.3)) OR
-    ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5)))
-    set(NEED_BOOST_FILESYSTEM ON)
-    find_package(Boost COMPONENTS
-                    filesystem # initialises Boost_FILESYSTEM_LIBRARY
-                    REQUIRED)
+if (APPLE)
+   set(OSX_ARCHITECTURES "x86_64")
+   add_definitions(-DOSMac_ -DMAC_PLUGIN)
+   add_definitions(-D_BOOL -DREQUIRE_IOSTREAM)
 endif()
 
-set(CMAKE_VERBOSE_MAKEFILE OFF)
+include(cmake/python.cmake)
+include(cmake/utils.cmake)
 
-set(CMAKE_CXX_FLAGS
-    -std=c++11
-    -msse3
-    -Werror
-    "${_PXR_CXX_WARNING_FLAGS}"
-)
-if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 6)
-    list(APPEND CMAKE_CXX_FLAGS -D_GLIBCXX_USE_CXX11_ABI=0)
+find_package(USD REQUIRED)
+include(cmake/usd.cmake)
+
+#==============================================================================
+# Compiler
+#==============================================================================
+# CXXDefaults will set a variety of variables for the project.
+# Consume them here. This is an effort to keep the most common
+# build files readable.
+include(CXXDefaults)
+add_definitions(${_PXR_CXX_DEFINITIONS})
+set(CMAKE_CXX_FLAGS "${_PXR_CXX_FLAGS} ${CMAKE_CXX_FLAGS}")
+
+if(NOT WIN32)
+    set(CMAKE_CXX_FLAGS
+        -msse3
+        "${CMAKE_CXX_FLAGS} ${_PXR_CXX_FLAGS}"
+    )
 endif()
 string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
-option(SKIP_USDMAYA_TESTS "Skip test building" OFF)
 
-if(NOT SKIP_USDMAYA_TESTS)
-    enable_testing()
+#==============================================================================
+# PLUGINS
+#==============================================================================
+if (BUILD_PXR_PLUGIN)
+    add_subdirectory(plugin/pxr)
 endif()
 
-# Path to the input schemas templates
-set(USD_SCHEMA_PATH ${PXR_CMAKE_DIR}/schemas/usd/schema.usda)
+if (BUILD_AL_PLUGIN)
+    if(BUILD_USDMAYA_PXR_TRANSLATORS AND NOT BUILD_PXR_PLUGIN)
+        message(FATAL_ERROR "Animal logic's pixar translator depends on pixar plugin!")
+    endif()
 
-# This will drive the schemas library and binding library names
-set(TRANSLATORS_PACKAGE AL_USDMayaTranslators_opensource)
+    add_subdirectory(plugin/al)
 
-set(AL_USDMAYA_LOCATION_NAME
-    "AL_USDMAYA_LOCATION"
-    CACHE
-    STRING
-    "Name of the environment variable used to store AL_USDMaya installation location"
-)
-
-# Build our plugs... non-standard as we're building from another source tree
-set(EVENTS_INCLUDE_LOCATION ${CMAKE_CURRENT_LIST_DIR}/${SUBTREE_DIRECTORY}/utils)
-set(USDUTILS_INCLUDE_LOCATION ${CMAKE_CURRENT_LIST_DIR}/${SUBTREE_DIRECTORY}/usdutils)
-set(MAYAUTILS_INCLUDE_LOCATION ${CMAKE_CURRENT_LIST_DIR}/${SUBTREE_DIRECTORY}/mayautils)
-set(USDMAYAUTILS_INCLUDE_LOCATION ${CMAKE_CURRENT_LIST_DIR}/${SUBTREE_DIRECTORY}/usdmayautils)
-set(MAYATEST_INCLUDE_LOCATION ${CMAKE_CURRENT_LIST_DIR}/${SUBTREE_DIRECTORY}/mayatest)
-
-set(INSTALL_DIR_SUFFIX .) #Autodesk use this in their INSTALL TARGET for plugins
-
-# pxrUsd translator uses this
-set(PROJECT_SOURCE_DIR "${CMAKE_SOURCE_DIR}/${SUBTREE_DIRECTORY}")
-# Build usdMaya pxr translator
-set(USD_MAYA_ROOT ${usdMaya_ROOT})
-set(USD_ROOT ${usdBase_ROOT})
-find_package(USD)
-
-add_subdirectory(${SUBTREE_DIRECTORY}/utils)
-add_subdirectory(${SUBTREE_DIRECTORY}/usdutils)
-if(NOT SKIP_USDMAYA_TESTS)
-	add_subdirectory(${SUBTREE_DIRECTORY}/mayatest)
-endif()
-add_subdirectory(${SUBTREE_DIRECTORY}/mayautils)
-add_subdirectory(${SUBTREE_DIRECTORY}/usdmayautils)
-add_subdirectory(${SUBTREE_DIRECTORY}/lib)
-add_subdirectory(${SUBTREE_DIRECTORY}/plugin)
-add_subdirectory(${SUBTREE_DIRECTORY}/schemas)
-add_subdirectory(${SUBTREE_DIRECTORY}/translators)
-
-# The opensource build has our these custom SdfMetadata in the schema plugInfo.json:
-
-#   - al_usdmaya_mergedTransform
-#   - al_usdmaya_selectability
-#   - al_usdmaya_lock
-#   - al_usdmaya_importAsNative
-#   - al_usdmaya_excludeFromProxyShape
-#   - al_usdmaya_transformType
-#   - al_usdmaya_*
-# Internally, these metadatas have been kept in AL_USDCommonSchemas for the cases we want to access them
-# without depending on AL_USDMaya therefore we're going to filter these metadatas out.
-set(to_filter
-    ${CMAKE_CURRENT_BINARY_DIR}/${SUBTREE_DIRECTORY}/schemas/AL/usd/schemas/maya/plugInfo.json
-)
-
-message(
-    STATUS
-    "Removing opensource metadatas from ${to_filter}"
-)
-execute_process(
-    COMMAND
-        python
-        ${CMAKE_CURRENT_SOURCE_DIR}/schemas/filter_pluginfo.py
-        ${to_filter}
-    RESULT_VARIABLE
-        filter_pluginfo
-)
-
-if(filter_pluginfo)
-    message(
-        FATAL_ERROR
-        "An error occured while filtering ${to_filter}"
-    )
+    if(BUILD_USDMAYA_PXR_TRANSLATORS)
+        add_dependencies(AL_USDMayaPxrTranslators usdMaya)
+    endif()
 endif()
 
-IF ($ENV{REZ_BUILD_VARIANT_NUMBER} STREQUAL "0")
-    set(doxygen_dirs
-        ${CMAKE_CURRENT_SOURCE_DIR}/${SUBTREE_DIRECTORY}/lib/AL_USDMaya/AL
-        ${CMAKE_CURRENT_SOURCE_DIR}/${SUBTREE_DIRECTORY}/doxygen
-    )
 
-    rez_install_doxygen(
-        doc
-        FILES             ${doxygen_dirs}
-        DESTINATION       doc
-        DOXYFILE          ${CMAKE_CURRENT_SOURCE_DIR}/${SUBTREE_DIRECTORY}/doxygen/Doxyfile
-        GENERATE_TAGFILE
-        USE_TAGFILES
-        INSTALL_DOXYFILE
-        SKIP_INSTALL
-    )
-    push_docs_to_gh_pages(
-    	REPOSITORY AL_USDMaya
-    )
-ELSE()
-  add_custom_target(doc)
-ENDIF()
-
-install(FILES cmake/AL_USDMaya.cmake DESTINATION cmake)
-
-get_property(LIBRARY_LOCATION GLOBAL PROPERTY GLOBAL_LIBRARY_LOCATION)
-get_property(PYTHON_LIBRARY_LOCATION GLOBAL PROPERTY GLOBAL_PYTHON_LIBRARY_LOCATION)
-configure_file(${SUBTREE_DIRECTORY}/ALUsdMayaConfig.cmake.in ${PROJECT_BINARY_DIR}/ALUsdMayaConfig.cmake @ONLY)
-
-install(FILES ${PROJECT_BINARY_DIR}/ALUsdMayaConfig.cmake
-  DESTINATION ${CMAKE_INSTALL_PREFIX}
-  COMPONENT dev
+#==============================================================================
+# Install mayaUSD.mod
+#==============================================================================
+configure_file(mayaUSD.mod.template ${PROJECT_BINARY_DIR}/mayaUSD.mod)
+install(FILES ${PROJECT_BINARY_DIR}/mayaUSD.mod
+    DESTINATION ${CMAKE_INSTALL_PREFIX}
 )
-
-if(MAYA_API_VERSION STRLESS 201700)
-    # AL_usdmaya_UnitTestHarness will hang maya 2016 (see PXR_MAYA_TBB_WORKAROUND)
-    # Exclude it for now for maya 2016 variant
-    message(STATUS
-        "Skipping AL_USDMayaTestPlugin for maya 2016 tests because of tbb bug"
-    )
-    add_custom_target(all_tests
-        ${CMAKE_CTEST_COMMAND} --output-on-failure -E "TestAL_USDMaya"
-    )
-else()
-    add_custom_target(all_tests
-        ${CMAKE_CTEST_COMMAND} --output-on-failure
-    )
-endif()
-
-rez_install_files(mel/${MAYA_MAJOR_VERSION}/al_usdmaya_autoload.mel RELATIVE mel/${MAYA_MAJOR_VERSION} DESTINATION mel)
