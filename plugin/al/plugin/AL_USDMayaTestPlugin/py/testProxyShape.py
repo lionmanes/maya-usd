@@ -251,13 +251,13 @@ class TestProxyShapeGetMayaPathFromUsdPrim(unittest.TestCase):
     def test_getMayaPathFromUsdPrim_reopenImport(self):
         """Saving and reopening a Maya scene with dynamic translated prims should work."""
 
-        # Save
-        _file = tempfile.NamedTemporaryFile(delete=False, suffix=".ma")
-        with _file:
-            cmds.file(rename=_file.name)
-            cmds.file(save=True, force=True)
-            self.assertFalse(cmds.ls(assemblies=True))
+         # Generate a temporary filename
+        _file = tempfile.NamedTemporaryFile(delete=True, suffix=".ma")
         _file.close()
+        
+        cmds.file(rename=_file.name)
+        cmds.file(save=True, force=True)
+        self.assertFalse(cmds.ls(assemblies=True))
 
         # Re-open
         cmds.file(_file.name, open=True, force=True)
@@ -285,12 +285,13 @@ class TestProxyShapeGetMayaPathFromUsdPrim(unittest.TestCase):
 
         cmds.AL_usdmaya_ProxyShapeImportPrimPathAsMaya(self._stageA.proxyName, primPath=str(self._stageA.prim.GetPath()))
 
-        # Save
+        # Generate a temporary filename
         _file = tempfile.NamedTemporaryFile(delete=False, suffix=".ma")
-        with _file:
-            cmds.file(rename=_file.name)
-            cmds.file(save=True, force=True)
         _file.close()
+        
+        cmds.file(rename=_file.name)
+        cmds.file(save=True, force=True)
+        
 
         # Re-open
         cmds.file(_file.name, open=True, force=True)
